@@ -1,2 +1,427 @@
-# intopia-testing-bookmarklets
-Bookmarklets used in our training
+# Intopia testing bookmarklets
+
+## About this project
+
+A set of accessibility testing bookmarklets at https://intopia.github.io/exercise/testing-bookmarklets.html used for the "Testing web accessibility for teams" course.
+
+## The current bookmarklets
+
+- Highlight headings
+- Highlight image alternatives
+- Highlight lists
+- Highlight landmarks
+- Highlight page language
+- Highlight captions and headers
+- Highlight table IDs and headers
+- Highlight ARIA table roles
+- Track focus order
+- Highlight tabindex
+- Highlight aria-label
+- Highlight aria-labelledby
+- Highlight aria-describedby
+- Highlight name mismatches
+- Highlight name-prohibited roles
+- Highlight form field names
+- Highlight buttons
+- Highlight fieldsets
+- Highlight required fields
+- Highlight aria-invalid
+- Highlight autocomplete
+- Highlight aria-expanded
+- Highlight aria-checked
+- Highlight shadow DOM
+- Render markdown
+
+## Design system
+
+A consistent badge system is used across the set:
+
+- Colour palette: dark green (valid), dark blue (informational), amber (caution), red (broken/missing)
+- Informational badges — sentence case, source first: `aria-label: Close`
+- Diagnostic verdict badges — all caps, verdict first: `NO ACCESSIBLE NAME`, `MISMATCH: Hello`
+
+## Key architectural decisions
+
+- All bookmarklets use an overlay div, not direct DOM badge injection
+- All have Esc to clear, re-running removes previous overlay
+- Dense bookmarklets (tables, ARIA tables) use keyboard number filters with a fixed legend panel — "progressive enhancement" approach, all on by default
+- Number keys isolate a single group; pressing the same key again restores the default view
+- `n` key cycles through groups in sequence on table bookmarklets
+- Lists use position-by-type: containers badge above, items badge inside at bottom
+- Badge wrapping: image alt bookmarklet uses max-width: 400px and white-space: normal for long alt text
+- Page language document banner appended directly to body (not overlay) to avoid fixed positioning issues
+
+## Tooling
+
+All minification done with terser via Node. Encoded bookmarklets output as complete `<a>` tags ready to paste.
+
+Key minification gotcha: terser can rename variables to the same single letter causing temporal dead zone errors. Use `mangle: { reserved: ['functionName'] }` for key functions and prefer `var` over `const`/`let` inside forEach callbacks to avoid conflicts.
+
+---
+
+# Bookmarklet badge reference
+
+Colour palette used across the set:
+- Dark green `#1b5e20` — valid, present, correctly implemented
+- Dark blue `#0a558c` — informational, secondary reference, generic
+- Amber `#e65100` — caution, unreliable, unconfirmed, redundant
+- Red `#b00020` — missing, broken, prohibited, invalid
+- Deep purple `#4a148c` — used in specific bookmarklets (landmarks, ARIA tables)
+- Teal `#006064` — used in specific bookmarklets (landmarks, ARIA tables)
+- Deep pink `#880e4f` — used in landmarks
+- Blue-grey `#37474f` — used in specific bookmarklets (landmarks, ARIA tables)
+- Dark `#111111` — used in focus order tracker
+
+Badge text system:
+- **Informational** — sentence case, source/element first: `aria-label: Close`
+- **Diagnostic verdict** — all caps, verdict first: `NO ACCESSIBLE NAME`, `MISMATCH: Hello`
+
+---
+
+## Highlight headings
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark blue | `#0a558c` | H1: [text] |
+| Dark green | `#1b5e20` | H2: [text] |
+| Amber | `#e65100` | H3: [text] |
+| Teal | `#006064` | H4: [text] |
+| Deep purple | `#4a148c` | H5: [text] |
+| Blue-grey | `#37474f` | H6: [text] |
+| Red | `#b00020` | H1: [text] (avoid more than one H1) |
+| Red | `#b00020` | H[N]: (empty heading) |
+
+---
+
+## Highlight image alternatives
+
+Badge allows wrapping (max-width: 400px) for long alt text values.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | Alt: [text] |
+| Dark blue | `#0a558c` | Empty alt |
+| Red | `#b00020` | Missing alt |
+
+---
+
+## Highlight lists
+
+Containers (ul, ol, dl, role="list") — badge above element.
+Items (li, dt, dd, role="listitem") — badge inside at bottom of element.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | `<ul>` |
+| Dark green | `#1b5e20` | `<ol>` |
+| Dark green | `#1b5e20` | `<li>` |
+| Dark blue | `#0a558c` | `<dl>` |
+| Dark blue | `#0a558c` | `<dt>` |
+| Dark blue | `#0a558c` | `<dd>` |
+| Amber | `#e65100` | role="list" |
+| Amber | `#e65100` | role="listitem" |
+
+---
+
+## Highlight landmarks
+
+Nested `<aside>` without accessible name is not flagged (matches HTML-AAM mapping). Nested `<aside>` with accessible name is flagged as complementary.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark blue | `#0a558c` | Banner [: name] |
+| Amber | `#e65100` | Navigation [: name] |
+| Dark green | `#1b5e20` | Main [: name] |
+| Teal | `#006064` | Complementary [: name] |
+| Deep purple | `#4a148c` | Contentinfo [: name] |
+| Deep pink | `#880e4f` | Search [: name] |
+| Blue-grey | `#37474f` | Region [: name] |
+| Red | `#b00020` | Form [: name] |
+
+---
+
+## Highlight page language
+
+Document-level banner appended directly to body (position: fixed). Inline lang attributes use standard positioned badges.
+
+Validates against 184 ISO 639-1 codes, common ISO 639-2/3 three-letter codes, and 65 full-word mistake mappings with "did you mean" suggestions.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | Document lang: [value] |
+| Amber | `#e65100` | Document lang: (empty) — lang attribute is present but has no value |
+| Amber | `#e65100` | Document lang: "[value]" — unrecognised language code |
+| Red | `#b00020` | Document lang: "[value]" — did you mean "[suggestion]"? |
+| Red | `#b00020` | Document lang: "[value]" — invalid format |
+| Red | `#b00020` | NO DOCUMENT LANG — lang attribute missing from `<html>` |
+| Amber | `#e65100` | Warning: lang="[value]" and xml:lang="[value]" differ |
+| Dark blue | `#0a558c` | lang: [value] (inline, valid) |
+| Amber | `#e65100` | lang: (empty) (inline) |
+| Amber | `#e65100` | lang: "[value]" — unrecognised (inline) |
+| Red | `#b00020` | lang: "[value]" — invalid (inline) |
+
+---
+
+## Highlight captions and headers
+
+Keyboard filter: [1] Table  [2] Caption  [3] TH  [4] Scope  [n] Next  [Esc] Clear
+
+Keys 1–3 on by default. Key 4 (scope) is opt-in — dimmed in legend until pressed.
+Pressing a key isolates that group. Pressing the same key again restores the default view.
+Press `n` to cycle through groups in sequence.
+
+TH badges (key 3) positioned above element — show cell text only, no scope information.
+Scope badges (key 4) positioned below element — show scope value or flag missing scope.
+
+| Colour | Hex | Badge text | Key |
+|--------|-----|------------|-----|
+| Dark blue | `#0a558c` | Table [N] | 1 |
+| Dark green | `#1b5e20` | Caption: [text] | 2 |
+| Red | `#b00020` | TH: [text] | 3 |
+| Amber | `#e65100` | scope: [value] | 4 |
+| Red | `#b00020` | no scope | 4 |
+
+---
+
+## Highlight table IDs and headers
+
+Interactive — makes all `<th>` and `<td>` elements focusable. Floating badge follows focused cell. Referenced header cells highlighted in green.
+
+Click to activate, then Tab or `n` to navigate between cells. Esc restores original tabindex values.
+
+| Colour | Hex | Badge / outline text |
+|--------|-----|----------------------|
+| Dark blue | `#0a558c` | Focused cell outline + badge: TH/TD: [text] \| id: [value] \| headers: [value] |
+| Dark green | `#1b5e20` | Referenced header cell outline |
+
+---
+
+## Highlight ARIA table roles
+
+Keyboard filter: [1] Table/Grid  [2] Rowgroup  [3] Row  [4] Column header  [5] Row header  [6] Cell  [n] Next  [Esc] Clear
+
+All groups on by default. Pressing a key isolates that group. Pressing the same key again restores all.
+Press `n` to cycle through the role hierarchy in sequence.
+
+Container roles (table, grid, treegrid, rowgroup) — badge above element.
+Row and cell roles — badge inside at bottom of element.
+
+`columnheader` badges also show `aria-sort` value where present. Re-run after sorting to refresh values.
+
+| Colour | Hex | Badge text | Key |
+|--------|-----|------------|-----|
+| Dark blue | `#0a558c` | role="table" [: name] | 1 |
+| Dark blue | `#0a558c` | role="grid" [: name] | 1 |
+| Dark blue | `#0a558c` | role="treegrid" [: name] | 1 |
+| Teal | `#006064` | role="rowgroup" | 2 |
+| Amber | `#e65100` | role="row" | 3 |
+| Red | `#b00020` | role="columnheader" [(sort: [value])] | 4 |
+| Red | `#b00020` | role="columnheader" (sort: INVALID VALUE) | 4 |
+| Deep purple | `#4a148c` | role="rowheader" | 5 |
+| Dark green | `#1b5e20` | role="cell" | 6 |
+| Dark green | `#1b5e20` | role="gridcell" | 6 |
+
+---
+
+## Track focus order
+
+Active listener — click to start, Tab or `n` to navigate, Esc to stop.
+Badge follows current focused element. Visited elements retain dark outline until Esc is pressed.
+Shift+Tab decrements the counter.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark | `#111111` | [N]. [tag][#id][role="…"]["name"] |
+
+---
+
+## Highlight tabindex
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | tabindex="0" |
+| Amber | `#e65100` | tabindex="-1" |
+| Red | `#b00020` | tabindex="[N]" (AVOID positive values) |
+| Red | `#b00020` | tabindex="[value]" (INVALID — use -1 or 0) |
+| Red | `#b00020` | tabindex="[value]" (INVALID VALUE) |
+
+---
+
+## Highlight aria-label
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-label: [value] |
+| Amber | `#e65100` | aria-label: (empty) |
+| Red | `#b00020` | aria-label on prohibited role: [role] |
+
+---
+
+## Highlight aria-labelledby
+
+Source element badge always appears at element position.
+Self, hidden and missing ID badges stack below source badge.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark blue | `#0a558c` | aria-labelledby: [ids] |
+| Dark green | `#1b5e20` | ID: [id] |
+| Dark green | `#1b5e20` | ID: [id] (self) |
+| Amber | `#e65100` | ID: [id] (hidden) |
+| Red | `#b00020` | Missing ID: [id] |
+
+---
+
+## Highlight aria-describedby
+
+Source element badge always appears at element position.
+Hidden and missing ID badges stack below source badge.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark blue | `#0a558c` | aria-describedby: [ids] |
+| Dark green | `#1b5e20` | ID: [id] |
+| Amber | `#e65100` | ID: [id] (hidden) |
+| Red | `#b00020` | Missing ID: [id] |
+
+---
+
+## Highlight name mismatches
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | MATCH: [accessible name] |
+| Dark blue | `#0a558c` | MODIFIED: [accessible name] |
+| Red | `#b00020` | MISMATCH: [accessible name] |
+
+---
+
+## Highlight name-prohibited roles
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Red | `#b00020` | NAME PROHIBITED: [role] |
+
+---
+
+## Highlight form field names
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-labelledby: [name] |
+| Dark green | `#1b5e20` | aria-label: [name] |
+| Dark green | `#1b5e20` | label: [name] |
+| Dark green | `#1b5e20` | implicit label: [name] |
+| Amber | `#e65100` | title: [name] |
+| Amber | `#e65100` | placeholder: [name] |
+| Red | `#b00020` | NO ACCESSIBLE NAME |
+
+---
+
+## Highlight buttons
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-labelledby: [name] |
+| Dark green | `#1b5e20` | aria-label: [name] |
+| Dark green | `#1b5e20` | text content: [name] |
+| Dark green | `#1b5e20` | value: [name] |
+| Dark green | `#1b5e20` | title: [name] |
+| Dark green | `#1b5e20` | default: Submit / default: Reset |
+| Red | `#b00020` | NO ACCESSIBLE NAME |
+
+---
+
+## Highlight fieldsets
+
+Legend badge positioned below legend element to avoid overlap with fieldset badge.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | Fieldset |
+| Red | `#b00020` | Fieldset (no legend) |
+| Dark blue | `#0a558c` | Legend: [text] |
+| Amber | `#e65100` | role="radiogroup" [: name] |
+
+---
+
+## Highlight required fields
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | required |
+| Dark blue | `#0a558c` | aria-required="true" |
+| Amber | `#e65100` | required + aria-required="true" (redundant) |
+| Dark green | `#1b5e20` | aria-required="false" |
+
+---
+
+## Highlight aria-invalid
+
+All recognised values are green. Only unrecognised values get red.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-invalid: true |
+| Dark green | `#1b5e20` | aria-invalid: false |
+| Dark green | `#1b5e20` | aria-invalid: grammar |
+| Dark green | `#1b5e20` | aria-invalid: spelling |
+| Red | `#b00020` | INVALID VALUE: aria-invalid="[value]" |
+
+---
+
+## Highlight autocomplete
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | autocomplete: [value] (valid) |
+| Dark blue | `#0a558c` | autocomplete: [value] (generic) |
+| Red | `#b00020` | autocomplete: [value] (invalid) |
+
+---
+
+## Highlight aria-expanded
+
+Re-run after activating a widget to see updated values.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-expanded="true" |
+| Amber | `#e65100` | aria-expanded="false" |
+| Red | `#b00020` | aria-expanded="[value]" (INVALID VALUE) |
+
+---
+
+## Highlight aria-checked
+
+Re-run after interacting with a widget to see updated values.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-checked="true" |
+| Amber | `#e65100` | aria-checked="false" |
+| Dark blue | `#0a558c` | aria-checked="mixed" |
+| Red | `#b00020` | aria-checked="[value]" (INVALID VALUE) |
+
+---
+
+## Highlight shadow DOM
+
+Fixed summary banner at bottom of page shows element counts.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | Open shadow DOM: [tag][#id or .class] |
+| Amber | `#e65100` | Custom element: [tag][#id or .class] |
+
+---
+
+## Render markdown
+
+Replaces the current page with a rendered HTML view. No persistent overlay or Esc handler — page is rewritten in place.
+
+Supports: headings H1–H6, bold, italic, bold+italic, inline code, fenced code blocks, unordered lists, ordered lists, blockquotes, horizontal rules, links, images.
+
+Does not support: tables, nested lists, footnotes, front matter.
+
+Only works on pages where the browser has rendered raw text in a `<pre>` element (e.g. opening a .md file directly in Chrome).
