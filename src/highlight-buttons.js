@@ -39,7 +39,7 @@ function getName(el) {
   return (title && title.trim()) ? { name: title.trim(), source: 'title' } : null;
 }
 
-document.querySelectorAll('button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]').forEach(function(el) {
+document.querySelectorAll('button, input[type="submit"], input[type="reset"]').forEach(function(el) {
   var result = getName(el);
   var colour = result ? '#1b5e20' : '#b00020';
   el.style.outline = '3px solid ' + colour;
