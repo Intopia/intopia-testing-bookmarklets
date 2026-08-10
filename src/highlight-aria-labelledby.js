@@ -1,4 +1,91 @@
 // Highlight aria-labelledby
-// Highlights elements with `aria-labelledby` and their targets.
-// Flags missing, hidden and self-referencing IDs.
-!function(){const e=document.getElementById("a11y-labelledby-overlay");e&&e.remove();const t=document.createElement("div");t.id="a11y-labelledby-overlay",t.style.position="absolute",t.style.top="0",t.style.left="0",t.style.width="100%",t.style.pointerEvents="none",t.style.zIndex="999999",document.body.appendChild(t);const n=[];function l(e,t){const n=document.createElement("div");return n.textContent=e,n.style.position="absolute",n.style.background=t,n.style.color="#ffffff",n.style.padding="2px 5px",n.style.fontSize="16px",n.style.zIndex="1000",n.style.pointerEvents="none",n}document.querySelectorAll("[aria-labelledby]").forEach(function(e){e.style.outline="5px solid #0a558c",n.push(e);const o=e.getAttribute("aria-labelledby").trim().split(/\s+/),i=e.getBoundingClientRect(),s=i.top+window.scrollY,d=i.left+window.scrollX,c=l("aria-labelledby: "+o.join(" "),"#0a558c");c.style.top=s+"px",c.style.left=d+"px",t.appendChild(c);let y=0;o.forEach(function(o){const i=document.getElementById(o);if(i){n.push(i);const c=i===e;if(c||function(e){const t=e.getBoundingClientRect();if(0===t.width&&0===t.height)return!0;const n=window.getComputedStyle(e);return"none"===n.display||"hidden"===n.visibility||t.width<=1&&t.height<=1||t.right+window.scrollX<0||t.bottom+window.scrollY<0}(i)){const e=c?"#1b5e20":"#e65100",n=c?"ID: "+o+" (self)":"ID: "+o+" (hidden)";c||(i.style.outline="5px solid #e65100");const p=l(n,e);p.style.top=s+28+24*y+"px",p.style.left=d+"px",t.appendChild(p),y++}else{i.style.outline="5px solid #1b5e20";const e=i.getBoundingClientRect(),n=l("ID: "+o,"#1b5e20");n.style.top=e.top+window.scrollY+"px",n.style.left=e.left+window.scrollX+"px",t.appendChild(n)}}else{const e=l("Missing ID: "+o,"#b00020");e.style.top=s+28+24*y+"px",e.style.left=d+"px",t.appendChild(e),y++}})}),document.addEventListener("keydown",function e(l){"Escape"===l.key&&(t.remove(),n.forEach(function(e){e.style.outline=""}),document.removeEventListener("keydown",e))})}();
+// Highlights elements with aria-labelledby and their targets.
+// Shows the concatenated accessible name resolved from referenced IDs.
+// Flags missing and self-referencing IDs.
+// Note: aria-labelledby resolves names from hidden elements by design.
+(function(){
+var existing = document.getElementById('a11y-labelledby-overlay');
+if (existing) existing.remove();
+var overlay = document.createElement('div');
+overlay.id = 'a11y-labelledby-overlay';
+overlay.style.position = 'absolute';
+overlay.style.top = '0';
+overlay.style.left = '0';
+overlay.style.width = '100%';
+overlay.style.pointerEvents = 'none';
+overlay.style.zIndex = '999999';
+document.body.appendChild(overlay);
+var flaggedEls = [];
+
+function makeBadge(text, colour) {
+  var b = document.createElement('div');
+  b.textContent = text;
+  b.style.position = 'absolute';
+  b.style.background = colour;
+  b.style.color = '#ffffff';
+  b.style.padding = '2px 5px';
+  b.style.fontSize = '14px';
+  b.style.fontFamily = 'Arial, sans-serif';
+  b.style.borderRadius = '3px';
+  b.style.whiteSpace = 'nowrap';
+  b.style.pointerEvents = 'none';
+  b.style.zIndex = '999999';
+  overlay.appendChild(b);
+  return b;
+}
+
+document.querySelectorAll('[aria-labelledby]').forEach(function(el) {
+  el.style.outline = '5px solid #0a558c';
+  flaggedEls.push(el);
+
+  var ids = el.getAttribute('aria-labelledby').trim().split(/\s+/);
+  var rect = el.getBoundingClientRect();
+  var top  = rect.top  + window.scrollY;
+  var left = rect.left + window.scrollX;
+
+  // Source badge
+  var sourceBadge = makeBadge('aria-labelledby: ' + ids.join(' '), '#0a558c');
+  sourceBadge.style.top  = top + 'px';
+  sourceBadge.style.left = left + 'px';
+
+  var idLabels = [];
+  var resolvedTexts = [];
+  var missingOffset = 0;
+
+  ids.forEach(function(id) {
+    var ref = document.getElementById(id);
+    if (!ref) {
+      var mb = makeBadge('Missing ID: ' + id, '#b00020');
+      mb.style.top  = (top + 28 + 24 * missingOffset) + 'px';
+      mb.style.left = left + 'px';
+      missingOffset++;
+    } else {
+      ref.style.outline = '5px solid #1b5e20';
+      flaggedEls.push(ref);
+      resolvedTexts.push(ref.textContent.trim());
+      idLabels.push(ref === el ? id + ' (self)' : id);
+    }
+  });
+
+  if (resolvedTexts.length > 0) {
+    var concatenated = resolvedTexts.join(' ').trim();
+    var cb;
+    if (concatenated === '') {
+      // All referenced elements resolved to empty — no accessible name
+      cb = makeBadge('ID: ' + idLabels.join(' ') + ' \u2192 EMPTY TEXT STRING = NO NAME', '#b00020');
+    } else {
+      cb = makeBadge('ID: ' + idLabels.join(' ') + ' \u2192 \u201c' + concatenated + '\u201d', '#1b5e20');
+    }
+    cb.style.top  = (top + 28 + 24 * missingOffset) + 'px';
+    cb.style.left = left + 'px';
+  }
+});
+
+function onKey(e) {
+  if (e.key !== 'Escape') return;
+  overlay.remove();
+  flaggedEls.forEach(function(el) { el.style.outline = ''; });
+  document.removeEventListener('keydown', onKey);
+}
+document.addEventListener('keydown', onKey);
+})();
