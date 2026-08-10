@@ -55,7 +55,7 @@ document.querySelectorAll('[aria-labelledby]').forEach(function(el) {
   ids.forEach(function(id) {
     var ref = document.getElementById(id);
     if (!ref) {
-      var mb = makeBadge('Missing ID: ' + id, '#b00020');
+      var mb = makeBadge('Missing ID: ' + id + ' = NO NAME', '#b00020');
       mb.style.top  = (top + 28 + 24 * missingOffset) + 'px';
       mb.style.left = left + 'px';
       missingOffset++;
