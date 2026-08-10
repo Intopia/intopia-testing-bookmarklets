@@ -1,8 +1,7 @@
 // Highlight aria-labelledby
 // Highlights elements with aria-labelledby and their targets.
 // Shows the concatenated accessible name resolved from referenced IDs.
-// Flags missing and self-referencing IDs.
-// Note: aria-labelledby resolves names from hidden elements by design.
+// Flags missing IDs inline. Note: resolves from hidden elements by design.
 (function(){
 var existing = document.getElementById('a11y-labelledby-overlay');
 if (existing) existing.remove();
@@ -17,10 +16,12 @@ overlay.style.zIndex = '999999';
 document.body.appendChild(overlay);
 var flaggedEls = [];
 
-function makeBadge(text, colour) {
+function makeBadge(text, colour, rect) {
   var b = document.createElement('div');
   b.textContent = text;
   b.style.position = 'absolute';
+  b.style.left = (rect.left + window.scrollX) + 'px';
+  b.style.top  = (rect.top  + window.scrollY - 26) + 'px';
   b.style.background = colour;
   b.style.color = '#ffffff';
   b.style.padding = '2px 5px';
@@ -35,50 +36,52 @@ function makeBadge(text, colour) {
 }
 
 document.querySelectorAll('[aria-labelledby]').forEach(function(el) {
-  el.style.outline = '5px solid #0a558c';
-  flaggedEls.push(el);
-
   var ids = el.getAttribute('aria-labelledby').trim().split(/\s+/);
   var rect = el.getBoundingClientRect();
-  var top  = rect.top  + window.scrollY;
-  var left = rect.left + window.scrollX;
-
-  // Source badge
-  var sourceBadge = makeBadge('aria-labelledby: ' + ids.join(' '), '#0a558c');
-  sourceBadge.style.top  = top + 'px';
-  sourceBadge.style.left = left + 'px';
 
   var idLabels = [];
   var resolvedTexts = [];
-  var missingOffset = 0;
+  var hasMissing = false;
 
   ids.forEach(function(id) {
     var ref = document.getElementById(id);
     if (!ref) {
-      var mb = makeBadge('Missing ID: ' + id + ' = NO NAME', '#b00020');
-      mb.style.top  = (top + 28 + 24 * missingOffset) + 'px';
-      mb.style.left = left + 'px';
-      missingOffset++;
+      idLabels.push(id + ' (missing)');
+      hasMissing = true;
     } else {
-      ref.style.outline = '5px solid #1b5e20';
+      var refRect = ref.getBoundingClientRect();
+      var isVisible = refRect.width > 0 || refRect.height > 0;
+      if (isVisible) {
+        ref.style.outline = '4px solid #0a558c';
+        makeBadge('ID: ' + id + (ref === el ? ' (self)' : ''), '#0a558c', refRect);
+      }
       flaggedEls.push(ref);
       resolvedTexts.push(ref.textContent.trim());
       idLabels.push(ref === el ? id + ' (self)' : id);
     }
   });
 
-  if (resolvedTexts.length > 0) {
-    var concatenated = resolvedTexts.join(' ').trim();
-    var cb;
-    if (concatenated === '') {
-      // All referenced elements resolved to empty — no accessible name
-      cb = makeBadge('ID: ' + idLabels.join(' ') + ' \u2192 EMPTY TEXT STRING = NO NAME', '#b00020');
-    } else {
-      cb = makeBadge('ID: ' + idLabels.join(' ') + ' \u2192 \u201c' + concatenated + '\u201d', '#1b5e20');
-    }
-    cb.style.top  = (top + 28 + 24 * missingOffset) + 'px';
-    cb.style.left = left + 'px';
+  // One source badge summarising everything
+  var concatenated = resolvedTexts.join(' ').trim();
+  var sourceBadgeText, sourceBadgeColour;
+
+  if (concatenated === '' && resolvedTexts.length > 0) {
+    // Found elements but all empty
+    sourceBadgeText = 'aria-labelledby: ' + idLabels.join(' ') + ' \u2192 EMPTY TEXT STRING = NO NAME';
+    sourceBadgeColour = '#b00020';
+  } else if (resolvedTexts.length === 0) {
+    // All missing
+    sourceBadgeText = 'aria-labelledby: ' + idLabels.join(' ') + ' \u2192 NO NAME';
+    sourceBadgeColour = '#b00020';
+  } else {
+    // At least some resolved — show name (annotate missing inline)
+    sourceBadgeText = 'aria-labelledby: ' + idLabels.join(' ') + ' \u2192 \u201c' + concatenated + '\u201d';
+    sourceBadgeColour = '#1b5e20';
   }
+
+  el.style.outline = '4px solid ' + sourceBadgeColour;
+  flaggedEls.push(el);
+  makeBadge(sourceBadgeText, sourceBadgeColour, rect);
 });
 
 function onKey(e) {
