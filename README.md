@@ -29,6 +29,11 @@ A set of accessibility testing bookmarklets at https://intopia.github.io/exercis
 - Highlight autocomplete
 - Highlight aria-expanded
 - Highlight aria-checked
+- Highlight aria-pressed
+- Highlight aria-roledescription
+- Highlight aria-details
+- Highlight aria-valuetext
+- Highlight aria-valuemin and aria-valuemax
 - Highlight shadow DOM
 - Render markdown
 
@@ -259,30 +264,30 @@ Shift+Tab decrements the counter.
 
 ## Highlight aria-labelledby
 
-Source element badge always appears at element position.
-Self, hidden and missing ID badges stack below source badge.
+Source element — green outline, green badge showing resolved name.
+Referenced elements — blue outline, blue badge at each element.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
-| Dark blue | `#0a558c` | aria-labelledby: [ids] |
-| Dark green | `#1b5e20` | ID: [id] |
-| Dark green | `#1b5e20` | ID: [id] (self) |
-| Amber | `#e65100` | ID: [id] (hidden) |
-| Red | `#b00020` | Missing ID: [id] |
+| Dark green | `#1b5e20` | aria-labelledby: [ids] → "[resolved name]" |
+| Dark green | `#1b5e20` | aria-labelledby: [ids] (self annotation inline) → "[resolved name]" |
+| Red | `#b00020` | aria-labelledby: [id] (missing) → NO NAME |
+| Red | `#b00020` | aria-labelledby: [ids] → EMPTY TEXT STRING = NO NAME |
+| Dark blue | `#0a558c` | ID: [id] (on referenced element) |
 
 ---
 
 ## Highlight aria-describedby
 
-Source element badge always appears at element position.
-Hidden and missing ID badges stack below source badge.
+Source element — green outline, green badge showing resolved description.
+Referenced elements — blue outline, blue badge at each element.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
-| Dark blue | `#0a558c` | aria-describedby: [ids] |
-| Dark green | `#1b5e20` | ID: [id] |
-| Amber | `#e65100` | ID: [id] (hidden) |
-| Red | `#b00020` | Missing ID: [id] |
+| Dark green | `#1b5e20` | aria-describedby: [ids] → "[resolved description]" |
+| Red | `#b00020` | aria-describedby: [id] (missing) → NO DESCRIPTION |
+| Red | `#b00020` | aria-describedby: [ids] → EMPTY TEXT STRING = NO DESCRIPTION |
+| Dark blue | `#0a558c` | ID: [id] (on referenced element) |
 
 ---
 
@@ -319,6 +324,8 @@ Hidden and missing ID badges stack below source badge.
 ---
 
 ## Highlight buttons
+
+Targets `<button>`, `input[type="submit"]` and `input[type="reset"]`.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
@@ -402,6 +409,67 @@ Re-run after interacting with a widget to see updated values.
 | Amber | `#e65100` | aria-checked="false" |
 | Dark blue | `#0a558c` | aria-checked="mixed" |
 | Red | `#b00020` | aria-checked="[value]" (INVALID VALUE) |
+
+---
+
+## Highlight aria-pressed
+
+Intended for toggle buttons — `<button>` or elements with `role="button"`. Re-run after interacting to see updated values.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-pressed="true" |
+| Amber | `#e65100` | aria-pressed="false" |
+| Dark blue | `#0a558c` | aria-pressed="mixed" |
+| Red | `#b00020` | aria-pressed="[value]" (INVALID VALUE) |
+
+---
+
+## Highlight aria-roledescription
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-roledescription: "[value]" |
+| Amber | `#e65100` | aria-roledescription: "[value]" (no role — possible misuse) |
+| Amber | `#e65100` | aria-roledescription: (empty) |
+
+Note: elements with meaningful implicit roles (fieldset, button, nav, h1–h6 etc.) are treated as having a role even without an explicit `role` attribute.
+
+---
+
+## Highlight aria-details
+
+Source element — green outline and badge. Referenced elements — blue outline and badge.
+Missing IDs annotated inline in the source badge.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-details: [ids] |
+| Amber | `#e65100` | aria-details: [id] [id] (missing) |
+| Red | `#b00020` | aria-details: [id] (missing) (all missing) |
+| Dark blue | `#0a558c` | ID: [id] (on referenced element) |
+
+---
+
+## Highlight aria-valuetext
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-valuetext: "[value]" |
+| Amber | `#e65100` | aria-valuetext: (empty) |
+
+---
+
+## Highlight aria-valuemin and aria-valuemax
+
+Shows both attributes together on each element.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-valuemin: [N]  \|  aria-valuemax: [N] |
+| Amber | `#e65100` | aria-valuemin: [N]  \|  aria-valuemax: (missing) |
+| Amber | `#e65100` | aria-valuemin: (missing)  \|  aria-valuemax: [N] |
+| Red | `#b00020` | aria-valuemin: "[value]" (invalid)  \|  aria-valuemax: [N] |
 
 ---
 
