@@ -6,36 +6,36 @@ A set of accessibility testing bookmarklets at https://intopia.github.io/exercis
 
 ## The current bookmarklets
 
-- Highlight headings
-- Highlight image alternatives
-- Highlight lists
-- Highlight landmarks
-- Highlight page language
-- Highlight captions and headers
-- Highlight table IDs and headers
-- Highlight ARIA table roles
-- Track focus order
-- Highlight tabindex
-- Highlight aria-label
-- Highlight aria-labelledby
-- Highlight aria-describedby
-- Highlight name mismatches
-- Highlight name-prohibited roles
-- Highlight form field names
-- Highlight buttons
-- Highlight fieldsets
-- Highlight required fields
-- Highlight aria-invalid
-- Highlight autocomplete
-- Highlight aria-expanded
-- Highlight aria-checked
-- Highlight aria-pressed
-- Highlight aria-roledescription
-- Highlight aria-details
-- Highlight aria-valuetext
-- Highlight aria-valuemin and aria-valuemax
-- Highlight shadow DOM
-- Render markdown
+1. Highlight headings
+2. Highlight image alternatives
+3. Highlight lists
+4. Highlight landmarks
+5. Highlight page language
+6. Highlight captions and headers
+7. Highlight table IDs and headers
+8. Highlight ARIA table roles
+9. Track focus order
+10. Highlight tabindex
+11. Highlight aria-label
+12. Highlight aria-labelledby
+13. Highlight aria-describedby
+14. Highlight name mismatches
+15. Highlight name-prohibited roles
+16. Highlight form field names
+17. Highlight buttons
+18. Highlight fieldsets
+19. Highlight required fields
+20. Highlight aria-invalid
+21. Highlight autocomplete
+22. Highlight aria-expanded
+23. Highlight aria-checked
+24. Highlight aria-pressed
+25. Highlight aria-roledescription
+26. Highlight aria-details
+27. Highlight aria-valuetext
+28. Highlight aria-valuemin and aria-valuemax
+29. Highlight shadow DOM
+30. Render markdown
 
 ## Design system
 
