@@ -2,7 +2,7 @@
 
 ## About this project
 
-A set of 32 accessibility testing bookmarklets. Each one highlights a specific HTML or ARIA feature directly on the page, helping teams quickly inspect, test and understand accessibility markup without needing browser DevTools.
+A set of 34 accessibility testing bookmarklets. Each one highlights a specific HTML or ARIA feature directly on the page, helping teams quickly inspect, test and understand accessibility markup without needing browser DevTools.
 
 Bookmarklets page: https://intopia.github.io/exercise/testing-bookmarklets.html
 
@@ -38,8 +38,10 @@ Bookmarklets page: https://intopia.github.io/exercise/testing-bookmarklets.html
 28. Highlight aria-valuemin and aria-valuemax
 29. Highlight aria-setsize and aria-posinset
 30. Highlight aria-level
-31. Highlight shadow DOM
-32. Render markdown
+31. Highlight aria-controls
+32. Highlight aria-haspopup
+33. Highlight shadow DOM
+34. Render markdown
 
 ## Design system
 
@@ -503,6 +505,39 @@ Values of 1–6 are green. Values above 6 are amber (valid per spec but inconsis
 | Amber | `#e65100` | aria-level: (empty) |
 | Red | `#b00020` | aria-level: [N] (invalid — must be 1 or greater) |
 | Red | `#b00020` | aria-level: "[value]" (invalid — must be an integer) |
+
+---
+
+## Highlight aria-controls
+
+Source element — green outline and badge. Referenced elements — blue outline and badge.
+Missing IDs annotated inline in the source badge. Hidden referenced elements are valid (e.g. a collapsed panel) and noted silently without a badge.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-controls: [id] |
+| Dark green | `#1b5e20` | aria-controls: [id1] [id2] |
+| Red | `#b00020` | aria-controls: [id] (missing) |
+| Red | `#b00020` | aria-controls: (empty) |
+| Dark blue | `#0a558c` | ID: [id] (on referenced element) |
+
+---
+
+## Highlight aria-haspopup
+
+All seven recognised values are green. Unrecognised and empty values are red.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-haspopup: "false" |
+| Dark green | `#1b5e20` | aria-haspopup: "true" |
+| Dark green | `#1b5e20` | aria-haspopup: "menu" |
+| Dark green | `#1b5e20` | aria-haspopup: "listbox" |
+| Dark green | `#1b5e20` | aria-haspopup: "tree" |
+| Dark green | `#1b5e20` | aria-haspopup: "grid" |
+| Dark green | `#1b5e20` | aria-haspopup: "dialog" |
+| Red | `#b00020` | aria-haspopup: "[value]" (INVALID VALUE) |
+| Red | `#b00020` | aria-haspopup: (empty) |
 
 ---
 
