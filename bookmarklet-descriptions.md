@@ -1,5 +1,8 @@
 # Bookmarklet descriptions
 
+The following are short descriptions for each bookmarklet for this page:
+https://intopia.github.io/exercise/testing-bookmarklets-intopia.html
+
 ## 1. Highlight headings
 Highlights all heading levels (H1–H6) with distinct colours. Flags empty headings and duplicate <h1> elements.
 
