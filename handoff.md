@@ -2,7 +2,7 @@
 
 ## Project overview
 
-A set of accessibility testing bookmarklets that highlight specific HTML and ARIA features directly on a page. Each bookmarklet uses a consistent colour system and badge format, allowing testers and developers to quickly inspect accessibility markup without needing browser DevTools.
+A growing set of accessibility testing bookmarklets that highlight specific HTML and ARIA features directly on a page. Each bookmarklet uses a consistent colour system and badge format, allowing testers and developers to quickly inspect accessibility markup without needing browser DevTools.
 
 These bookmarklets are designed to help designers, developers and testers understand aspects of accessibility.
 
@@ -77,11 +77,11 @@ intopia-testing-bookmarklets/
 ├── README.md
 ├── LICENSE
 ├── src/
-│   └── [34 .js files — readable source with comment headers]
+│   └── [.js files — readable source with comment headers]
 └── dist/
     ├── testing-bookmarklets.html
     └── hrefs/
-        └── [34 .txt files — ready-to-paste <a> tags]
+        └── [.txt files — ready-to-paste <a> tags]
 ```
 
 ### Workflow for updates
@@ -95,44 +95,44 @@ The exercise repo (`https://intopia.github.io/exercise/`) is the published produ
 
 ---
 
-## Full bookmarklet list (34)
+## Full bookmarklet list
 
-| # | File | Notes |
-|---|------|-------|
-| 1 | `highlight-headings` | H1–H6 six colours, flags empty and duplicate H1 |
-| 2 | `highlight-image-alternatives` | Three states: alt text, empty alt, missing alt |
-| 3 | `highlight-lists` | Native and ARIA list roles, badge position differs for containers vs items |
-| 4 | `highlight-landmarks` | Eight landmark roles, shows accessible name where present. Nested aside handling matches HTML-AAM |
-| 5 | `highlight-page-language` | BCP 47 validation, 184 ISO 639-1 codes, "did you mean" suggestions for full-word mistakes |
-| 6 | `highlight-captions-and-headers` | Keys 1–3 on by default, key 4 (scope) opt-in. `n` key cycles |
-| 7 | `highlight-table-id-and-headers` | Interactive — makes cells focusable, Tab/n to navigate, referenced headers highlighted green |
-| 8 | `highlight-aria-table-roles` | Six groups, all on by default, keys 1–6 plus `n` key cycling. Shows aria-sort value |
-| 9 | `track-focus-order` | Active listener, Tab/n to navigate, Shift+Tab decrements, Esc to stop |
-| 10 | `highlight-tabindex` | Green=0, amber=-1, red=positive or invalid |
-| 11 | `highlight-aria-label` | Flags empty values and use on name-prohibited roles |
-| 12 | `highlight-aria-labelledby` | Source badge shows resolved name with arrow. Referenced elements get blue badges. Missing IDs annotated inline. Hidden elements resolve correctly per AccName spec |
-| 13 | `highlight-aria-describedby` | Same pattern as labelledby but for descriptions. NO DESCRIPTION error states |
-| 14 | `highlight-name-mismatches` | MATCH / MODIFIED / MISMATCH states |
-| 15 | `highlight-name-prohibited-roles` | ARIA 1.2 and 1.3 draft roles. NAME PROHIBITED: [role] |
-| 16 | `highlight-form-field-names` | Six name sources, amber for unreliable (placeholder, title) |
-| 17 | `highlight-buttons` | Targets `<button>`, `input[type="submit"]`, `input[type="reset"]` only |
-| 18 | `highlight-fieldsets` | Fieldset, legend, radiogroup |
-| 19 | `highlight-required-fields` | Native required, aria-required, redundant combinations |
-| 20 | `highlight-aria-invalid` | All four valid values green, only unrecognised values red |
-| 21 | `highlight-autocomplete` | Valid / generic / invalid states |
-| 22 | `highlight-aria-expanded` | true / false / invalid. Re-run after interaction |
-| 23 | `highlight-aria-checked` | true / false / mixed / invalid. Re-run after interaction |
-| 24 | `highlight-aria-pressed` | true / false / mixed / invalid. Re-run after interaction |
-| 25 | `highlight-aria-roledescription` | Checks for underlying role (explicit or meaningful implicit). Flags misuse on generic elements |
-| 26 | `highlight-aria-details` | Relationship bookmarklet. Missing IDs annotated inline |
-| 27 | `highlight-aria-valuetext` | Simple value display. Flags empty |
-| 28 | `highlight-aria-valuemin-max` | Combined badge. Flags incomplete pairs and non-numeric values. setsize=-1 treated as amber |
-| 29 | `highlight-aria-setsize-posinset` | Shows "N of M" shorthand plus raw values. Shows level where aria-level also present |
-| 30 | `highlight-aria-level` | Green 1–6, amber above 6 (inconsistent support), red zero/negative/non-integer |
-| 31 | `highlight-aria-controls` | Relationship bookmarklet. Hidden referenced elements valid (e.g. collapsed panels). Dynamic insertion flagged as missing until element exists in DOM — re-run after triggering |
-| 32 | `highlight-aria-haspopup` | All seven recognised values green. Red for invalid/empty |
-| 33 | `highlight-shadow-dom` | Open shadow DOM hosts and custom elements. Fixed banner shows element counts |
-| 34 | `render-markdown` | Replaces page with rendered HTML. Only works on raw markdown files opened directly in browser |
+| File | Notes |
+|------|-------|
+| `highlight-headings` | H1–H6 six colours, flags empty and duplicate H1 |
+| `highlight-image-alternatives` | Three states: alt text, empty alt, missing alt |
+| `highlight-lists` | Native and ARIA list roles, badge position differs for containers vs items |
+| `highlight-landmarks` | Eight landmark roles, shows accessible name where present. Nested aside handling matches HTML-AAM |
+| `highlight-page-language` | BCP 47 validation, 184 ISO 639-1 codes, "did you mean" suggestions for full-word mistakes |
+| `highlight-captions-and-headers` | Keys 1–3 on by default, key 4 (scope) opt-in. `n` key cycles |
+| `highlight-table-id-and-headers` | Interactive — makes cells focusable, Tab/n to navigate, referenced headers highlighted green |
+| `highlight-aria-table-roles` | Six groups, all on by default, keys 1–6 plus `n` key cycling. Shows aria-sort value |
+| `track-focus-order` | Active listener, Tab/n to navigate, Shift+Tab decrements, Esc to stop |
+| `highlight-tabindex` | Green=0, amber=-1, red=positive or invalid |
+| `highlight-aria-label` | Flags empty values and use on name-prohibited roles |
+| `highlight-aria-labelledby` | Source badge shows resolved name with arrow. Referenced elements get blue badges. Missing IDs annotated inline. Hidden elements resolve correctly per AccName spec |
+| `highlight-aria-describedby` | Same pattern as labelledby but for descriptions. NO DESCRIPTION error states |
+| `highlight-name-mismatches` | MATCH / MODIFIED / MISMATCH states |
+| `highlight-name-prohibited-roles` | ARIA 1.2 and 1.3 draft roles. NAME PROHIBITED: [role] |
+| `highlight-form-field-names` | Six name sources, amber for unreliable (placeholder, title) |
+| `highlight-buttons` | Targets `<button>`, `input[type="submit"]`, `input[type="reset"]` only |
+| `highlight-fieldsets` | Fieldset, legend, radiogroup |
+| `highlight-required-fields` | Native required, aria-required, redundant combinations |
+| `highlight-aria-invalid` | All four valid values green, only unrecognised values red |
+| `highlight-autocomplete` | Valid / generic / invalid states |
+| `highlight-aria-expanded` | true / false / invalid. Re-run after interaction |
+| `highlight-aria-checked` | true / false / mixed / invalid. Re-run after interaction |
+| `highlight-aria-pressed` | true / false / mixed / invalid. Re-run after interaction |
+| `highlight-aria-roledescription` | Checks for underlying role (explicit or meaningful implicit). Flags misuse on generic elements |
+| `highlight-aria-details` | Relationship bookmarklet. Missing IDs annotated inline |
+| `highlight-aria-valuetext` | Simple value display. Flags empty |
+| `highlight-aria-valuemin-max` | Combined badge. Flags incomplete pairs and non-numeric values |
+| `highlight-aria-setsize-posinset` | Shows "N of M" shorthand plus raw values. setsize=-1 (unknown total) treated as amber. Shows level where aria-level also present |
+| `highlight-aria-level` | Green 1–6, amber above 6 (inconsistent support), red zero/negative/non-integer |
+| `highlight-aria-controls` | Relationship bookmarklet. Hidden referenced elements valid (e.g. collapsed panels). Dynamic insertion flagged as missing until element exists in DOM — re-run after triggering |
+| `highlight-aria-haspopup` | All seven recognised values green. Red for invalid/empty |
+| `highlight-shadow-dom` | Open shadow DOM hosts and custom elements. Fixed banner shows element counts |
+| `render-markdown` | Replaces page with rendered HTML. Only works on raw markdown files opened directly in browser |
 
 ---
 
@@ -158,8 +158,8 @@ Captions and headers: keys 1–3 on by default, key 4 (scope) opt-in. ARIA table
 ## Related resources
 
 **Test pages**
-Approximatelty 125 test pages covering every badge state each bookmarklet can produce:
-- https://intopia.github.io/exercise/testing.html 
+Approximately 125 test pages covering every badge state each bookmarklet can produce:
+- https://intopia.github.io/exercise/testing.html
 
 **Explainer pages**
 A set of pages with videos and transcripts covering page structure, tables, focus and navigation, names and descriptions, forms, and states:
@@ -170,8 +170,8 @@ A set of pages with videos and transcripts covering page structure, tables, focu
 - https://intopia.github.io/exercise/bookmarklets-05-forms.html
 - https://intopia.github.io/exercise/bookmarklets-06-states.html
 
-- **ARIA attribute articles**
-- A set of in-depth aria articles published on maxdesign.com.au:
+**ARIA attribute articles**
+A set of in-depth ARIA articles published on maxdesign.com.au:
 - https://www.maxdesign.com.au/articles/aria-activedescendant-explained.html
 - https://www.maxdesign.com.au/articles/aria-roledescription-explained.html
 - https://www.maxdesign.com.au/articles/aria-details-explained.html
