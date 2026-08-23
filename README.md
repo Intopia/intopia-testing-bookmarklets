@@ -2,7 +2,7 @@
 
 ## About this project
 
-A set of 34 accessibility testing bookmarklets. Each one highlights a specific HTML or ARIA feature directly on the page, helping teams quickly inspect, test and understand accessibility markup without needing browser DevTools.
+A set of 35 accessibility testing bookmarklets. Each one highlights a specific HTML or ARIA feature directly on the page, helping teams quickly inspect, test and understand accessibility markup without needing browser DevTools.
 
 Bookmarklets page: https://intopia.github.io/exercise/testing-bookmarklets.html
 
@@ -27,21 +27,22 @@ Bookmarklets page: https://intopia.github.io/exercise/testing-bookmarklets.html
 17. Highlight buttons
 18. Highlight fieldsets
 19. Highlight required fields
-20. Highlight aria-invalid
-21. Highlight autocomplete
-22. Highlight aria-expanded
-23. Highlight aria-checked
-24. Highlight aria-pressed
-25. Highlight aria-roledescription
-26. Highlight aria-details
-27. Highlight aria-valuetext
-28. Highlight aria-valuemin and aria-valuemax
-29. Highlight aria-setsize and aria-posinset
-30. Highlight aria-level
-31. Highlight aria-controls
-32. Highlight aria-haspopup
-33. Highlight shadow DOM
-34. Render markdown
+20. Highlight readonly fields
+21. Highlight aria-invalid
+22. Highlight autocomplete
+23. Highlight aria-expanded
+24. Highlight aria-checked
+25. Highlight aria-pressed
+26. Highlight aria-roledescription
+27. Highlight aria-details
+28. Highlight aria-valuetext
+29. Highlight aria-valuemin and aria-valuemax
+30. Highlight aria-setsize and aria-posinset
+31. Highlight aria-level
+32. Highlight aria-controls
+33. Highlight aria-haspopup
+34. Highlight shadow DOM
+35. Render markdown
 
 ## Design system
 
@@ -366,6 +367,21 @@ Legend badge positioned below legend element to avoid overlap with fieldset badg
 | Dark blue | `#0a558c` | aria-required="true" |
 | Amber | `#e65100` | required + aria-required="true" (redundant) |
 | Dark green | `#1b5e20` | aria-required="false" |
+
+---
+
+## Highlight readonly fields
+
+Native `readonly` (`<input>`, `<textarea>`) is browser-enforced and implicitly sets `aria-readonly="true"` in the accessibility tree — no ARIA needed. `aria-readonly="true"` alone only affects the AT announcement; it does not stop the user typing unless the field is also restricted some other way. Teaching bookmarklet — the blue badge is deliberately informational rather than pass/fail.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | readonly |
+| Dark blue | `#0a558c` | aria-readonly="true" |
+| Amber | `#e65100` | aria-readonly="false" (redundant — default value) |
+| Amber | `#e65100` | readonly + aria-readonly="true" (redundant) |
+| Red | `#b00020` | readonly + aria-readonly="false" (CONFLICTING — native readonly wins) |
+| Red | `#b00020` | INVALID VALUE: aria-readonly="[value]" |
 
 ---
 
