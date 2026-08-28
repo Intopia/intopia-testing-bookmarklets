@@ -132,7 +132,12 @@ The exercise repo (`https://intopia.github.io/exercise/`) is the published produ
 | `highlight-aria-controls` | Relationship bookmarklet. Hidden referenced elements valid (e.g. collapsed panels). Dynamic insertion flagged as missing until element exists in DOM — re-run after triggering |
 | `highlight-aria-haspopup` | All seven recognised values green. Red for invalid/empty |
 | `highlight-shadow-dom` | Open shadow DOM hosts and custom elements. Fixed banner shows element counts |
-| `render-markdown` | Replaces page with rendered HTML. Only works on raw markdown files opened directly in browser |
+
+---
+
+## Removed bookmarklets
+
+**Render markdown** — removed from the set. Originally built as a convenience tool to render raw `.md` files in Chrome. Replaced by a proper browser extension (Markdown Viewer) which handles all edge cases reliably. The bookmarklet had a fragile hand-rolled parser that failed on inline HTML such as `<title>` in text. The `.js` and `.txt` files remain in the repo for reference but the bookmarklet is no longer listed on the public page.
 
 ---
 

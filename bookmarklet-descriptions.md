@@ -107,10 +107,3 @@ Highlights all elements with `aria-haspopup`. All seven recognised values are di
 
 ## 34. Highlight shadow DOM
 Highlights open shadow DOM hosts and custom elements. Flags where shadow DOM cannot be confirmed.
-
-## 35. Render markdown
-Renders markdown files into HTML on the page for easier viewing.
-
-
-
-

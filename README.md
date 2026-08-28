@@ -2,7 +2,7 @@
 
 ## About this project
 
-A set of 35 accessibility testing bookmarklets. Each one highlights a specific HTML or ARIA feature directly on the page, helping teams quickly inspect, test and understand accessibility markup without needing browser DevTools.
+A set of 34 accessibility testing bookmarklets. Each one highlights a specific HTML or ARIA feature directly on the page, helping teams quickly inspect, test and understand accessibility markup without needing browser DevTools.
 
 Bookmarklets page: https://intopia.github.io/exercise/testing-bookmarklets.html
 
@@ -42,7 +42,6 @@ Bookmarklets page: https://intopia.github.io/exercise/testing-bookmarklets.html
 32. Highlight aria-controls
 33. Highlight aria-haspopup
 34. Highlight shadow DOM
-35. Render markdown
 
 ## Design system
 
@@ -565,15 +564,3 @@ Fixed summary banner at bottom of page shows element counts.
 |--------|-----|------------|
 | Dark green | `#1b5e20` | Open shadow DOM: [tag][#id or .class] |
 | Amber | `#e65100` | Custom element: [tag][#id or .class] |
-
----
-
-## Render markdown
-
-Replaces the current page with a rendered HTML view. No persistent overlay or Esc handler — page is rewritten in place.
-
-Supports: headings H1–H6, bold, italic, bold+italic, inline code, fenced code blocks, unordered lists, ordered lists, blockquotes, horizontal rules, links, images.
-
-Does not support: tables, nested lists, footnotes, front matter.
-
-Only works on pages where the browser has rendered raw text in a `<pre>` element (e.g. opening a .md file directly in Chrome).
