@@ -2,7 +2,7 @@
 
 ## About this project
 
-A set of 34 accessibility testing bookmarklets. Each one highlights a specific HTML or ARIA feature directly on the page, helping teams quickly inspect, test and understand accessibility markup without needing browser DevTools.
+A set of 35 accessibility testing bookmarklets. Each one highlights a specific HTML or ARIA feature directly on the page, helping teams quickly inspect, test and understand accessibility markup without needing browser DevTools.
 
 Bookmarklets page: https://intopia.github.io/exercise/testing-bookmarklets.html
 
@@ -36,12 +36,13 @@ Bookmarklets page: https://intopia.github.io/exercise/testing-bookmarklets.html
 26. Highlight aria-roledescription
 27. Highlight aria-details
 28. Highlight aria-valuetext
-29. Highlight aria-valuemin and aria-valuemax
-30. Highlight aria-setsize and aria-posinset
-31. Highlight aria-level
-32. Highlight aria-controls
-33. Highlight aria-haspopup
-34. Highlight shadow DOM
+29. Highlight aria-valuenow
+30. Highlight aria-valuemin and aria-valuemax
+31. Highlight aria-setsize and aria-posinset
+32. Highlight aria-level
+33. Highlight aria-controls
+34. Highlight aria-haspopup
+35. Highlight shadow DOM
 
 ## Design system
 
@@ -480,6 +481,14 @@ Missing IDs annotated inline in the source badge.
 | Amber | `#e65100` | aria-valuetext: (empty) |
 
 ---
+
+## Highlight aria-valuenow
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-valuenow: [N] |
+| Amber | `#e65100` | aria-valuenow: (empty) |
+| Red | `#b00020` | aria-valuenow: "[value]" (invalid — must be a number) |
 
 ## Highlight aria-valuemin and aria-valuemax
 

@@ -90,20 +90,23 @@ Highlights all elements with `aria-details` and their referenced targets. Shows 
 ## 28. Highlight aria-valuetext
 Highlights all elements with `aria-valuetext`. Shows the text alternative value that assistive technologies announce instead of the numeric `aria-valuenow`. Flags empty values.
 
-## 29. Highlight aria-valuemin and aria-valuemax
+## 29. Highlight aria-valuenow
+Highlights all elements with `aria-valuenow`. Shows the current numeric value of a range widget such as a slider or spinbutton. Flags empty and non-numeric values.
+
+## 30. Highlight aria-valuemin and aria-valuemax
 Highlights all elements with `aria-valuemin` and/or `aria-valuemax`. Shows both values together on each element. Flags incomplete pairs where only one attribute is present, and non-numeric values.
 
-## 30. Highlight aria-setsize and aria-posinset
+## 31. Highlight aria-setsize and aria-posinset
 Highlights all elements with `aria-setsize` and `aria-posinset`. Shows the position of each item within its sibling group. Where aria-level is also present, shows the level alongside the position. Flags incomplete pairs and non-numeric values.
 
-## 31. Highlight aria-level
+## 32. Highlight aria-level
 Highlights all elements with `aria-level`. Shows the level value on each element. Flags values above 6 where browser support is inconsistent, and invalid values such as zero, negative numbers and non-integers.
 
-## 32. Highlight aria-controls
+## 33. Highlight aria-controls
 Highlights elements with `aria-controls` and their referenced targets. Shows whether each referenced element exists in the page. Flags missing and empty values. If the controlled element is initially hidden, re-run the bookmarklet after activating the trigger to see the highlighted relationship. Note: if the controlled element is inserted into the DOM dynamically on first activation, the bookmarklet will flag it as a missing ID until the element exists. Re-run after triggering to confirm the reference resolves correctly.
 
-## 33. Highlight aria-haspopup
+## 34. Highlight aria-haspopup
 Highlights all elements with `aria-haspopup`. All seven recognised values are displayed: `false`, `true`, `menu`, `listbox`, `tree`, `grid` and `dialog`. Flags empty and unrecognised values.
 
-## 34. Highlight shadow DOM
+## 35. Highlight shadow DOM
 Highlights open shadow DOM hosts and custom elements. Flags where shadow DOM cannot be confirmed.
