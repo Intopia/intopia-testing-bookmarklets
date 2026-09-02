@@ -2,7 +2,7 @@
 
 ## About this project
 
-A set of 34 accessibility testing bookmarklets. Each one highlights a specific HTML or ARIA feature directly on the page, helping teams quickly inspect, test and understand accessibility markup without needing browser DevTools.
+A set of accessibility testing bookmarklets. Each one highlights a specific HTML or ARIA feature directly on the page, helping teams quickly inspect, test and understand accessibility markup without needing browser DevTools.
 
 Bookmarklets page: https://intopia.github.io/exercise/testing-bookmarklets.html
 
@@ -13,36 +13,35 @@ Bookmarklets page: https://intopia.github.io/exercise/testing-bookmarklets.html
 3. Highlight lists
 4. Highlight landmarks
 5. Highlight page language
-6. Highlight document title
-8. Highlight captions and headers
-8. Highlight table IDs and headers
-9. Highlight ARIA table roles
-10. Track focus order
-11. Highlight tabindex
-12. Highlight aria-label
-13. Highlight aria-labelledby
-14. Highlight aria-describedby
-15. Highlight name mismatches
-16. Highlight name-prohibited roles
-17. Highlight form field names
-18. Highlight buttons
-19. Highlight fieldsets
-20. Highlight required fields
-21. Highlight readonly fields
-22. Highlight aria-invalid
-23. Highlight autocomplete
-24. Highlight aria-expanded
-25. Highlight aria-checked
-26. Highlight aria-pressed
-27. Highlight aria-roledescription
-28. Highlight aria-details
-29. Highlight aria-valuetext
-30. Highlight aria-valuemin and aria-valuemax
-31. Highlight aria-setsize and aria-posinset
-32. Highlight aria-level
-33. Highlight aria-controls
-34. Highlight aria-haspopup
-35. Highlight shadow DOM
+6. Highlight captions and headers
+7. Highlight table IDs and headers
+8. Highlight ARIA table roles
+9. Track focus order
+10. Highlight tabindex
+11. Highlight aria-label
+12. Highlight aria-labelledby
+13. Highlight aria-describedby
+14. Highlight name mismatches
+15. Highlight name-prohibited roles
+16. Highlight form field names
+17. Highlight buttons
+18. Highlight fieldsets
+19. Highlight required fields
+20. Highlight readonly fields
+21. Highlight aria-invalid
+22. Highlight autocomplete
+23. Highlight aria-expanded
+24. Highlight aria-checked
+25. Highlight aria-pressed
+26. Highlight aria-roledescription
+27. Highlight aria-details
+28. Highlight aria-valuetext
+29. Highlight aria-valuemin and aria-valuemax
+30. Highlight aria-setsize and aria-posinset
+31. Highlight aria-level
+32. Highlight aria-controls
+33. Highlight aria-haspopup
+34. Highlight shadow DOM
 
 ## Design system
 
@@ -173,17 +172,6 @@ Validates against 184 ISO 639-1 codes, common ISO 639-2/3 three-letter codes, an
 | Red | `#b00020` | lang: "[value]" — invalid (inline) |
 
 ---
-
-## Highlight document title
-
-Document-level fixed banner appended directly to body. No overlay or outline — `<title>` is not a visible element.
-
-| Colour | Hex | Badge text |
-|--------|-----|------------|
-| Dark green | `#1b5e20` | Document title: "[text]" |
-| Red | `#b00020` | Document title: (empty) — `<title>` element is present but has no content |
-| Red | `#b00020` | NO DOCUMENT TITLE — `<title>` element is missing |
-| Amber | `#e65100` | Warning: [N] `<title>` elements found — only one is valid |
 
 ## Highlight captions and headers
 
