@@ -153,14 +153,14 @@ Validates against 184 ISO 639-1 codes, common ISO 639-2/3 three-letter codes, an
 
 ## Highlight document title
 
-Document-level fixed banner appended directly to body. No overlay or outline — `<title>` is not a visible element.
+Document-level fixed banner appended directly to body. No overlay or outline — `<title>` is not a visible element. Only one banner is ever shown.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | Document title: "[text]" |
+| Amber | `#e65100` | Warning: [N] `<title>` elements found — only one is valid. Browsers use: "[text]" |
 | Red | `#b00020` | Document title: (empty) — `<title>` element is present but has no content |
 | Red | `#b00020` | NO DOCUMENT TITLE — `<title>` element is missing |
-| Amber | `#e65100` | Warning: [N] `<title>` elements found — only one is valid |
 
 ---
 
