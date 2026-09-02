@@ -13,60 +13,38 @@ Bookmarklets page: https://intopia.github.io/exercise/testing-bookmarklets.html
 3. Highlight lists
 4. Highlight landmarks
 5. Highlight page language
-6. Highlight captions and headers
-7. Highlight table IDs and headers
-8. Highlight ARIA table roles
-9. Track focus order
-10. Highlight tabindex
-11. Highlight aria-label
-12. Highlight aria-labelledby
-13. Highlight aria-describedby
-14. Highlight name mismatches
-15. Highlight name-prohibited roles
-16. Highlight form field names
-17. Highlight buttons
-18. Highlight fieldsets
-19. Highlight required fields
-20. Highlight readonly fields
-21. Highlight aria-invalid
-22. Highlight autocomplete
-23. Highlight aria-expanded
-24. Highlight aria-checked
-25. Highlight aria-pressed
-26. Highlight aria-roledescription
-27. Highlight aria-details
-28. Highlight aria-valuetext
-29. Highlight aria-valuemin and aria-valuemax
-30. Highlight aria-setsize and aria-posinset
-31. Highlight aria-level
-32. Highlight aria-controls
-33. Highlight aria-haspopup
-34. Highlight shadow DOM
-
-## Design system
-
-A consistent badge system is used across the set:
-
-- Colour palette: dark green (valid), dark blue (informational), amber (caution), red (broken/missing)
-- Informational badges — sentence case, source first: `aria-label: Close`
-- Diagnostic verdict badges — all caps, verdict first: `NO ACCESSIBLE NAME`, `MISMATCH: Hello`
-
-## Key architectural decisions
-
-- All bookmarklets use an overlay div, not direct DOM badge injection
-- All have Esc to clear, re-running removes previous overlay
-- Dense bookmarklets (tables, ARIA tables) use keyboard number filters with a fixed legend panel — "progressive enhancement" approach, all on by default
-- Number keys isolate a single group; pressing the same key again restores the default view
-- `n` key cycles through groups in sequence on table bookmarklets
-- Lists use position-by-type: containers badge above, items badge inside at bottom
-- Badge wrapping: image alt bookmarklet uses max-width: 400px and white-space: normal for long alt text
-- Page language document banner appended directly to body (not overlay) to avoid fixed positioning issues
-
-## Tooling
-
-All minification done with terser via Node. Encoded bookmarklets output as complete `<a>` tags ready to paste.
-
-Key minification gotcha: terser can rename variables to the same single letter causing temporal dead zone errors. Use `mangle: { reserved: ['functionName'] }` for key functions and prefer `var` over `const`/`let` inside forEach callbacks to avoid conflicts.
+6. Highlight document title
+7. Highlight page encoding
+8. Highlight captions and headers
+9. Highlight table IDs and headers
+10. Highlight ARIA table roles
+11. Track focus order
+12. Highlight tabindex
+13. Highlight aria-label
+14. Highlight aria-labelledby
+15. Highlight aria-describedby
+16. Highlight name mismatches
+17. Highlight name-prohibited roles
+18. Highlight form field names
+19. Highlight buttons
+20. Highlight fieldsets
+21. Highlight required fields
+22. Highlight readonly fields
+23. Highlight aria-invalid
+24. Highlight autocomplete
+25. Highlight aria-expanded
+26. Highlight aria-checked
+27. Highlight aria-pressed
+28. Highlight aria-roledescription
+29. Highlight aria-details
+30. Highlight aria-valuetext
+31. Highlight aria-valuenow
+32. Highlight aria-valuemin and aria-valuemax
+33. Highlight aria-setsize and aria-posinset
+34. Highlight aria-level
+35. Highlight aria-controls
+36. Highlight aria-haspopup
+37. Highlight shadow DOM
 
 ---
 
@@ -172,6 +150,32 @@ Validates against 184 ISO 639-1 codes, common ISO 639-2/3 three-letter codes, an
 | Red | `#b00020` | lang: "[value]" — invalid (inline) |
 
 ---
+
+## Highlight document title
+
+Document-level fixed banner appended directly to body. No overlay or outline — `<title>` is not a visible element.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | Document title: "[text]" |
+| Red | `#b00020` | Document title: (empty) — `<title>` element is present but has no content |
+| Red | `#b00020` | NO DOCUMENT TITLE — `<title>` element is missing |
+| Amber | `#e65100` | Warning: [N] `<title>` elements found — only one is valid |
+
+---
+
+## Highlight page encoding
+
+Document-level fixed banner appended directly to body. Detects both `<meta charset>` and `http-equiv Content-Type` forms.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | Charset: "UTF-8" via `<meta charset>` |
+| Amber | `#e65100` | Charset: "[value]" via [source] — UTF-8 is recommended |
+| Amber | `#e65100` | Warning: conflicting charset declarations — meta charset: "[value]" and http-equiv: "[value]" |
+| Amber | `#e65100` | Warning: charset declaration found outside `<head>` |
+| Red | `#b00020` | Charset: (empty) — charset attribute is present but has no value |
+| Red | `#b00020` | NO CHARSET DECLARATION — `<meta charset>` is missing |
 
 ## Highlight captions and headers
 
@@ -480,6 +484,14 @@ Missing IDs annotated inline in the source badge.
 | Amber | `#e65100` | aria-valuetext: (empty) |
 
 ---
+
+## Highlight aria-valuenow
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | aria-valuenow: [N] |
+| Amber | `#e65100` | aria-valuenow: (empty) |
+| Red | `#b00020` | aria-valuenow: "[value]" (invalid — must be a number) |
 
 ## Highlight aria-valuemin and aria-valuemax
 
