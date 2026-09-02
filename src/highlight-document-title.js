@@ -4,7 +4,6 @@
 (function(){
   var BANNER_CLASS = 'a11y-doc-title-banner';
 
-  // Remove any existing banners
   document.querySelectorAll('.' + BANNER_CLASS).forEach(function(el) { el.remove(); });
 
   function makeBanner(text, colour) {
@@ -36,10 +35,14 @@
 
   if (titles.length === 0) {
     makeBanner('NO DOCUMENT TITLE \u2014 <title> element is missing', '#b00020');
-  } else {
-    if (titles.length > 1) {
-      makeBanner('Warning: ' + titles.length + ' <title> elements found \u2014 only one is valid', '#e65100');
+  } else if (titles.length > 1) {
+    var firstTitle = titles[0].textContent.trim();
+    var msg = 'Warning: ' + titles.length + ' <title> elements found \u2014 only one is valid.';
+    if (firstTitle !== '') {
+      msg += ' Browsers use: \u201c' + firstTitle + '\u201d';
     }
+    makeBanner(msg, '#e65100');
+  } else {
     var titleText = titles[0].textContent.trim();
     if (titleText === '') {
       makeBanner('Document title: (empty) \u2014 <title> element is present but has no content', '#b00020');
