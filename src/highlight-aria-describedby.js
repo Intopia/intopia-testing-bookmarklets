@@ -1,7 +1,9 @@
 // Highlight aria-describedby
 // Highlights elements with aria-describedby and their targets.
 // Shows the concatenated description resolved from referenced IDs.
-// Flags missing IDs inline. Note: resolves from hidden elements by design.
+// Flags missing IDs and self-references inline, and flags an empty attribute value.
+// Note: resolves text from hidden elements by design, per AccName. Hidden
+// referenced elements get no badge or outline of their own.
 (function(){
 var existing = document.getElementById('a11y-describedby-overlay');
 if (existing) existing.remove();
@@ -35,10 +37,21 @@ function makeBadge(text, colour, rect) {
   return b;
 }
 
-document.querySelectorAll('[aria-describedby]').forEach(function(el) {
-  var ids = el.getAttribute('aria-describedby').trim().split(/\s+/);
+var sources = document.querySelectorAll('[aria-describedby]');
+
+sources.forEach(function(el) {
+  var raw = el.getAttribute('aria-describedby').trim();
   var rect = el.getBoundingClientRect();
 
+  // Empty or whitespace-only attribute value
+  if (raw === '') {
+    el.style.outline = '4px solid #b00020';
+    flaggedEls.push(el);
+    makeBadge('aria-describedby: (empty) \u2192 NO DESCRIPTION', '#b00020', rect);
+    return;
+  }
+
+  var ids = raw.split(/\s+/);
   var idLabels = [];
   var resolvedTexts = [];
 
@@ -51,11 +64,11 @@ document.querySelectorAll('[aria-describedby]').forEach(function(el) {
       var isVisible = refRect.width > 0 || refRect.height > 0;
       if (isVisible) {
         ref.style.outline = '4px solid #0a558c';
-        makeBadge('ID: ' + id, '#0a558c', refRect);
+        makeBadge('ID: ' + id + (ref === el ? ' (self)' : ''), '#0a558c', refRect);
       }
       flaggedEls.push(ref);
       resolvedTexts.push(ref.textContent.trim());
-      idLabels.push(id);
+      idLabels.push(ref === el ? id + ' (self)' : id);
     }
   });
 
@@ -81,6 +94,23 @@ document.querySelectorAll('[aria-describedby]').forEach(function(el) {
   flaggedEls.push(el);
   makeBadge(sourceBadgeText, sourceBadgeColour, rect);
 });
+
+if (sources.length === 0) {
+  var msg = document.createElement('div');
+  msg.textContent = 'No aria-describedby attributes found on this page.';
+  msg.style.position = 'fixed';
+  msg.style.top = '20px';
+  msg.style.left = '50%';
+  msg.style.transform = 'translateX(-50%)';
+  msg.style.background = '#333';
+  msg.style.color = '#fff';
+  msg.style.padding = '10px 16px';
+  msg.style.borderRadius = '6px';
+  msg.style.fontSize = '16px';
+  msg.style.zIndex = '999999';
+  msg.style.pointerEvents = 'none';
+  overlay.appendChild(msg);
+}
 
 function onKey(e) {
   if (e.key !== 'Escape') return;
