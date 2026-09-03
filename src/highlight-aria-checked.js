@@ -2,4 +2,87 @@
 // Highlights all 'aria-checked' attributes on custom widgets.
 // Distinguishes between `true`, `false` and `mixed` states.
 // Re-run after interacting with a widget to see updated values.
-!function(){const e=document.getElementById("a11y-checked-overlay");e&&e.remove();const t=document.createElement("div");t.id="a11y-checked-overlay",t.style.position="absolute",t.style.top="0",t.style.left="0",t.style.width="100%",t.style.pointerEvents="none",t.style.zIndex="999999",document.body.appendChild(t);const n=[];if(document.querySelectorAll("[aria-checked]").forEach(function(e){const o=e.getAttribute("aria-checked").trim().toLowerCase();let l,s;"true"===o?(l="#1b5e20",s='aria-checked="true"'):"false"===o?(l="#e65100",s='aria-checked="false"'):"mixed"===o?(l="#0a558c",s='aria-checked="mixed"'):(l="#b00020",s='aria-checked="'+e.getAttribute("aria-checked")+'" (INVALID VALUE)'),e.style.outline="3px solid "+l,e.style.outlineOffset="2px",n.push(e);const i=document.createElement("div");i.textContent=s,i.style.position="absolute";const d=e.getBoundingClientRect();i.style.left=d.left+window.scrollX+"px",i.style.top=d.top+window.scrollY-26+"px",i.style.background=l,i.style.color="#ffffff",i.style.padding="2px 6px",i.style.fontSize="14px",i.style.fontFamily="Arial, sans-serif",i.style.borderRadius="4px",i.style.whiteSpace="nowrap",i.style.pointerEvents="none",i.style.zIndex="999999",t.appendChild(i)}),0===n.length){const e=document.createElement("div");e.textContent="No aria-checked attributes found on this page.",e.style.position="fixed",e.style.top="20px",e.style.left="50%",e.style.transform="translateX(-50%)",e.style.background="#333",e.style.color="#fff",e.style.padding="10px 16px",e.style.borderRadius="6px",e.style.fontSize="16px",e.style.zIndex="999999",e.style.pointerEvents="none",t.appendChild(e)}document.addEventListener("keydown",function e(o){"Escape"===o.key&&(t.remove(),n.forEach(function(e){e.style.outline="",e.style.outlineOffset=""}),document.removeEventListener("keydown",e))})}();
+(function () {
+  var existing = document.getElementById('a11y-checked-overlay');
+  if (existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'a11y-checked-overlay';
+  overlay.style.position = 'absolute';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.pointerEvents = 'none';
+  overlay.style.zIndex = '999999';
+  document.body.appendChild(overlay);
+
+  var flaggedEls = [];
+
+  document.querySelectorAll('[aria-checked]').forEach(function (el) {
+    var value = el.getAttribute('aria-checked').trim().toLowerCase();
+    var colour, label;
+
+    if (value === 'true') {
+      colour = '#1b5e20';
+      label = 'aria-checked="true"';
+    } else if (value === 'false') {
+      colour = '#e65100';
+      label = 'aria-checked="false"';
+    } else if (value === 'mixed') {
+      colour = '#0a558c';
+      label = 'aria-checked="mixed"';
+    } else {
+      colour = '#b00020';
+      label = 'aria-checked="' + el.getAttribute('aria-checked') + '" (INVALID VALUE)';
+    }
+
+    el.style.outline = '3px solid ' + colour;
+    el.style.outlineOffset = '2px';
+    flaggedEls.push(el);
+
+    var badge = document.createElement('div');
+    badge.textContent = label;
+    badge.style.position = 'absolute';
+    var rect = el.getBoundingClientRect();
+    badge.style.left = (rect.left + window.scrollX) + 'px';
+    badge.style.top = (rect.top + window.scrollY - 26) + 'px';
+    badge.style.background = colour;
+    badge.style.color = '#ffffff';
+    badge.style.padding = '2px 6px';
+    badge.style.fontSize = '14px';
+    badge.style.fontFamily = 'Arial, sans-serif';
+    badge.style.borderRadius = '4px';
+    badge.style.whiteSpace = 'nowrap';
+    badge.style.pointerEvents = 'none';
+    badge.style.zIndex = '999999';
+    overlay.appendChild(badge);
+  });
+
+  if (flaggedEls.length === 0) {
+    var msg = document.createElement('div');
+    msg.textContent = 'No aria-checked attributes found on this page.';
+    msg.style.position = 'fixed';
+    msg.style.top = '20px';
+    msg.style.left = '50%';
+    msg.style.transform = 'translateX(-50%)';
+    msg.style.background = '#333';
+    msg.style.color = '#fff';
+    msg.style.padding = '10px 16px';
+    msg.style.borderRadius = '6px';
+    msg.style.fontSize = '16px';
+    msg.style.zIndex = '999999';
+    msg.style.pointerEvents = 'none';
+    overlay.appendChild(msg);
+  }
+
+  function onKey(e) {
+    if (e.key !== 'Escape') return;
+    overlay.remove();
+    flaggedEls.forEach(function (el) {
+      el.style.outline = '';
+      el.style.outlineOffset = '';
+    });
+    document.removeEventListener('keydown', onKey);
+  }
+  document.addEventListener('keydown', onKey);
+})();
