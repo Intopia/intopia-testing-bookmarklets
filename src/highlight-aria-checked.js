@@ -1,6 +1,7 @@
 // Highlight aria-checked
 // Highlights all 'aria-checked' attributes on custom widgets.
 // Distinguishes between `true`, `false` and `mixed` states.
+// `undefined` is also valid per the tristate value type.
 // Re-run after interacting with a widget to see updated values.
 (function () {
   var existing = document.getElementById('a11y-checked-overlay');
@@ -31,6 +32,11 @@
     } else if (value === 'mixed') {
       colour = '#0a558c';
       label = 'aria-checked="mixed"';
+    } else if (value === 'undefined') {
+      // Valid per the tristate value type (true/false/mixed/undefined). Means
+      // the element is not checkable, the same as omitting it.
+      colour = '#1b5e20';
+      label = 'aria-checked="undefined"';
     } else {
       colour = '#b00020';
       label = 'aria-checked="' + el.getAttribute('aria-checked') + '" (INVALID VALUE)';
