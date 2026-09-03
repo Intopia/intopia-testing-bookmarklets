@@ -46,6 +46,7 @@ Bookmarklets main reference page:
 35. Highlight aria-controls
 36. Highlight aria-haspopup
 37. Highlight shadow DOM
+38. Highlight links
 
 ---
 
@@ -579,3 +580,20 @@ Fixed summary banner at bottom of page shows element counts.
 |--------|-----|------------|
 | Dark green | `#1b5e20` | Open shadow DOM: [tag][#id or .class] |
 | Amber | `#e65100` | Custom element: [tag][#id or .class] |
+
+---
+
+## Highlight links
+
+Resolves the accessible name of every `<a>` element regardless of source (aria-labelledby, aria-label, text content). Checks for duplicate names pointing to different URLs, title attribute issues, empty and missing href.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | "[name]" |
+| Amber | `#e65100` | "[name]" (title matches — may double-announce) |
+| Amber | `#e65100` | "[name]" (title mismatch: "[title]" — may double-announce differently) |
+| Amber | `#e65100` | (no name — title only: "[title]") |
+| Red | `#b00020` | "[name]" (duplicate name, different URL) |
+| Red | `#b00020` | (empty href) |
+| Red | `#b00020` | (no href — not a link in the accessibility tree) |
+| Red | `#b00020` | (no accessible name) |

@@ -1,6 +1,6 @@
 # Intopia testing bookmarklets — handoff document
 
-*Verified against README.md, bookmarklet-descriptions.md and the `dist/hrefs/` file list. All three agree on 37 bookmarklets.*
+*Verified against README.md, bookmarklet-descriptions.md and the `dist/hrefs/` file list. All three agree on 38 bookmarklets.*
 
 ---
 
@@ -145,6 +145,7 @@ Ordered as in README. Repo filenames confirmed against `dist/hrefs/`.
 | 35 | Highlight aria-controls | `highlight-aria-controls` | Relationship bookmarklet. Hidden referenced elements valid. Dynamic insertion flagged missing until element exists, re-run after triggering |
 | 36 | Highlight aria-haspopup | `highlight-aria-haspopup` | All seven recognised values green. Red for invalid and empty |
 | 37 | Highlight shadow DOM | `highlight-shadow-dom` | Green for open shadow DOM hosts, amber for custom elements. Fixed banner at bottom shows counts |
+| 38 | Highlight links | `highlight-links` | Resolves accessible name regardless of source. Flags duplicate names to different URLs, title-only names, title mismatches, empty href and missing href |
 
 ---
 
@@ -152,7 +153,7 @@ Ordered as in README. Repo filenames confirmed against `dist/hrefs/`.
 
 **Render markdown.** Removed from the set. Originally a convenience tool to render raw `.md` files in Chrome, replaced by the Markdown Viewer browser extension, which handles the edge cases reliably. The bookmarklet had a fragile hand-rolled parser that failed on inline HTML such as `<title>` in text.
 
-The `.js` and `.txt` source files were removed from the repo when the bookmarklet was retired. The `dist/hrefs/` list confirms `render-markdown.txt` is not present.
+Note: the previous handoff said the `.js` and `.txt` files remain in the repo for reference, but `render-markdown.txt` is not in the current `dist/hrefs/` list. Worth confirming whether it was deleted or the note is stale.
 
 ---
 
@@ -217,6 +218,7 @@ Extracted directly from `testing-bookmarklets-intopia.html`. Verified September 
 | Highlight aria-controls | `testing-aria-controls.html` |
 | Highlight readonly fields | `testing-aria-readonly.html` |
 | Highlight shadow DOM | `testing-shadow-dom.html` |
+| Highlight links | (no dedicated test page yet) |
 
 ### Notes
 
@@ -255,8 +257,6 @@ Extracted directly from `testing-bookmarklets-intopia.html`. Verified September 
 - [Understanding aria-roledescription](https://www.maxdesign.com.au/articles/aria-roledescription-explained.html)
 - [Understanding aria-activedescendant](https://www.maxdesign.com.au/articles/aria-activedescendant-explained.html)
 
-All 13 articles are published and complete.
-
 ---
 
 ## Exact build commands
@@ -292,7 +292,7 @@ The `mangle: { reserved: [...] }` list varies per bookmarklet — any named func
 
 ---
 
-## Rejected alternatives — relationship badge system
+## Final design
 
 - **Source element** (the element with `aria-labelledby` or `aria-describedby`) — green outline, green badge showing the resolved name: `aria-labelledby: cheetah zebra → "Buy Lawn Mower On special"`
 - **Referenced elements** — blue outline, blue badge at their own position: `ID: cheetah`, `ID: zebra`
@@ -335,3 +335,5 @@ The same green/blue logic was then applied consistently to `aria-describedby`, `
 ### Note on confidence
 
 This is from memory of the conversation in which these decisions were made. The final design is correct and verified in the current bookmarklet code. The intermediate versions are described from memory and may not be in exactly the order stated above.
+
+---

@@ -116,3 +116,6 @@ Highlights all elements with `aria-haspopup`. All seven recognised values are di
 
 ## 37. Highlight shadow DOM
 Highlights open shadow DOM hosts and custom elements. Flags where shadow DOM cannot be confirmed.
+
+## 38. Highlight links
+Highlights all links on the page. Resolves the accessible name from any source (text content, aria-label, aria-labelledby). Flags duplicate names pointing to different URLs, links named by title only, title attribute mismatches, empty href and missing href. Click to activate, Esc to clear.
