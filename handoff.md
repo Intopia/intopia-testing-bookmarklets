@@ -24,6 +24,125 @@ The audience is designers, developers and testers. Several bookmarklets are deli
 
 ---
 
+## Repo structure
+
+This repository contains the bookmarklet source files and the artefacts used to update the published bookmarklets page. It is not itself the published product.
+
+```text
+intopia-testing-bookmarklets/
+├─ bookmarklet-descriptions.md
+├─ handoff.md
+├─ LICENSE
+├─ README.md
+├─ SKILL.md
+├─ dist/
+│  └─ hrefs/
+│     ├─ [name].txt        ← ready-to-paste bookmarklet link
+│     └─ ...
+└─ src/
+   ├─ [name].js            ← readable JavaScript source
+   └─ ...
+```
+
+### `src/`
+
+Contains the readable JavaScript source for each bookmarklet.
+
+Each bookmarklet has a corresponding `.js` file, for example:
+
+```text
+src/
+├─ highlight-headings.js
+├─ highlight-links.js
+├─ highlight-landmarks.js
+└─ ...
+```
+
+These are the true JavaScript source files and should be edited when changing bookmarklet behaviour.
+
+### `dist/hrefs/`
+
+Contains the built `.txt` versions of the bookmarklets used when updating the published page.
+
+Each `.txt` file contains a ready-to-paste bookmarklet link. These files are particularly important in the publishing workflow because their contents are copied directly into:
+
+```text
+intopia.github.io/exercise/testing-bookmarklets-intopia.html
+```
+
+For example:
+
+```text
+dist/
+└─ hrefs/
+   ├─ highlight-headings.txt
+   ├─ highlight-links.txt
+   ├─ highlight-landmarks.txt
+   └─ ...
+```
+
+The relationship is therefore:
+
+```text
+src/[name].js
+      ↓ build
+dist/hrefs/[name].txt
+      ↓ copy into published page
+testing-bookmarklets-intopia.html
+
+```
+
+### `bookmarklet-descriptions.md`
+
+This is an internal working file containing the short description for each bookmarklet.
+
+It is not published or intended to be viewed outside this repository. The descriptions are copied from this file and used as the descriptive text for each bookmarklet on:
+
+```text
+intopia.github.io/exercise/testing-bookmarklets-intopia.html
+```
+
+Its role in the publishing workflow is:
+
+```text
+bookmarklet-descriptions.md
+      ↓ copy description
+testing-bookmarklets-intopia.html
+```
+
+### Published product
+
+The published bookmarklets live in the separate exercise repository:
+
+```text
+intopia.github.io/exercise/
+```
+
+The live page is:
+
+```text
+testing-bookmarklets-intopia.html
+```
+
+When updating a bookmarklet, the main relationship between the two repositories is:
+
+```text
+intopia-testing-bookmarklets/
+├─ src/[name].js
+│     ↓ build
+├─ dist/hrefs/[name].txt
+│     ↓ copy bookmarklet link
+└─ bookmarklet-descriptions.md
+      ↓ copy short description
+
+intopia.github.io/exercise/
+└─ testing-bookmarklets-intopia.html
+```
+
+Treat `intopia-testing-bookmarklets` as the source and build repository, and `intopia.github.io/exercise/` as the published product.
+
+---
+
 ## Design system
 
 ### Colour palette
@@ -68,30 +187,16 @@ Known gotcha: terser can rename variables to the same single letter, causing tem
 
 ---
 
-## Repo structure
-
-```
-intopia-testing-bookmarklets/
-├── README.md              ← full badge reference, one section per bookmarklet
-├── LICENSE
-├── src/
-│   └── [name].js          ← readable source with comment header
-└── dist/
-    ├── testing-bookmarklets.html
-    └── hrefs/
-        └── [name].txt     ← ready-to-paste <a> tag
-```
-
-The exercise repo (`intopia.github.io/exercise/`) is the published product. It holds the live `testing-bookmarklets-intopia.html` and `bookmarklet-descriptions.md`. This repo is source and build artefacts.
-
-### Workflow for updates
+## Workflow for updates
 
 1. Edit `src/[name].js`.
 2. Minify and re-encode, update `dist/hrefs/[name].txt`.
 3. Update the README badge reference and the `bookmarklet-descriptions.md` entry if badges or behaviour changed.
 4. Copy the encoded href into `testing-bookmarklets-intopia.html` in the exercise repo.
 
-### Decision process for new bookmarklets
+---
+
+## Decision process for new bookmarklets
 
 1. Confirm the aim: which ARIA attribute or HTML feature, and which states and edge cases it needs to flag.
 2. Check README for the closest existing bookmarklet in the same category (relationship, state, table) and follow its badge pattern rather than inventing a new one.
@@ -146,14 +251,6 @@ Ordered as in README. Repo filenames confirmed against `dist/hrefs/`.
 | 36 | Highlight aria-haspopup | `highlight-aria-haspopup` | All seven recognised values green. Red for invalid and empty |
 | 37 | Highlight shadow DOM | `highlight-shadow-dom` | Green for open shadow DOM hosts, amber for custom elements. Fixed banner at bottom shows counts |
 | 38 | Highlight links | `highlight-links` | Resolves accessible name regardless of source. Flags duplicate names to different URLs, title-only names, title mismatches, empty href and missing href |
-
----
-
-## Removed bookmarklets
-
-**Render markdown.** Removed from the set. Originally a convenience tool to render raw `.md` files in Chrome, replaced by the Markdown Viewer browser extension, which handles the edge cases reliably. The bookmarklet had a fragile hand-rolled parser that failed on inline HTML such as `<title>` in text.
-
-Note: the previous handoff said the `.js` and `.txt` files remain in the repo for reference, but `render-markdown.txt` is not in the current `dist/hrefs/` list. Worth confirming whether it was deleted or the note is stale.
 
 ---
 

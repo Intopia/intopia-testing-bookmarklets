@@ -497,6 +497,8 @@ Missing IDs annotated inline in the source badge.
 | Amber | `#e65100` | aria-valuenow: (empty) |
 | Red | `#b00020` | aria-valuenow: "[value]" (invalid — must be a number) |
 
+---
+
 ## Highlight aria-valuemin and aria-valuemax
 
 Shows both attributes together on each element.

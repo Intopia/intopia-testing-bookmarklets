@@ -66,16 +66,17 @@ Fix: use `mangle: { reserved: ['functionName'] }` for key functions, and prefer 
 
 ```
 intopia-testing-bookmarklets/
-├── README.md              ← full badge reference, one section per bookmarklet
+├── README.md                      ← full badge reference, one section per bookmarklet
+├── bookmarklet-descriptions.md    ← plain-language description per bookmarklet
 ├── src/
-│   └── [name].js          ← readable source, comment header
+│   └── [name].js                  ← readable source, comment header
 └── dist/
     ├── testing-bookmarklets.html
     └── hrefs/
-        └── [name].txt     ← ready-to-paste <a> tag
+        └── [name].txt             ← ready-to-paste <a> tag
 ```
 
-The exercise repo (`intopia.github.io/exercise/`) is the published product. It holds the live `testing-bookmarklets-intopia.html` and `bookmarklet-descriptions.md`. This repo is source and build artefacts.
+The exercise repo (`intopia.github.io/exercise/`) is the published product. It holds the live `testing-bookmarklets-intopia.html`. This repo is source and build artefacts. `bookmarklet-descriptions.md` lives here, not in the exercise repo, and its entries are copied into the published page alongside each bookmarklet link.
 
 ---
 
@@ -112,4 +113,4 @@ Before editing any of them, re-read the file rather than working from an earlier
 
 ## Reference, not duplicated here
 
-Full badge specs for all 37 existing bookmarklets live in `README.md`. Always check it before building a new one, both to match colour and text conventions for the relevant category, and to avoid re-describing a pattern that already has an established form.
+Full badge specs for every existing bookmarklet live in `README.md`. Always check it before building a new one, both to match colour and text conventions for the relevant category, and to avoid re-describing a pattern that already has an established form.
