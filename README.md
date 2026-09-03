@@ -4,7 +4,8 @@
 
 A set of accessibility testing bookmarklets. Each one highlights a specific HTML or ARIA feature directly on the page, helping teams quickly inspect, test and understand accessibility markup without needing browser DevTools.
 
-Bookmarklets page: https://intopia.github.io/exercise/testing-bookmarklets.html
+Bookmarklets main reference page: 
+[Intopia's accessibility testing bookmarklets](https://intopia.github.io/exercise/testing-bookmarklets-intopia.html)
 
 ## The current bookmarklets
 
@@ -176,6 +177,8 @@ Document-level fixed banner appended directly to body. Detects both `<meta chars
 | Amber | `#e65100` | Warning: charset declaration found outside `<head>` |
 | Red | `#b00020` | Charset: (empty) — charset attribute is present but has no value |
 | Red | `#b00020` | NO CHARSET DECLARATION — `<meta charset>` is missing |
+
+---
 
 ## Highlight captions and headers
 

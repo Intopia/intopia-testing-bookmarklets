@@ -152,7 +152,7 @@ Ordered as in README. Repo filenames confirmed against `dist/hrefs/`.
 
 **Render markdown.** Removed from the set. Originally a convenience tool to render raw `.md` files in Chrome, replaced by the Markdown Viewer browser extension, which handles the edge cases reliably. The bookmarklet had a fragile hand-rolled parser that failed on inline HTML such as `<title>` in text.
 
-Note: the previous handoff said the `.js` and `.txt` files remain in the repo for reference, but `render-markdown.txt` is not in the current `dist/hrefs/` list. Worth confirming whether it was deleted or the note is stale.
+The `.js` and `.txt` source files were removed from the repo when the bookmarklet was retired. The `dist/hrefs/` list confirms `render-markdown.txt` is not present.
 
 ---
 
@@ -174,6 +174,58 @@ Note: the previous handoff said the `.js` and `.txt` files remain in the repo fo
 
 ---
 
+## Bookmarklet to test page mapping
+
+Extracted directly from `testing-bookmarklets-intopia.html`. Verified September 2026.
+
+| Bookmarklet | Test page(s) |
+|-------------|-------------|
+| Highlight headings | `testing-headings.html` |
+| Highlight image alternatives | `testing-images.html` |
+| Highlight lists | `reviewing-lists.html` |
+| Highlight landmarks | `reviewing-landmarks.html` |
+| Highlight page language | `testing-lang-good.html`, `testing-lang-invalid.html`, `testing-lang-missing.html` |
+| Highlight document title | `testing-title-correct.html`, `testing-title-missing.html`, `testing-title-empty.html`, `testing-title-multiple.html` |
+| Highlight page encoding | `testing-charset-correct.html`, `testing-charset-missing.html`, `testing-charset-non-utf8.html`, `testing-charset-empty.html`, `testing-charset-conflicting.html` |
+| Highlight captions and headers | `testing-tables.html` |
+| Highlight table IDs and headers | `testing-tables-complex.html` |
+| Highlight ARIA table roles | `testing-tables-aria.html` |
+| Track focus order | `testing-focus-order.html` |
+| Highlight tabindex | `reviewing-tabindex.html` |
+| Highlight aria-label | `testing-aria-label.html` |
+| Highlight aria-labelledby | `reviewing-aria-labelledby.html` |
+| Highlight aria-describedby | `testing-aria-describedby.html` |
+| Highlight name mismatches | `testing-name-mismatches.html` |
+| Highlight name-prohibited roles | `testing-name-prohibited-roles.html` |
+| Highlight form field names | `testing-form-labels.html` |
+| Highlight buttons | `testing-buttons.html` |
+| Highlight fieldsets | `testing-fieldsets.html` |
+| Highlight required fields | `testing-required-fields.html` |
+| Highlight aria-invalid | `testing-aria-invalid.html` |
+| Highlight autocomplete | `testing-autocomplete.html` |
+| Highlight aria-expanded | `testing-aria-expanded.html` |
+| Highlight aria-checked | `testing-aria-checked.html` |
+| Highlight aria-roledescription | `testing-aria-roledescription.html` |
+| Highlight aria-details | `testing-aria-details.html` |
+| Highlight aria-valuenow | `testing-aria-valuenow.html` |
+| Highlight aria-valuetext | `testing-aria-valuetext.html` |
+| Highlight aria-valuemin and aria-valuemax | `testing-aria-valuetext.html` (shares with aria-valuetext — may need dedicated page) |
+| Highlight aria-pressed | `testing-aria-pressed.html` |
+| Highlight aria-level | `testing-aria-level.html` |
+| Highlight aria-setsize and aria-posinset | `testing-aria-setsize-posinset.html` |
+| Highlight aria-haspopup | `testing-aria-setsize-posinset.html` (shares with setsize/posinset — may need dedicated page) |
+| Highlight aria-controls | `testing-aria-controls.html` |
+| Highlight readonly fields | `testing-aria-readonly.html` |
+| Highlight shadow DOM | `testing-shadow-dom.html` |
+
+### Notes
+
+- `aria-valuemin` and `aria-valuemax` currently share `testing-aria-valuetext.html` with `aria-valuetext`. A dedicated test page may be worth adding.
+- `aria-haspopup` currently shares `testing-aria-setsize-posinset.html`. A dedicated test page may be worth adding.
+- `aria-labelledby` uses a "reviewing" page (`reviewing-aria-labelledby.html`) rather than a "testing" page, consistent with landmarks and tabindex which also use the `reviewing-` prefix.
+
+---
+
 ## Related resources
 
 **Test pages.** Approximately 125 pages covering every badge state each bookmarklet can produce: https://intopia.github.io/exercise/testing.html
@@ -189,36 +241,97 @@ Note: the previous handoff said the `.js` and `.txt` files remain in the repo fo
 
 **ARIA attribute articles** on maxdesign.com.au:
 
-- https://www.maxdesign.com.au/articles/aria-activedescendant-explained.html
-- https://www.maxdesign.com.au/articles/aria-roledescription-explained.html
-- https://www.maxdesign.com.au/articles/aria-details-explained.html
-- https://www.maxdesign.com.au/articles/aria-valuenow-explained.html
-- https://www.maxdesign.com.au/articles/aria-valuetext-explained.html
-- https://www.maxdesign.com.au/articles/aria-valuemin-valuemax-explained.html
-- https://www.maxdesign.com.au/articles/aria-pressed-explained.html
-- https://www.maxdesign.com.au/articles/aria-level-explained.html
-- https://www.maxdesign.com.au/articles/aria-posinset-aria-setsize-explained.html
-- https://www.maxdesign.com.au/articles/aria-current-explained.html
-- https://www.maxdesign.com.au/articles/aria-haspopup-explained.html
+- [Understanding readonly and aria-readonly](https://www.maxdesign.com.au/articles/aria-readonly-readonly-explained.htm)
+- [Understanding aria-controls](https://www.maxdesign.com.au/articles/aria-controls-explained.html)
+- [Understanding aria-haspopup](https://www.maxdesign.com.au/articles/aria-haspopup-explained.html)
+- [Understanding aria-current](https://www.maxdesign.com.au/articles/aria-current-explained.html)
+- [Understanding aria-posinset and aria-setsize](https://www.maxdesign.com.au/articles/aria-posinset-aria-setsize-explained.html)
+- [Understanding aria-level](https://www.maxdesign.com.au/articles/aria-level-explained.html)
+- [Understanding aria-pressed](https://www.maxdesign.com.au/articles/aria-pressed-explained.html)
+- [Understanding aria-valuemin and aria-valuemax](https://www.maxdesign.com.au/articles/aria-valuemin-valuemax-explained.html)
+- [Understanding aria-valuetext](https://www.maxdesign.com.au/articles/aria-valuetext-explained.html)
+- [Understanding aria-valuenow](https://www.maxdesign.com.au/articles/aria-valuenow-explained.html)
+- [Understanding aria-details](https://www.maxdesign.com.au/articles/aria-details-explained.html)
+- [Understanding aria-roledescription](https://www.maxdesign.com.au/articles/aria-roledescription-explained.html)
+- [Understanding aria-activedescendant](https://www.maxdesign.com.au/articles/aria-activedescendant-explained.html)
+
+All 13 articles are published and complete.
 
 ---
 
-## Gaps for the old conversation to fill
+## Exact build commands
 
-These are the things no current file holds. Ask about them one at a time, with the relevant file in view, and check each answer against the repo before accepting it.
+The exact terser invocation used throughout:
 
-1. **Test page mapping.** Which test page belongs to which bookmarklet. Only the index is recorded here.
-2. **Exact build commands.** The terser invocation, the encoding step, and how `dist/hrefs/[name].txt` is produced. Currently described but not written down.
-3. **Rejected alternatives.** Particularly the relationship badge system. Green source, blue referenced was settled on after something else. What, and why it was dropped.
-4. **In-flight work.** What was half-finished when the thread got long. The aria-readonly article was being outlined.
-5. **Document title correction.** What the badge error was and what fixed it, in case the rule behind it is not fully captured by the README table.
-6. **Render markdown files.** Whether they still exist in the repo.
-7. **Article to bookmarklet mapping.** Which published articles pair with which bookmarklet and test page.
+```
+Node
+node -e "
+const terser = require('/tmp/node_modules/terser');
+const fs = require('fs');
+const code = fs.readFileSync('/tmp/bm/[name].js', 'utf8');
+terser.minify(code, {
+  mangle: { reserved: ['functionName', 'onKey'] }
+}).then(result => {
+  if (result.error) { console.error(JSON.stringify(result.error)); process.exit(1); }
+  const encoded = encodeURIComponent(result.code);
+  fs.writeFileSync('/tmp/[name]-href.txt',
+    '<a class=\"bookmarklet\" href=\"javascript:' + encoded + '\">[Label]</a>');
+  console.log('Done. Length:', encoded.length);
+});
+"
+```
+
+The encoding step is JavaScript's `encodeURIComponent()` — no custom encoding, no selective escaping. The minified JS goes straight into `encodeURIComponent` and the result is placed directly in the href attribute after `javascript:`.
+
+The `dist/hrefs/[name].txt` file contains the complete ready-to-paste `<a>` tag — not just the encoded JS, not just the href, but the full element including class and label text.
+
+Key dependencies: terser installed at `/tmp/node_modules/terser` in the build environment. In a fresh environment you would run `npm install terser --prefix /tmp` first.
+
+The `mangle: { reserved: [...] }` list varies per bookmarklet — any named function that could collide under minification goes here. onKey is always reserved. Other common ones: `makeBadge`, `makeBanner`, `isNumeric`, `getName`.
+
 
 ---
 
-## Housekeeping found during this review
+## Rejected alternatives — relationship badge system
 
-- README pointed at `testing-bookmarklets.html`. The live page is `testing-bookmarklets-intopia.html`. Fixed here, still needs fixing in README.
-- SKILL.md referred to 34 existing bookmarklets. Now 37. Fixed in the clean SKILL.md.
-- README is missing the `---` separator after the aria-invalid section and after the aria-valuenow section. Every other section has one.
+- **Source element** (the element with `aria-labelledby` or `aria-describedby`) — green outline, green badge showing the resolved name: `aria-labelledby: cheetah zebra → "Buy Lawn Mower On special"`
+- **Referenced elements** — blue outline, blue badge at their own position: `ID: cheetah`, `ID: zebra`
+
+What was tried first:
+
+### Version 1: Source-only stacking
+
+The first version put all badges on the source element, stacked vertically:
+
+- `aria-labelledby: cheetah zebra` (blue badge, at top of source)
+- `ID: cheetah` (green badge, stacked below)
+- `ID: zebra` (green badge, stacked below)
+
+Referenced elements got a green outline but no badge of their own. The problem: the stack of badges obscured the source element on complex pages, and the ID badges floating below the source gave no visual indication of which element on the page each ID referred to.
+
+### Version 2: Source blue, referenced green
+
+The second version moved ID badges onto the referenced elements themselves (better), but had the colours reversed from the final design:
+
+- Source element: blue outline and badge `aria-labelledby: cheetah zebra`
+- Referenced elements: green outline and badge `ID: cheetah`, `ID: zebra`
+
+This was dropped because the colour logic was backwards. Green means "valid, correctly implemented" in the design system — but the referenced elements aren't the ones being named, they're the sources. The element that has been correctly named is the source element. Putting green on the referenced elements implied they were the "result" when they're actually the "input".
+
+### Version 3: No resolved name shown
+
+Throughout versions 1 and 2, the badge showed only the mechanism — which IDs were referenced — not the computed accessible name itself. A colleague using the bookmarklet pointed out that what they actually wanted to see was the concatenated name that AT would announce, not just the raw ID values. An experienced developer could infer "cheetah + zebra = Buy Lawn Mower On special" but a tester or learner could not.
+
+### Why the final design was settled on
+
+Three decisions came together:
+
+1. **Source = green** because the source element is the one receiving the name. Green means "this element has been correctly named."
+2. **Referenced = blue** because the referenced elements are informational signposts. Blue means "secondary reference."
+3. **Resolved name in the source badge** because that is the actual output AT users hear. The IDs are the mechanism; the resolved text is the result. Both appear in the source badge: `aria-labelledby: cheetah zebra → "Buy Lawn Mower On special"`.
+
+The same green/blue logic was then applied consistently to `aria-describedby`, `aria-details` and `aria-controls`.
+
+### Note on confidence
+
+This is from memory of the conversation in which these decisions were made. The final design is correct and verified in the current bookmarklet code. The intermediate versions are described from memory and may not be in exactly the order stated above.
