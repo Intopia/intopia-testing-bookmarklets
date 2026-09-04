@@ -1,7 +1,7 @@
 // Highlight aria-setsize and aria-posinset
 // Highlights elements with aria-setsize and/or aria-posinset.
 // Shows position within set, and level where present.
-// Flags incomplete pairs and non-numeric values.
+// Flags incomplete pairs, non-integer values, and a posinset that exceeds setsize.
 (function(){
 var existing = document.getElementById('a11y-setsize-overlay');
 if (existing) existing.remove();
@@ -16,20 +16,29 @@ overlay.style.zIndex = '999999';
 document.body.appendChild(overlay);
 var flaggedEls = [];
 
-function isNumeric(val) {
-  return val !== null && val.trim() !== '' && !isNaN(Number(val.trim()));
+// ARIA integer type: an optional sign followed by digits only. Number() is too
+// permissive — it would accept hex (0x10), exponential (1e2), a leading plus
+// and decimal notation (3.0), then report the converted value rather than what
+// the author wrote.
+function isInteger(val) {
+  return val !== null && /^[-+]?\d+$/.test(val.trim());
 }
 
+function toInt(val) {
+  return parseInt(val.trim(), 10);
+}
+
+// -1 means the total is unknown. Otherwise a set an element belongs to has at
+// least one item, so 0 is incoherent.
 function isValidSetsize(val) {
-  if (!isNumeric(val)) return false;
-  var n = Number(val.trim());
-  return Number.isInteger(n) && (n === -1 || n >= 0);
+  if (!isInteger(val)) return false;
+  var n = toInt(val);
+  return n === -1 || n >= 1;
 }
 
 function isValidPosinset(val) {
-  if (!isNumeric(val)) return false;
-  var n = Number(val.trim());
-  return Number.isInteger(n) && n >= 1;
+  if (!isInteger(val)) return false;
+  return toInt(val) >= 1;
 }
 
 document.querySelectorAll('[aria-setsize],[aria-posinset]').forEach(function(el) {
@@ -39,11 +48,17 @@ document.querySelectorAll('[aria-setsize],[aria-posinset]').forEach(function(el)
 
   var posOk   = posVal  !== null && isValidPosinset(posVal);
   var sizeOk  = sizeVal !== null && isValidSetsize(sizeVal);
-  var posInvalid  = posVal  !== null && !isValidPosinset(posVal);
-  var sizeInvalid = sizeVal !== null && !isValidSetsize(sizeVal);
+  var posInvalid  = posVal  !== null && !posOk;
+  var sizeInvalid = sizeVal !== null && !sizeOk;
+
+  var posNum  = posOk  ? toInt(posVal)  : null;
+  var sizeNum = sizeOk ? toInt(sizeVal) : null;
+
+  // An item cannot be at position 5 of a set of 3
+  var exceeds = posNum !== null && sizeNum !== null && sizeNum !== -1 && posNum > sizeNum;
 
   var colour;
-  if (posInvalid || sizeInvalid) {
+  if (posInvalid || sizeInvalid || exceeds) {
     colour = '#b00020';
   } else if (!posOk || !sizeOk) {
     colour = '#e65100';
@@ -55,7 +70,7 @@ document.querySelectorAll('[aria-setsize],[aria-posinset]').forEach(function(el)
   var parts = [];
 
   if (levelVal !== null) {
-    parts.push('level: ' + levelVal.trim());
+    parts.push(levelVal.trim() === '' ? 'level: (empty)' : 'level: ' + levelVal.trim());
   }
 
   // posinset part
@@ -82,10 +97,10 @@ document.querySelectorAll('[aria-setsize],[aria-posinset]').forEach(function(el)
   }
 
   // Combine into readable label
-  var posNum  = posOk  ? Number(posVal.trim())  : null;
-  var sizeNum = sizeOk ? Number(sizeVal.trim()) : null;
   if (posNum !== null && sizeNum !== null && sizeNum !== -1) {
-    parts.push(posNum + ' of ' + sizeNum + '  (' + posPart + '  |  ' + sizePart + ')');
+    var summary = posNum + ' of ' + sizeNum;
+    if (exceeds) summary += ' (posinset exceeds setsize)';
+    parts.push(summary + '  (' + posPart + '  |  ' + sizePart + ')');
   } else {
     parts.push(posPart + '  |  ' + sizePart);
   }
