@@ -7,7 +7,7 @@ https://intopia.github.io/exercise/testing-bookmarklets-intopia.html
 Highlights all heading levels (H1–H6) with distinct colours. Flags empty headings and duplicate <h1> elements.
 
 ## 2. Highlight image alternatives
-Highlights all images. Distinguishes between meaningful `alt` text, empty `alt` and missing `alt`.
+Highlights `<img>` elements and elements with `role="img"`. Distinguishes between meaningful `alt` text, empty `alt` and missing `alt`, and shows where `aria-label` or `aria-labelledby` override the `alt` attribute. Flags images made decorative by `role="presentation"`, and names that come from `title` alone.
 
 ## 3. Highlight lists
 Highlights native list elements and ARIA list roles with distinct colours per type.

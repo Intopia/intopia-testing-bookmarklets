@@ -92,11 +92,24 @@ Elements that are not rendered are skipped.
 
 Badge allows wrapping (max-width: 400px) for long alt text values.
 
+Targets `<img>` and any element with `role="img"` or `role="image"`. `<area>` is not covered because it has no layout box to anchor a badge to. `input[type="image"]` is covered by the buttons bookmarklet.
+Names resolve in AccName order, so `aria-labelledby` and `aria-label` override `alt` and the badge says so. `role="presentation"` or `role="none"` removes the image from the accessibility tree, so its alt is never announced.
+Elements that are not rendered are skipped.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | Alt: [text] |
+| Dark green | `#1b5e20` | aria-label: [name] |
+| Dark green | `#1b5e20` | aria-labelledby: [name] |
+| Dark green | `#1b5e20` | aria-label: [name] (overrides alt: "[alt]") |
+| Dark green | `#1b5e20` | svg title: [name] |
 | Dark blue | `#0a558c` | Empty alt |
+| Dark blue | `#0a558c` | Decorative (role="presentation") |
+| Dark blue | `#0a558c` | Decorative (role="none") |
+| Amber | `#e65100` | title: [text] (no alt — unreliable name source) |
 | Red | `#b00020` | Missing alt |
+| Red | `#b00020` | NO ACCESSIBLE NAME |
+| — | — | non-`<img>` elements carry a `[role="img"]` suffix |
 
 ---
 
