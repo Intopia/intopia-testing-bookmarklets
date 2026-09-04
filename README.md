@@ -347,7 +347,9 @@ Referenced elements — blue outline, blue badge at each element.
 
 ## Highlight buttons
 
-Targets `<button>`, `input[type="submit"]` and `input[type="reset"]`.
+Targets `<button>`, `input` types `submit`, `reset`, `button` and `image`, and any element with `role="button"`.
+Custom buttons carry a `[role="button"]` suffix on the badge so they are distinguishable from native ones.
+An image button takes its name from `alt`, not from `value`. Elements that are not rendered are skipped.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
@@ -355,9 +357,11 @@ Targets `<button>`, `input[type="submit"]` and `input[type="reset"]`.
 | Dark green | `#1b5e20` | aria-label: [name] |
 | Dark green | `#1b5e20` | text content: [name] |
 | Dark green | `#1b5e20` | value: [name] |
-| Dark green | `#1b5e20` | title: [name] |
+| Dark green | `#1b5e20` | alt: [name] (image buttons) |
 | Dark green | `#1b5e20` | default: Submit / default: Reset |
+| Amber | `#e65100` | title: [name] (unreliable — title only) |
 | Red | `#b00020` | NO ACCESSIBLE NAME |
+| — | — | any of the above with a `[role="button"]` suffix |
 
 ---
 

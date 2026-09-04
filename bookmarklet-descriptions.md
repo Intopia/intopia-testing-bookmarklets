@@ -46,10 +46,10 @@ Highlights all tabindex attributes. Distinguishes between `tabindex="0"` (in nat
 Highlights all elements with `aria-label`. Flags empty values and use on roles where author-provided names are prohibited.
 
 ## 14. Highlight aria-labelledby
-Highlights elements with `aria-labelledby` and their targets. Flags missing, hidden and self-referencing IDs.
+Highlights elements with `aria-labelledby` and their targets. Shows the accessible name resolved from the referenced IDs. Flags missing IDs, self-references and an empty attribute value. Hidden referenced elements still contribute their text, and are outlined only where they are visible on the page.
 
 ## 15. Highlight aria-describedby
-Highlights elements with `aria-describedby` and their targets. Flags missing, hidden and self-referencing IDs.
+Highlights elements with `aria-describedby` and their targets. Shows the description resolved from the referenced IDs. Flags missing IDs, self-references and an empty attribute value. Hidden referenced elements still contribute their text, and are outlined only where they are visible on the page.
 
 ## 16. Highlight name mismatches
 Highlights links and buttons where the visible label and accessible name don’t match.
@@ -61,7 +61,7 @@ Highlights elements with `aria-label` or `aria-labelledby` on roles that must no
 Highlights form fields and their accessible names. Flags fields with no name, and fields where the name comes from an unreliable source such as `placeholder` or `title`.
 
 ## 19. Highlight buttons
-Highlights all buttons and their accessible names. Flags buttons with no accessible name.
+Highlights native buttons and elements with `role="button"`, and their accessible names. Covers `<button>` and `input` types `submit`, `reset`, `button` and `image`. Custom buttons are marked with a `[role="button"]` suffix. Flags buttons with no accessible name, and names that come from `title` alone.
 
 ## 20. Highlight fieldsets
 Highlights `<fieldset>`, `<legend>` and `radiogroup` elements. Flags `<fieldset>` elements missing a `<legend>`.
@@ -73,37 +73,37 @@ Highlights required form fields. Distinguishes between native `required`, `aria-
 Highlights native `readonly` and `aria-readonly` for teaching purposes. Native `readonly` is browser-enforced and automatically announced correctly to AT, no ARIA needed. `aria-readonly="true"` alone only affects the AT announcement — it does not stop the user typing unless the field is functionally restricted some other way. Flags the redundant and conflicting combinations, and invalid values.
 
 ## 23. Highlight aria-invalid
-Highlights all `aria-invalid` states: `true`, `grammar`, `spelling` and `false`.
+Highlights all `aria-invalid` states: `true`, `grammar`, `spelling` and `false`. Flags empty and unrecognised values.
 
 ## 24. Highlight autocomplete
-Highlights `autocomplete` attributes. Flags valid, generic and invalid values with distinct colours.
+Highlights `autocomplete` attributes. Flags valid, generic and invalid values with distinct colours. Follows the HTML autofill grammar, including section, shipping and billing, contact tokens and `webauthn`.
 
 ## 25. Highlight aria-expanded
-Highlights all `aria-expanded` attributes. Distinguishes between `true` (expanded) and `false` (collapsed) states. Re-run after activating a widget to see updated values.
+Highlights all `aria-expanded` attributes. Distinguishes between `true` (expanded) and `false` (collapsed) states. `undefined` is also a valid value. Re-run after activating a widget to see updated values.
 
 ## 26. Highlight aria-checked
-Highlights all `aria-checked` attributes on custom widgets. Distinguishes between `true`, `false` and `mixed` states. Re-run after interacting with a widget to see updated values.
+Highlights all `aria-checked` attributes on custom widgets. Distinguishes between `true`, `false` and `mixed` states. `undefined` is also a valid value. Re-run after interacting with a widget to see updated values.
 
 ## 27. Highlight aria-pressed
-Highlights all `aria-pressed` attributes on custom toggle buttons. Distinguishes between `true` (pressed), `false` (not pressed) and `mixed` states. Re-run after interacting with a widget to see updated values.
+Highlights all `aria-pressed` attributes on custom toggle buttons. Distinguishes between `true` (pressed), `false` (not pressed) and `mixed` states. `undefined` is also a valid value. Re-run after interacting with a widget to see updated values.
 
 ## 28. Highlight aria-roledescription
-Highlights all elements with `aria-roledescription`. Shows the custom role description value. Flags empty values and elements where `aria-roledescription` has been applied without an underlying role, which is a misuse of the attribute.
+Highlights all elements with `aria-roledescription`. Shows the custom role description value. Flags empty values, elements with no underlying role, and elements whose role has no semantics of its own (`generic`, `presentation`, `none`). Both are a misuse of the attribute.
 
 ## 29. Highlight aria-details
-Highlights all elements with `aria-details` and their referenced targets. Shows whether each referenced element exists in the page. Flags missing IDs.
+Highlights all elements with `aria-details` and their referenced targets. Shows whether each referenced element exists in the page. Flags missing IDs, self-references and an empty attribute value. Where only some IDs are missing the badge is amber; where all are missing it is red.
 
 ## 30. Highlight aria-valuetext
-Highlights all elements with `aria-valuetext`. Shows the text alternative value that assistive technologies announce instead of the numeric `aria-valuenow`. Flags empty values.
+Highlights all elements with `aria-valuetext`. Shows the text alternative value that assistive technologies announce instead of the numeric `aria-valuenow`. Flags empty values, and a missing or empty `aria-valuenow`, which ARIA requires wherever `aria-valuetext` is used. Re-run after interacting with a widget to see updated values.
 
 ## 31. Highlight aria-valuenow
-Highlights all elements with `aria-valuenow`. Shows the current numeric value of a range widget such as a slider or spinbutton. Flags empty and non-numeric values.
+Highlights all elements with `aria-valuenow`. Shows the current numeric value of a range widget such as a slider or spinbutton. Flags empty and non-numeric values, and a value that falls outside a declared `aria-valuemin` to `aria-valuemax` range. Re-run after interacting with a widget to see updated values.
 
 ## 32. Highlight aria-valuemin and aria-valuemax
-Highlights all elements with `aria-valuemin` and/or `aria-valuemax`. Shows both values together on each element. Flags incomplete pairs where only one attribute is present, and non-numeric values.
+Highlights all elements with `aria-valuemin` and/or `aria-valuemax`. Shows both values together on each element. Flags incomplete pairs where only one attribute is present, non-numeric values, an inverted range where the minimum exceeds the maximum, and an empty range where the two are equal.
 
 ## 33. Highlight aria-setsize and aria-posinset
-Highlights all elements with `aria-setsize` and `aria-posinset`. Shows the position of each item within its sibling group. Where aria-level is also present, shows the level alongside the position. Flags incomplete pairs and non-numeric values.
+Highlights all elements with `aria-setsize` and `aria-posinset`. Shows the position of each item within its sibling group. Where aria-level is also present, shows the level alongside the position. Flags incomplete pairs, non-integer values, and a position that exceeds the size of the set.
 
 ## 34. Highlight aria-level
 Highlights all elements with `aria-level`. Shows the level value on each element. Flags values above 6 where browser support is inconsistent, and invalid values such as zero, negative numbers and non-integers.
