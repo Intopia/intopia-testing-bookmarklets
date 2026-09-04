@@ -1,6 +1,8 @@
 // Highlight document title
 // Displays the document title from the <title> element as a fixed banner.
 // Flags missing, empty and duplicate title elements.
+// Only HTML <title> elements are counted. An SVG <title> is an accessible name
+// for the graphic, not a document title, and must not be mistaken for one.
 (function(){
   var BANNER_CLASS = 'a11y-doc-title-banner';
 
@@ -26,12 +28,18 @@
       'max-width:90vw',
       'text-align:center',
       'box-shadow:0 2px 8px rgba(0,0,0,0.3)',
-      'white-space:nowrap'
+      'white-space:normal'
     ].join(';');
     document.body.appendChild(banner);
   }
 
-  var titles = document.querySelectorAll('title');
+  // querySelectorAll('title') matches SVG <title> too, which would report a
+  // page with icon labels as having several document titles.
+  var HTML_NS = 'http://www.w3.org/1999/xhtml';
+  var titles = Array.prototype.filter.call(
+    document.querySelectorAll('title'),
+    function (el) { return el.namespaceURI === HTML_NS; }
+  );
 
   if (titles.length === 0) {
     makeBanner('NO DOCUMENT TITLE \u2014 <title> element is missing', '#b00020');
