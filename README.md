@@ -718,15 +718,20 @@ Values of 1–6 are green. Values above 6 are amber (valid per spec but inconsis
 ## Highlight aria-controls
 
 Source element — green outline and badge. Referenced elements — blue outline and badge.
-Missing IDs annotated inline in the source badge. Hidden referenced elements are valid (e.g. a collapsed panel) and noted silently without a badge.
+Missing IDs annotated inline in the source badge. Referenced elements that are not rendered are valid (e.g. a collapsed panel) and noted silently without a badge.
+
+Where only some IDs are missing the badge is amber; where all are missing it is red. One stale reference is not the same as a relationship that resolves to nothing. This matches the aria-details bookmarklet, and it reads better for the documented dynamic-insertion case, where a panel inserted on first activation is legitimately missing until it exists.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | aria-controls: [id] |
 | Dark green | `#1b5e20` | aria-controls: [id1] [id2] |
-| Red | `#b00020` | aria-controls: [id] (missing) |
+| Dark green | `#1b5e20` | aria-controls: [id] (self) |
+| Amber | `#e65100` | aria-controls: [id] [id] (missing) |
+| Red | `#b00020` | aria-controls: [id] (missing) (all missing) |
 | Red | `#b00020` | aria-controls: (empty) |
 | Dark blue | `#0a558c` | ID: [id] (on referenced element) |
+| Dark blue | `#0a558c` | ID: [id] (self) (on a self-referencing element) |
 
 ---
 

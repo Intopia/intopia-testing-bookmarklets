@@ -109,7 +109,7 @@ Highlights all elements with `aria-setsize` and `aria-posinset`. Shows the posit
 Highlights all elements with `aria-level`. Shows the level value on each element. Flags values above 6 where browser support is inconsistent, and invalid values such as zero, negative numbers and non-integers.
 
 ## 35. Highlight aria-controls
-Highlights elements with `aria-controls` and their referenced targets. Shows whether each referenced element exists in the page. Flags missing and empty values. If the controlled element is initially hidden, re-run the bookmarklet after activating the trigger to see the highlighted relationship. Note: if the controlled element is inserted into the DOM dynamically on first activation, the bookmarklet will flag it as a missing ID until the element exists. Re-run after triggering to confirm the reference resolves correctly.
+Highlights elements with `aria-controls` and their referenced targets. Shows whether each referenced element exists in the page. Flags missing IDs, self-references and empty values. Where only some IDs are missing the badge is amber; where all are missing it is red. If the controlled element is initially hidden, re-run the bookmarklet after activating the trigger to see the highlighted relationship. Note: if the controlled element is inserted into the DOM dynamically on first activation, the bookmarklet will flag it as a missing ID until the element exists. Re-run after triggering to confirm the reference resolves correctly.
 
 ## 36. Highlight aria-haspopup
 Highlights all elements with `aria-haspopup`. All seven recognised values are displayed: `false`, `true`, `menu`, `listbox`, `tree`, `grid` and `dialog`. Flags empty and unrecognised values.

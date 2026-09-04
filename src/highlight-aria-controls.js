@@ -1,6 +1,12 @@
 // Highlight aria-controls
 // Highlights elements with aria-controls and their referenced targets.
-// Flags missing IDs. Hidden referenced elements are valid and noted silently.
+// Flags missing IDs and self-references inline, and flags an empty attribute value.
+// Where only some IDs are missing the badge is amber; where all are missing it is red.
+// Referenced elements that are not rendered (display:none, visibility:hidden) are
+// valid and noted silently, with no badge or outline of their own.
+// Note: an element inserted into the DOM only on first activation will be flagged
+// as missing until it exists. That is correct — it reflects what AT sees at that
+// moment. Re-run after triggering to confirm the reference resolves.
 (function(){
 var existing = document.getElementById('a11y-controls-overlay');
 if (existing) existing.remove();
@@ -33,10 +39,21 @@ function makeBadge(text, colour, rect) {
   overlay.appendChild(b);
 }
 
-document.querySelectorAll('[aria-controls]').forEach(function(el) {
+// An element is only badged if it is actually rendered. width/height catch
+// display:none; visibility must be checked separately because a hidden element
+// still occupies layout space.
+function isRendered(el, rect) {
+  if (rect.width === 0 && rect.height === 0) return false;
+  return window.getComputedStyle(el).visibility !== 'hidden';
+}
+
+var sources = document.querySelectorAll('[aria-controls]');
+
+sources.forEach(function(el) {
   var raw = el.getAttribute('aria-controls').trim();
   var rect = el.getBoundingClientRect();
 
+  // Empty or whitespace-only attribute value
   if (raw === '') {
     el.style.outline = '3px solid #b00020';
     el.style.outlineOffset = '2px';
@@ -47,27 +64,35 @@ document.querySelectorAll('[aria-controls]').forEach(function(el) {
 
   var ids = raw.split(/\s+/);
   var idLabels = [];
+  var missingCount = 0;
 
   ids.forEach(function(id) {
     var ref = document.getElementById(id);
     if (!ref) {
       idLabels.push(id + ' (missing)');
+      missingCount++;
     } else {
-      // Blue badge on referenced element only if visible
       var refRect = ref.getBoundingClientRect();
-      if (refRect.width > 0 || refRect.height > 0) {
+      if (isRendered(ref, refRect)) {
         ref.style.outline = '3px solid #0a558c';
         ref.style.outlineOffset = '2px';
-        makeBadge('ID: ' + id, '#0a558c', refRect);
+        makeBadge('ID: ' + id + (ref === el ? ' (self)' : ''), '#0a558c', refRect);
       }
       flaggedEls.push(ref);
-      idLabels.push(id);
+      idLabels.push(ref === el ? id + ' (self)' : id);
     }
   });
 
-  var hasMissing = idLabels.some(function(l) { return l.indexOf('(missing)') > -1; });
-  var allMissing = idLabels.every(function(l) { return l.indexOf('(missing)') > -1; });
-  var colour = (hasMissing || allMissing) ? '#b00020' : '#1b5e20';
+  // Partial is amber, total is red: one stale reference is not the same as a
+  // relationship that resolves to nothing.
+  var colour;
+  if (missingCount === 0) {
+    colour = '#1b5e20';
+  } else if (missingCount === ids.length) {
+    colour = '#b00020';
+  } else {
+    colour = '#e65100';
+  }
 
   el.style.outline = '3px solid ' + colour;
   el.style.outlineOffset = '2px';
@@ -75,7 +100,7 @@ document.querySelectorAll('[aria-controls]').forEach(function(el) {
   makeBadge('aria-controls: ' + idLabels.join(' '), colour, rect);
 });
 
-if (flaggedEls.length === 0) {
+if (sources.length === 0) {
   var msg = document.createElement('div');
   msg.textContent = 'No aria-controls attributes found on this page.';
   msg.style.position = 'fixed';
