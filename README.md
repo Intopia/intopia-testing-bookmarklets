@@ -194,12 +194,17 @@ Press `n` to cycle through groups in sequence.
 TH badges (key 3) positioned above element — show cell text only, no scope information.
 Scope badges (key 4) positioned below element — show scope value or flag missing scope.
 
+A caption is not required, so a table without one is amber rather than red, annotated on the table badge itself.
+Captions and header cells are only attributed to the table that owns them, so nested tables are not double-counted.
+
 | Colour | Hex | Badge text | Key |
 |--------|-----|------------|-----|
 | Dark blue | `#0a558c` | Table [N] | 1 |
+| Amber | `#e65100` | Table [N] (no caption) | 1 |
 | Dark green | `#1b5e20` | Caption: [text] | 2 |
 | Red | `#b00020` | TH: [text] | 3 |
 | Amber | `#e65100` | scope: [value] | 4 |
+| Red | `#b00020` | scope: "[value]" INVALID VALUE | 4 |
 | Red | `#b00020` | no scope | 4 |
 
 ---

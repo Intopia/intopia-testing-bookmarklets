@@ -1,5 +1,244 @@
 // Highlight captions and headers
-// Highlights accessibility features within tables. Flags header cells with and without `scope`, and tables missing a `caption`.
+// Highlights accessibility features within tables. Flags header cells with and without `scope`,
+// invalid `scope` values, and tables missing a `<caption>`.
 // Click to activate, then press `1` through `3` in order to step through `table`, `caption` and `th` elements individually.
 // Press `n` to step through each element type in sequence.
-!function(){const e=document.getElementById("a11y-tables-overlay");e&&e.remove();const t=document.getElementById("a11y-tables-legend");t&&t.remove();const o=document.createElement("div");o.id="a11y-tables-overlay",o.style.position="absolute",o.style.top="0",o.style.left="0",o.style.width="100%",o.style.pointerEvents="none",o.style.zIndex="999999",document.body.appendChild(o);let n=null;const l={table:{items:[]},caption:{items:[]},th:{items:[]},scope:{items:[]}},s=new Set(["table","caption","th"]),a=["table","caption","th","scope"],i="#0a558c",c="#1b5e20",p="#b00020",r="#e65100",d="#b00020";function u(e,t,n,a,i,c,p){const r=function(e,t,n,l,s){const a=document.createElement("div");return a.textContent=e,a.style.position="absolute",a.style.left=n.left+window.scrollX+(s||0)+"px",a.style.top="above"===l?n.top+window.scrollY-26+"px":n.bottom+window.scrollY-24+"px",a.style.background=t,a.style.color="#ffffff",a.style.padding="4px 6px",a.style.fontSize="14px",a.style.fontFamily="Arial,sans-serif",a.style.borderRadius="4px",a.style.whiteSpace="nowrap",a.style.pointerEvents="none",a.style.zIndex="999999",o.appendChild(a),a}(n,t,e.getBoundingClientRect(),a,p);s.has(i)||(r.style.display="none"),c&&s.has(i)&&(e.style.outline="4px solid "+t,e.style.outlineOffset="2px"),l[i].items.push({el:e,badge:r,colour:t,hasOutline:!!c})}document.querySelectorAll("table").forEach(function(e,t){u(e,i,"Table "+(t+1),"above","table",!0);const o=e.querySelector("caption");o&&u(o,c,"Caption: "+(o.textContent.trim()||"(empty)"),"above","caption",!0),e.querySelectorAll("th").forEach(function(e){const t=e.textContent.trim()||"(empty)",o=e.getAttribute("scope");u(e,p,"TH: "+t,"above","th",!0),u(e,o?r:d,o?"scope: "+o:"no scope","bottom","scope",!1)})});const f=[{key:"1",group:"table",colour:i,label:"Table"},{key:"2",group:"caption",colour:c,label:"Caption"},{key:"3",group:"th",colour:p,label:"TH"},{key:"4",group:"scope",colour:r,label:"Scope",colour2:d}],y=document.createElement("div");y.id="a11y-tables-legend",y.style.cssText="position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;font-family:Arial,sans-serif;z-index:999999;pointer-events:none;display:flex;gap:16px;align-items:center;white-space:nowrap;",f.forEach(function(e){const t=document.createElement("span");if(t.dataset.group=e.group,e.colour2)[e.colour,e.colour2].forEach(function(e){const o=document.createElement("span");o.style.cssText="display:inline-block;width:10px;height:10px;background:"+e+";border-radius:2px;margin-right:3px;",t.appendChild(o)});else{const o=document.createElement("span");o.style.cssText="display:inline-block;width:10px;height:10px;background:"+e.colour+";border-radius:2px;margin-right:5px;",t.appendChild(o)}const o=document.createElement("kbd");o.textContent=e.key,o.style.cssText="background:#555;color:#fff;padding:1px 5px;border-radius:3px;font-size:13px;margin-right:4px;",t.appendChild(o),t.appendChild(document.createTextNode(e.label)),t.style.opacity=s.has(e.group)?"1":"0.4",y.appendChild(t)});const b=document.createElement("span");b.style.opacity="0.6",b.innerHTML='<kbd style="background:#555;color:#fff;padding:1px 5px;border-radius:3px;font-size:13px">n</kbd> next &nbsp;<kbd style="background:#555;color:#fff;padding:1px 5px;border-radius:3px;font-size:13px">Esc</kbd> clear',y.appendChild(b),document.body.appendChild(y);const x={1:"table",2:"caption",3:"th",4:"scope"};function m(e){n=n===e?null:e,Object.keys(l).forEach(function(e){const t=null===n?s.has(e):n===e;l[e].items.forEach(function(e){e.badge.style.display=t?"":"none",e.hasOutline&&(e.el.style.outline=t?"4px solid "+e.colour:"",e.el.style.outlineOffset=t?"2px":"")})}),f.forEach(function(e){const t=y.querySelector('[data-group="'+e.group+'"]');t&&(t.style.opacity=null===n?s.has(e.group)?"1":"0.4":n===e.group?"1":"0.4")})}function h(e){x[e.key]?m(x[e.key]):"n"===e.key||"N"===e.key?function(){if(null===n)m(a[0]);else{const e=a.indexOf(n);e>=a.length-1?m(n):m(a[e+1])}}():"Escape"===e.key&&(o.remove(),y.remove(),Object.keys(l).forEach(function(e){l[e].items.forEach(function(e){e.hasOutline&&(e.el.style.outline="",e.el.style.outlineOffset="")})}),document.removeEventListener("keydown",h))}if(!document.querySelectorAll("table").length){const e=document.createElement("div");e.textContent="No table elements found on this page.",e.style.cssText="position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 16px;border-radius:6px;font-size:16px;z-index:999999;pointer-events:none;",o.appendChild(e)}document.addEventListener("keydown",h)}();
+(function () {
+  var OVERLAY_ID = 'a11y-tables-overlay';
+  var LEGEND_ID = 'a11y-tables-legend';
+
+  var oldOverlay = document.getElementById(OVERLAY_ID);
+  if (oldOverlay) oldOverlay.remove();
+  var oldLegend = document.getElementById(LEGEND_ID);
+  if (oldLegend) oldLegend.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = OVERLAY_ID;
+  overlay.style.position = 'absolute';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.pointerEvents = 'none';
+  overlay.style.zIndex = '999999';
+  document.body.appendChild(overlay);
+
+  var activeGroup = null;
+
+  var groups = {
+    table: { items: [] },
+    caption: { items: [] },
+    th: { items: [] },
+    scope: { items: [] }
+  };
+
+  // scope is opt-in: everything else is on by default
+  var defaultOn = new Set(['table', 'caption', 'th']);
+  var groupOrder = ['table', 'caption', 'th', 'scope'];
+
+  var BLUE = '#0a558c';
+  var GREEN = '#1b5e20';
+  var RED = '#b00020';
+  var AMBER = '#e65100';
+
+  var VALID_SCOPES = new Set(['row', 'col', 'rowgroup', 'colgroup']);
+
+  function makeBadge(text, colour, rect, position, leftOffset) {
+    var b = document.createElement('div');
+    b.textContent = text;
+    b.style.position = 'absolute';
+    b.style.left = (rect.left + window.scrollX + (leftOffset || 0)) + 'px';
+    b.style.top = position === 'above'
+      ? (rect.top + window.scrollY - 26) + 'px'
+      : (rect.bottom + window.scrollY - 24) + 'px';
+    b.style.background = colour;
+    b.style.color = '#ffffff';
+    b.style.padding = '4px 6px';
+    b.style.fontSize = '14px';
+    b.style.fontFamily = 'Arial,sans-serif';
+    b.style.borderRadius = '4px';
+    b.style.whiteSpace = 'nowrap';
+    b.style.pointerEvents = 'none';
+    b.style.zIndex = '999999';
+    overlay.appendChild(b);
+    return b;
+  }
+
+  function addItem(el, colour, text, position, group, hasOutline, leftOffset) {
+    var badge = makeBadge(text, colour, el.getBoundingClientRect(), position, leftOffset);
+    if (!defaultOn.has(group)) badge.style.display = 'none';
+    if (hasOutline && defaultOn.has(group)) {
+      el.style.outline = '4px solid ' + colour;
+      el.style.outlineOffset = '2px';
+    }
+    groups[group].items.push({ el: el, badge: badge, colour: colour, hasOutline: !!hasOutline });
+  }
+
+  // A caption must be a direct child of its table. Searching descendants would
+  // let an outer table borrow a nested table's caption.
+  function ownCaption(table) {
+    for (var i = 0; i < table.children.length; i++) {
+      if (table.children[i].tagName.toLowerCase() === 'caption') return table.children[i];
+    }
+    return null;
+  }
+
+  // Same problem for header cells: only take the ones this table owns.
+  function ownHeaderCells(table) {
+    return Array.prototype.filter.call(table.querySelectorAll('th'), function (th) {
+      return th.closest('table') === table;
+    });
+  }
+
+  var tables = document.querySelectorAll('table');
+
+  tables.forEach(function (table, index) {
+    var caption = ownCaption(table);
+
+    // A caption is not required, so a missing one is a caution, not a failure
+    addItem(
+      table,
+      caption ? BLUE : AMBER,
+      caption ? 'Table ' + (index + 1) : 'Table ' + (index + 1) + ' (no caption)',
+      'above',
+      'table',
+      true
+    );
+
+    if (caption) {
+      addItem(caption, GREEN, 'Caption: ' + (caption.textContent.trim() || '(empty)'),
+        'above', 'caption', true);
+    }
+
+    ownHeaderCells(table).forEach(function (th) {
+      var text = th.textContent.trim() || '(empty)';
+      addItem(th, RED, 'TH: ' + text, 'above', 'th', true);
+
+      var raw = th.getAttribute('scope');
+      var scope = raw === null ? null : raw.trim();
+      var scopeColour, scopeText;
+
+      if (!scope) {
+        scopeColour = RED;
+        scopeText = 'no scope';
+      } else if (VALID_SCOPES.has(scope.toLowerCase())) {
+        scopeColour = AMBER;
+        scopeText = 'scope: ' + scope;
+      } else {
+        scopeColour = RED;
+        scopeText = 'scope: "' + scope + '" INVALID VALUE';
+      }
+
+      addItem(th, scopeColour, scopeText, 'bottom', 'scope', false);
+    });
+  });
+
+  // Legend
+  var legendItems = [
+    { key: '1', group: 'table', colour: BLUE, colour2: AMBER, label: 'Table' },
+    { key: '2', group: 'caption', colour: GREEN, label: 'Caption' },
+    { key: '3', group: 'th', colour: RED, label: 'TH' },
+    { key: '4', group: 'scope', colour: AMBER, colour2: RED, label: 'Scope' }
+  ];
+
+  var legend = document.createElement('div');
+  legend.id = LEGEND_ID;
+  legend.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);' +
+    'background:#222;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;' +
+    'font-family:Arial,sans-serif;z-index:999999;pointer-events:none;display:flex;' +
+    'gap:16px;align-items:center;white-space:nowrap;';
+
+  legendItems.forEach(function (item) {
+    var wrap = document.createElement('span');
+    wrap.dataset.group = item.group;
+
+    var swatches = item.colour2 ? [item.colour, item.colour2] : [item.colour];
+    swatches.forEach(function (colour, i) {
+      var sw = document.createElement('span');
+      sw.style.cssText = 'display:inline-block;width:10px;height:10px;background:' + colour +
+        ';border-radius:2px;margin-right:' + (i === swatches.length - 1 ? '5px' : '3px') + ';';
+      wrap.appendChild(sw);
+    });
+
+    var kbd = document.createElement('kbd');
+    kbd.textContent = item.key;
+    kbd.style.cssText = 'background:#555;color:#fff;padding:1px 5px;border-radius:3px;' +
+      'font-size:13px;margin-right:4px;';
+    wrap.appendChild(kbd);
+    wrap.appendChild(document.createTextNode(item.label));
+    wrap.style.opacity = defaultOn.has(item.group) ? '1' : '0.4';
+    legend.appendChild(wrap);
+  });
+
+  var hint = document.createElement('span');
+  hint.style.opacity = '0.6';
+  hint.innerHTML = '<kbd style="background:#555;color:#fff;padding:1px 5px;border-radius:3px;' +
+    'font-size:13px">n</kbd> next &nbsp;<kbd style="background:#555;color:#fff;padding:1px 5px;' +
+    'border-radius:3px;font-size:13px">Esc</kbd> clear';
+  legend.appendChild(hint);
+  document.body.appendChild(legend);
+
+  var keyToGroup = { 1: 'table', 2: 'caption', 3: 'th', 4: 'scope' };
+
+  function setFilter(group) {
+    activeGroup = (activeGroup === group) ? null : group;
+
+    Object.keys(groups).forEach(function (name) {
+      var visible = activeGroup === null ? defaultOn.has(name) : activeGroup === name;
+      groups[name].items.forEach(function (item) {
+        item.badge.style.display = visible ? '' : 'none';
+        if (item.hasOutline) {
+          item.el.style.outline = visible ? '4px solid ' + item.colour : '';
+          item.el.style.outlineOffset = visible ? '2px' : '';
+        }
+      });
+    });
+
+    legendItems.forEach(function (item) {
+      var span = legend.querySelector('[data-group="' + item.group + '"]');
+      if (!span) return;
+      span.style.opacity = activeGroup === null
+        ? (defaultOn.has(item.group) ? '1' : '0.4')
+        : (activeGroup === item.group ? '1' : '0.4');
+    });
+  }
+
+  function nextGroup() {
+    if (activeGroup === null) {
+      setFilter(groupOrder[0]);
+    } else {
+      var i = groupOrder.indexOf(activeGroup);
+      setFilter(i >= groupOrder.length - 1 ? activeGroup : groupOrder[i + 1]);
+    }
+  }
+
+  function onKey(e) {
+    if (keyToGroup[e.key]) {
+      setFilter(keyToGroup[e.key]);
+    } else if (e.key === 'n' || e.key === 'N') {
+      nextGroup();
+    } else if (e.key === 'Escape') {
+      overlay.remove();
+      legend.remove();
+      Object.keys(groups).forEach(function (name) {
+        groups[name].items.forEach(function (item) {
+          if (item.hasOutline) {
+            item.el.style.outline = '';
+            item.el.style.outlineOffset = '';
+          }
+        });
+      });
+      document.removeEventListener('keydown', onKey);
+    }
+  }
+
+  if (!tables.length) {
+    var msg = document.createElement('div');
+    msg.textContent = 'No table elements found on this page.';
+    msg.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);' +
+      'background:#333;color:#fff;padding:10px 16px;border-radius:6px;font-size:16px;' +
+      'z-index:999999;pointer-events:none;';
+    overlay.appendChild(msg);
+  }
+
+  document.addEventListener('keydown', onKey);
+})();
