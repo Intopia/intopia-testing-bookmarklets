@@ -10,7 +10,7 @@ Highlights all heading levels (H1–H6) with distinct colours. Flags empty headi
 Highlights `<img>` elements and elements with `role="img"`. Distinguishes between meaningful `alt` text, empty `alt` and missing `alt`, and shows where `aria-label` or `aria-labelledby` override the `alt` attribute. Flags images made decorative by `role="presentation"`, and names that come from `title` alone.
 
 ## 3. Highlight lists
-Highlights native list elements and ARIA list roles with distinct colours per type.
+Highlights native list elements and ARIA list roles with distinct colours per type. Flags lists made non-lists by `role="presentation"`, and list items that sit outside a list they can belong to.
 
 ## 4. Highlight landmarks
 Highlights all landmark regions with distinct colours per role. Shows accessible name where present.

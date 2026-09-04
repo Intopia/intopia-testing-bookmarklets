@@ -1,3 +1,155 @@
 // Highlight lists
 // Highlights native list elements and ARIA list roles with distinct colours per type.
-!function(){const e=document.getElementById("a11y-lists-overlay");e&&e.remove();const t=document.createElement("div");t.id="a11y-lists-overlay",t.style.position="absolute",t.style.top="0",t.style.left="0",t.style.width="100%",t.style.pointerEvents="none",t.style.zIndex="999999",document.body.appendChild(t);const o=[],l="#1b5e20",n="#0a558c",s="#e65100";function i(e,l,n,s){e.style.outline="3px solid "+l,e.style.outlineOffset="2px",o.push(e),function(e,o,l,n){const s=document.createElement("div");s.textContent=e,s.style.position="absolute",s.style.left=l.left+window.scrollX+2+"px",s.style.top="above"===n?l.top+window.scrollY-24+"px":l.bottom+window.scrollY-22+"px",s.style.background=o,s.style.color="#ffffff",s.style.padding="4px 6px",s.style.fontSize="14px",s.style.fontFamily="Arial, sans-serif",s.style.borderRadius="4px",s.style.whiteSpace="nowrap",s.style.pointerEvents="none",s.style.zIndex="999999",t.appendChild(s)}(n,l,e.getBoundingClientRect(),s)}if(document.querySelectorAll("ul, ol").forEach(function(e){i(e,l,"<"+e.tagName.toLowerCase()+">","above")}),document.querySelectorAll("dl").forEach(function(e){i(e,n,"<dl>","above")}),document.querySelectorAll("li").forEach(function(e){i(e,l,"<li>","bottom")}),document.querySelectorAll("dt").forEach(function(e){i(e,n,"<dt>","bottom")}),document.querySelectorAll("dd").forEach(function(e){i(e,n,"<dd>","bottom")}),document.querySelectorAll('[role="list"]').forEach(function(e){const t=e.tagName.toLowerCase();"ul"!==t&&"ol"!==t&&i(e,s,'role="list"',"above")}),document.querySelectorAll('[role="listitem"]').forEach(function(e){"li"!==e.tagName.toLowerCase()&&i(e,s,'role="listitem"',"bottom")}),0===o.length){const e=document.createElement("div");e.textContent="No list elements found on this page.",e.style.position="fixed",e.style.top="20px",e.style.left="50%",e.style.transform="translateX(-50%)",e.style.background="#333",e.style.color="#fff",e.style.padding="10px 16px",e.style.borderRadius="6px",e.style.fontSize="16px",e.style.zIndex="999999",e.style.pointerEvents="none",t.appendChild(e)}document.addEventListener("keydown",function e(l){"Escape"===l.key&&(t.remove(),o.forEach(function(e){e.style.outline="",e.style.outlineOffset=""}),document.removeEventListener("keydown",e))})}();
+// An explicit role="presentation" or role="none" removes list semantics, so the
+// element is flagged as not a list.
+// List items are flagged when they sit outside a list they can belong to.
+(function () {
+  var existing = document.getElementById('a11y-lists-overlay');
+  if (existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'a11y-lists-overlay';
+  overlay.style.position = 'absolute';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.pointerEvents = 'none';
+  overlay.style.zIndex = '999999';
+  document.body.appendChild(overlay);
+
+  var flaggedEls = [];
+
+  var GREEN = '#1b5e20';
+  var BLUE = '#0a558c';
+  var AMBER = '#e65100';
+  var RED = '#b00020';
+
+  function isRendered(el, rect) {
+    if (rect.width === 0 && rect.height === 0) return false;
+    return window.getComputedStyle(el).visibility !== 'hidden';
+  }
+
+  function roleOf(el) {
+    var role = el.getAttribute('role');
+    return role ? role.trim().toLowerCase().split(/\s+/)[0] : '';
+  }
+
+  function isPresentational(el) {
+    var role = roleOf(el);
+    return role === 'presentation' || role === 'none';
+  }
+
+  function flag(el, colour, text, position) {
+    var rect = el.getBoundingClientRect();
+    if (!isRendered(el, rect)) return;
+
+    el.style.outline = '3px solid ' + colour;
+    el.style.outlineOffset = '2px';
+    flaggedEls.push(el);
+
+    var b = document.createElement('div');
+    b.textContent = text;
+    b.style.position = 'absolute';
+    b.style.left = (rect.left + window.scrollX + 2) + 'px';
+    b.style.top = position === 'above'
+      ? (rect.top + window.scrollY - 24) + 'px'
+      : (rect.bottom + window.scrollY - 22) + 'px';
+    b.style.background = colour;
+    b.style.color = '#ffffff';
+    b.style.padding = '4px 6px';
+    b.style.fontSize = '14px';
+    b.style.fontFamily = 'Arial, sans-serif';
+    b.style.borderRadius = '4px';
+    b.style.whiteSpace = 'nowrap';
+    b.style.pointerEvents = 'none';
+    b.style.zIndex = '999999';
+    overlay.appendChild(b);
+  }
+
+  // A list item only counts when its direct parent is a list. A wrapper element
+  // between the two breaks the relationship in the accessibility tree.
+  function parentIsNativeList(el) {
+    var parent = el.parentElement;
+    if (!parent) return false;
+    var tag = parent.tagName.toLowerCase();
+    if (tag !== 'ul' && tag !== 'ol' && tag !== 'menu') return false;
+    return !isPresentational(parent);
+  }
+
+  function parentIsAriaList(el) {
+    var parent = el.parentElement;
+    return !!parent && roleOf(parent) === 'list';
+  }
+
+  // Native lists
+  document.querySelectorAll('ul, ol, menu').forEach(function (el) {
+    var tag = el.tagName.toLowerCase();
+    if (isPresentational(el)) {
+      flag(el, RED, '<' + tag + '> role="' + roleOf(el) + '" (not a list)', 'above');
+    } else {
+      flag(el, GREEN, '<' + tag + '>', 'above');
+    }
+  });
+
+  document.querySelectorAll('dl').forEach(function (el) {
+    if (isPresentational(el)) {
+      flag(el, RED, '<dl> role="' + roleOf(el) + '" (not a list)', 'above');
+    } else {
+      flag(el, BLUE, '<dl>', 'above');
+    }
+  });
+
+  document.querySelectorAll('li').forEach(function (el) {
+    if (isPresentational(el)) {
+      flag(el, RED, '<li> role="' + roleOf(el) + '" (not a list item)', 'bottom');
+    } else if (!parentIsNativeList(el) && !parentIsAriaList(el)) {
+      flag(el, RED, '<li> (not in a list)', 'bottom');
+    } else {
+      flag(el, GREEN, '<li>', 'bottom');
+    }
+  });
+
+  document.querySelectorAll('dt').forEach(function (el) { flag(el, BLUE, '<dt>', 'bottom'); });
+  document.querySelectorAll('dd').forEach(function (el) { flag(el, BLUE, '<dd>', 'bottom'); });
+
+  // ARIA list roles, on elements that are not already native lists
+  document.querySelectorAll('[role="list" i]').forEach(function (el) {
+    var tag = el.tagName.toLowerCase();
+    if (tag === 'ul' || tag === 'ol' || tag === 'menu') return;
+    flag(el, AMBER, 'role="list"', 'above');
+  });
+
+  document.querySelectorAll('[role="listitem" i]').forEach(function (el) {
+    if (el.tagName.toLowerCase() === 'li') return;
+    if (!parentIsAriaList(el) && !parentIsNativeList(el)) {
+      flag(el, RED, 'role="listitem" (not in a list)', 'bottom');
+    } else {
+      flag(el, AMBER, 'role="listitem"', 'bottom');
+    }
+  });
+
+  if (flaggedEls.length === 0) {
+    var msg = document.createElement('div');
+    msg.textContent = 'No list elements found on this page.';
+    msg.style.position = 'fixed';
+    msg.style.top = '20px';
+    msg.style.left = '50%';
+    msg.style.transform = 'translateX(-50%)';
+    msg.style.background = '#333';
+    msg.style.color = '#fff';
+    msg.style.padding = '10px 16px';
+    msg.style.borderRadius = '6px';
+    msg.style.fontSize = '16px';
+    msg.style.zIndex = '999999';
+    msg.style.pointerEvents = 'none';
+    overlay.appendChild(msg);
+  }
+
+  function onKey(e) {
+    if (e.key !== 'Escape') return;
+    overlay.remove();
+    flaggedEls.forEach(function (el) { el.style.outline = ''; el.style.outlineOffset = ''; });
+    document.removeEventListener('keydown', onKey);
+  }
+  document.addEventListener('keydown', onKey);
+})();

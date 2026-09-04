@@ -115,19 +115,29 @@ Elements that are not rendered are skipped.
 
 ## Highlight lists
 
-Containers (ul, ol, dl, role="list") — badge above element.
+Containers (ul, ol, menu, dl, role="list") — badge above element.
 Items (li, dt, dd, role="listitem") — badge inside at bottom of element.
+
+`<menu>` maps to the list role and is covered alongside `ul` and `ol`.
+An explicit `role="presentation"` or `role="none"` removes list semantics, so the element is not a list and its items are not list items.
+A list item only counts when its direct parent is a list. A wrapper element between the two breaks the relationship.
+Role values are matched case-insensitively. Elements that are not rendered are skipped.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | `<ul>` |
 | Dark green | `#1b5e20` | `<ol>` |
+| Dark green | `#1b5e20` | `<menu>` |
 | Dark green | `#1b5e20` | `<li>` |
 | Dark blue | `#0a558c` | `<dl>` |
 | Dark blue | `#0a558c` | `<dt>` |
 | Dark blue | `#0a558c` | `<dd>` |
 | Amber | `#e65100` | role="list" |
 | Amber | `#e65100` | role="listitem" |
+| Red | `#b00020` | `<ul>` role="presentation" (not a list) |
+| Red | `#b00020` | `<li>` role="presentation" (not a list item) |
+| Red | `#b00020` | `<li>` (not in a list) |
+| Red | `#b00020` | role="listitem" (not in a list) |
 
 ---
 
