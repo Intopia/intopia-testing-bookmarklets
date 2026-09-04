@@ -303,6 +303,10 @@ Shift+Tab decrements the counter.
 
 ## Highlight aria-label
 
+Name-prohibited roles follow the ARIA 1.2 and ARIA 1.3 draft tables: `caption`, `code`, `definition`, `deletion`, `emphasis`, `generic`, `insertion`, `mark`, `none`, `paragraph`, `presentation`, `strong`, `subscript`, `suggestion`, `superscript`, `term`, `time`, `tooltip`.
+Elements with a name-prohibited implicit role: `caption`, `code`, `del`, `s`, `em`, `ins`, `p`, `strong`, `sub`, `sup`, `dfn`, `mark`, `time`, and the elements mapping to `generic` (`b`, `bdi`, `bdo`, `data`, `div`, `i`, `pre`, `q`, `samp`, `small`, `span`, `u`).
+An explicit role overrides the implicit one, so `<span role="button" aria-label="Close">` is a button and may be named. Role values are matched case-insensitively. Elements that are not rendered are skipped.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | aria-label: [value] |
@@ -365,6 +369,12 @@ Role values are matched case-insensitively. Elements that are not rendered are s
 ---
 
 ## Highlight name-prohibited roles
+
+Name-prohibited roles follow the ARIA 1.2 and ARIA 1.3 draft tables: `caption`, `code`, `definition`, `deletion`, `emphasis`, `generic`, `insertion`, `mark`, `none`, `paragraph`, `presentation`, `strong`, `subscript`, `suggestion`, `superscript`, `term`, `time`, `tooltip`.
+Elements with a name-prohibited implicit role: `caption`, `code`, `del`, `s`, `em`, `ins`, `p`, `strong`, `sub`, `sup`, `dfn`, `mark`, `time`, and the elements mapping to `generic` (`b`, `bdi`, `bdo`, `data`, `div`, `i`, `pre`, `q`, `samp`, `small`, `span`, `u`).
+An explicit role overrides the implicit one, so `<span role="button" aria-label="Close">` is a button and may be named. Role values are matched case-insensitively. Elements that are not rendered are skipped.
+
+Shares its role lists with the aria-label bookmarklet; the two must stay identical.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|

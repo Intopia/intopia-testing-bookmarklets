@@ -1,6 +1,8 @@
 // Highlight aria-label
 // Highlights all elements with `aria-label`.
 // Flags empty values and use on roles where author-provided names are prohibited.
+// An explicit role overrides the implicit one, so a <span role="button"> is a
+// button and may be named.
 (function () {
   var existing = document.getElementById('a11y-aria-label-overlay');
   if (existing) existing.remove();
@@ -18,31 +20,58 @@
   var flaggedEls = [];
 
   // Roles that must not carry an author-provided name.
-  // ARIA 1.2, plus the roles added in the ARIA 1.3 draft.
-  var prohibitedRoles = new Set([
-    'caption', 'code', 'deletion', 'emphasis', 'generic', 'insertion',
-    'paragraph', 'presentation', 'strong', 'subscript', 'superscript',
-    'definition', 'mark', 'none', 'suggestion', 'term', 'time', 'tooltip'
+  // ARIA 1.2 and the ARIA 1.3 draft, per the published spec tables.
+  var PROHIBITED_ROLES = new Set([
+    'caption', 'code', 'definition', 'deletion', 'emphasis', 'generic',
+    'insertion', 'mark', 'none', 'paragraph', 'presentation', 'strong',
+    'subscript', 'suggestion', 'superscript', 'term', 'time', 'tooltip'
   ]);
 
-  // Implicit roles for elements that map to a name-prohibited role.
-  var implicitRoles = new Map([
-    ['caption', 'caption'],
-    ['code', 'code'],
-    ['del', 'deletion'],
-    ['s', 'deletion'],
-    ['em', 'emphasis'],
-    ['div', 'generic'],
-    ['span', 'generic'],
-    ['ins', 'insertion'],
-    ['p', 'paragraph'],
-    ['strong', 'strong'],
-    ['sub', 'subscript'],
-    ['sup', 'superscript'],
-    ['dfn', 'definition'],
-    ['mark', 'mark'],
-    ['time', 'time']
-  ]);
+  // Elements whose implicit role is name-prohibited, per HTML-AAM.
+  var IMPLICIT_ROLES = {
+    caption: 'caption',
+    code: 'code',
+    del: 'deletion',
+    s: 'deletion',
+    em: 'emphasis',
+    ins: 'insertion',
+    p: 'paragraph',
+    strong: 'strong',
+    sub: 'subscript',
+    sup: 'superscript',
+    dfn: 'definition',
+    mark: 'mark',
+    time: 'time',
+    // elements mapping to generic
+    b: 'generic',
+    bdi: 'generic',
+    bdo: 'generic',
+    data: 'generic',
+    div: 'generic',
+    i: 'generic',
+    pre: 'generic',
+    q: 'generic',
+    samp: 'generic',
+    small: 'generic',
+    span: 'generic',
+    u: 'generic'
+  };
+
+  // An explicit role overrides the implicit one. If it is not itself
+  // name-prohibited, the element is fine, whatever its tag would have implied.
+  function prohibitedRole(el) {
+    var explicit = el.getAttribute('role');
+    if (explicit && explicit.trim()) {
+      var role = explicit.trim().toLowerCase().split(/\s+/)[0];
+      return PROHIBITED_ROLES.has(role) ? role : null;
+    }
+    return IMPLICIT_ROLES[el.tagName.toLowerCase()] || null;
+  }
+
+  function isRendered(el, rect) {
+    if (rect.width === 0 && rect.height === 0) return false;
+    return window.getComputedStyle(el).visibility !== 'hidden';
+  }
 
   function makeBadge(text, colour, rect) {
     var b = document.createElement('div');
@@ -52,7 +81,7 @@
     b.style.top = (rect.top + window.scrollY - 26) + 'px';
     b.style.background = colour;
     b.style.color = '#ffffff';
-    b.style.padding = '2px 5px';
+    b.style.padding = '2px 6px';
     b.style.fontSize = '14px';
     b.style.fontFamily = 'Arial, sans-serif';
     b.style.borderRadius = '4px';
@@ -62,27 +91,26 @@
     overlay.appendChild(b);
   }
 
-  function flag(el, colour, text) {
+  function flag(el, colour, text, rect) {
     el.style.outline = '3px solid ' + colour;
+    el.style.outlineOffset = '2px';
     flaggedEls.push(el);
-    makeBadge(text, colour, el.getBoundingClientRect());
-  }
-
-  function getRole(el) {
-    var explicit = el.getAttribute('role');
-    return explicit || implicitRoles.get(el.tagName.toLowerCase()) || null;
+    makeBadge(text, colour, rect);
   }
 
   document.querySelectorAll('[aria-label]').forEach(function (el) {
-    var value = el.getAttribute('aria-label').trim();
-    var role = getRole(el);
+    var rect = el.getBoundingClientRect();
+    if (!isRendered(el, rect)) return;
 
-    if (prohibitedRoles.has(role)) {
-      flag(el, '#b00020', 'aria-label on prohibited role: ' + role);
+    var value = el.getAttribute('aria-label').trim();
+    var role = prohibitedRole(el);
+
+    if (role) {
+      flag(el, '#b00020', 'aria-label on prohibited role: ' + role, rect);
     } else if (value === '') {
-      flag(el, '#e65100', 'aria-label: (empty)');
+      flag(el, '#e65100', 'aria-label: (empty)', rect);
     } else {
-      flag(el, '#1b5e20', 'aria-label: ' + value);
+      flag(el, '#1b5e20', 'aria-label: ' + value, rect);
     }
   });
 
@@ -106,7 +134,7 @@
   function onKey(e) {
     if (e.key !== 'Escape') return;
     overlay.remove();
-    flaggedEls.forEach(function (el) { el.style.outline = ''; });
+    flaggedEls.forEach(function (el) { el.style.outline = ''; el.style.outlineOffset = ''; });
     document.removeEventListener('keydown', onKey);
   }
   document.addEventListener('keydown', onKey);

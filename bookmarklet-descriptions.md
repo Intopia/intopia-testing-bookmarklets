@@ -43,7 +43,7 @@ Tracks each focusable element on the page. Click to activate, then `TAB` through
 Highlights all tabindex attributes. Distinguishes between `tabindex="0"` (in natural tab order), `tabindex="-1"` (removed from tab order) and positive values (avoid — overrides natural tab order).
 
 ## 13. Highlight aria-label
-Highlights all elements with `aria-label`. Flags empty values and use on roles where author-provided names are prohibited.
+Highlights all elements with `aria-label`. Flags empty values and use on roles where author-provided names are prohibited, following the ARIA 1.2 and 1.3 tables. An explicit role overrides the implicit one, so a `<span role="button">` may be named.
 
 ## 14. Highlight aria-labelledby
 Highlights elements with `aria-labelledby` and their targets. Shows the accessible name resolved from the referenced IDs. Flags missing IDs, self-references and an empty attribute value. Hidden referenced elements still contribute their text, and are outlined only where they are visible on the page.
@@ -55,7 +55,7 @@ Highlights elements with `aria-describedby` and their targets. Shows the descrip
 Highlights links and buttons where the visible label and accessible name don’t match, following WCAG 2.5.3 Label in Name. Distinguishes a name that extends the visible label from one that merely contains it, and from a genuine mismatch. Visible text includes image `alt`. Where there is no visible text label, 2.5.3 does not apply and the badge says so.
 
 ## 17. Highlight name-prohibited roles
-Highlights elements with `aria-label` or `aria-labelledby` on roles that must not have an author-provided name.
+Highlights elements with `aria-label` or `aria-labelledby` on roles that must not have an author-provided name, following the ARIA 1.2 and 1.3 tables. Covers both explicit roles and elements whose implicit role is name-prohibited.
 
 ## 18. Highlight form field names
 Highlights form fields and their accessible names. Flags fields with no name, and fields where the name comes from an unreliable source such as `placeholder` or `title`.
