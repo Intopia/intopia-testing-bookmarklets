@@ -67,7 +67,7 @@ Highlights native buttons and elements with `role="button"`, and their accessibl
 Highlights `<fieldset>`, `<legend>`, `radiogroup` and `group` elements. Flags fieldsets with no accessible name, and legends that are not the first child of their fieldset and so do not label it. A fieldset named by `aria-label` or `aria-labelledby` is not flagged. An unnamed `radiogroup` is flagged, since that role requires a name; an unnamed `group` is not.
 
 ## 21. Highlight required fields
-Highlights required form fields. Distinguishes between native `required`, `aria-required`, and redundant combinations.
+Highlights required form fields. Distinguishes between native `required`, `aria-required`, and redundant, conflicting and invalid combinations. Flags cases where `required` has no effect at all, such as on a range input or a button.
 
 ## 22. Highlight readonly fields
 Highlights native `readonly` and `aria-readonly` for teaching purposes. Native `readonly` is browser-enforced and automatically announced correctly to AT, no ARIA needed. `aria-readonly="true"` alone only affects the AT announcement — it does not stop the user typing unless the field is functionally restricted some other way. Flags the redundant and conflicting combinations, invalid values, and cases where the attribute has no effect at all, such as `readonly` on a `<select>` or a checkbox, or `aria-readonly` on a role that does not support it.

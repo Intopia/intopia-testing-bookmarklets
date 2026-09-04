@@ -467,12 +467,24 @@ A `<legend>` only labels its fieldset when it is the first child, so a legend an
 
 ## Highlight required fields
 
+Mirrors the readonly bookmarklet: the blue badge for `aria-required="true"` alone is deliberately informational rather than pass/fail, and `aria-required="false"` is amber because it restates the default.
+
+`required` only does something on `<select>`, `<textarea>` and the `input` types `text`, `search`, `url`, `tel`, `email`, `password`, `date`, `month`, `week`, `time`, `datetime-local`, `number`, `checkbox`, `radio` and `file`. On a range, colour picker, button or anything else it has no effect, which is flagged.
+
+Values are trimmed and lowercased before comparison. Whether the element's role supports `aria-required` is **not** checked.
+Elements that are not rendered are skipped.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | required |
 | Dark blue | `#0a558c` | aria-required="true" |
 | Amber | `#e65100` | required + aria-required="true" (redundant) |
-| Dark green | `#1b5e20` | aria-required="false" |
+| Amber | `#e65100` | aria-required="false" (redundant — default value) |
+| Red | `#b00020` | required + aria-required="false" (CONFLICTING — native required wins) |
+| Red | `#b00020` | INVALID VALUE: aria-required="[value]" |
+| Red | `#b00020` | required + INVALID VALUE: aria-required="[value]" |
+| Red | `#b00020` | required HAS NO EFFECT: `<[tag]>` does not support required |
+| Red | `#b00020` | required HAS NO EFFECT: input type="[type]" does not support required |
 
 ---
 
