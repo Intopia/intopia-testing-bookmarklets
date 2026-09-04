@@ -3,7 +3,9 @@
 // Shows accessible name where present.
 // Name resolution follows AccName precedence: aria-labelledby before aria-label.
 // An explicit non-landmark role (for example role="presentation") excludes the
-// element. <form> and <section> only count as landmarks when they have a name.
+// element, and role values are matched case-insensitively.
+// <form> and <section> only count as landmarks when they have a name.
+// Landmarks that are not rendered are skipped.
 (function () {
   var existing = document.getElementById('a11y-landmarks-overlay');
   if (existing) existing.remove();
@@ -84,6 +86,14 @@
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+  // An element is only badged if it is actually rendered. width/height catch
+  // display:none; visibility must be checked separately because a hidden element
+  // still occupies layout space.
+  function isRendered(el, rect) {
+    if (rect.width === 0 && rect.height === 0) return false;
+    return window.getComputedStyle(el).visibility !== 'hidden';
+  }
+
   var SELECTOR = [
     'header',
     'nav',
@@ -93,14 +103,14 @@
     'form',
     'section',
     'search',
-    '[role="banner"]',
-    '[role="navigation"]',
-    '[role="main"]',
-    '[role="contentinfo"]',
-    '[role="complementary"]',
-    '[role="form"]',
-    '[role="search"]',
-    '[role="region"]'
+    '[role="banner" i]',
+    '[role="navigation" i]',
+    '[role="main" i]',
+    '[role="contentinfo" i]',
+    '[role="complementary" i]',
+    '[role="form" i]',
+    '[role="search" i]',
+    '[role="region" i]'
   ].join(',');
 
   var landmarks = Array.from(document.querySelectorAll(SELECTOR)).filter(function (el) {
@@ -108,10 +118,12 @@
   });
 
   landmarks.forEach(function (el) {
+    var rect = el.getBoundingClientRect();
+    if (!isRendered(el, rect)) return;
+
     var role = getRole(el);
     var name = getName(el);
     var colour = COLOURS[role] || '#333333';
-    var rect = el.getBoundingClientRect();
 
     el.style.outline = '4px solid ' + colour;
     el.style.outlineOffset = '2px';
@@ -134,7 +146,7 @@
     overlay.appendChild(badge);
   });
 
-  if (landmarks.length === 0) {
+  if (flaggedEls.length === 0) {
     var msg = document.createElement('div');
     msg.textContent = 'No landmarks found on this page.';
     msg.style.position = 'fixed';

@@ -135,7 +135,7 @@ Items (li, dt, dd, role="listitem") — badge inside at bottom of element.
 
 Nested `<aside>` without accessible name is not flagged (matches HTML-AAM mapping). Nested `<aside>` with accessible name is flagged as complementary.
 
-`<form>` and `<section>` are only flagged when they have an accessible name, matching HTML-AAM. An explicit non-landmark role excludes the element entirely, so `<nav role="presentation">` is not flagged. Accessible names resolve in AccName order: `aria-labelledby` before `aria-label`.
+`<form>` and `<section>` are only flagged when they have an accessible name, matching HTML-AAM. An explicit non-landmark role excludes the element entirely, so `<nav role="presentation">` is not flagged. Role values are matched case-insensitively. Accessible names resolve in AccName order: `aria-labelledby` before `aria-label`. Landmarks that are not rendered are skipped.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
