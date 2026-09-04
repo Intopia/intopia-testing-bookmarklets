@@ -347,11 +347,20 @@ Referenced elements — blue outline, blue badge at each element.
 
 ## Highlight name mismatches
 
+WCAG 2.5.3 Label in Name requires the accessible name to contain the visible label text.
+A name that starts with the visible label also satisfies the speech input use case; one that merely contains it passes the SC but does not.
+Visible text includes image `alt`, because an image is a visible label. An `<svg><title>` is not rendered, so it counts towards the accessible name but not towards the visible label.
+Where there is no visible text label, 2.5.3 does not apply.
+Role values are matched case-insensitively. Elements that are not rendered are skipped.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | MATCH: [accessible name] |
 | Dark blue | `#0a558c` | MODIFIED: [accessible name] |
-| Red | `#b00020` | MISMATCH: [accessible name] |
+| Dark blue | `#0a558c` | NO VISIBLE TEXT — 2.5.3 does not apply: [accessible name] |
+| Amber | `#e65100` | CONTAINS: [accessible name] (visible label not at start: "[visible]") |
+| Red | `#b00020` | MISMATCH: [accessible name] (visible: "[visible]") |
+| Red | `#b00020` | NO VISIBLE TEXT AND NO ACCESSIBLE NAME |
 
 ---
 

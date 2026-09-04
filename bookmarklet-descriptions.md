@@ -52,7 +52,7 @@ Highlights elements with `aria-labelledby` and their targets. Shows the accessib
 Highlights elements with `aria-describedby` and their targets. Shows the description resolved from the referenced IDs. Flags missing IDs, self-references and an empty attribute value. Hidden referenced elements still contribute their text, and are outlined only where they are visible on the page.
 
 ## 16. Highlight name mismatches
-Highlights links and buttons where the visible label and accessible name don’t match.
+Highlights links and buttons where the visible label and accessible name don’t match, following WCAG 2.5.3 Label in Name. Distinguishes a name that extends the visible label from one that merely contains it, and from a genuine mismatch. Visible text includes image `alt`. Where there is no visible text label, 2.5.3 does not apply and the badge says so.
 
 ## 17. Highlight name-prohibited roles
 Highlights elements with `aria-label` or `aria-labelledby` on roles that must not have an author-provided name.
