@@ -37,7 +37,7 @@ Highlights ARIA roles relating to tables.
 Click to activate, then press `1` through `6` in order to step through the `role` hierarchy from container to cell. Press `n` to step through each role type in sequence. Note: re-run the bookmarklet after sorting to see updated `aria-sort` values.
 
 ## 11. Track focus order
-Tracks each focusable element on the page. Click to activate, then `TAB` through the page. Each element is numbered in order. `ESC` to stop.
+Tracks each focusable element on the page. Click to activate, then `TAB` through the page. Each element is numbered in order and keeps its number, so the whole sequence stays visible as a trail. Flags focus stops on elements that are not rendered. `ESC` to stop.
 
 ## 12. Highlight tabindex
 Highlights all tabindex attributes. Distinguishes between `tabindex="0"` (in natural tab order), `tabindex="-1"` (removed from tab order) and positive values (avoid — overrides natural tab order). Flags values the browser cannot parse, which make the element not focusable at all, `tabindex="0"` where it is redundant, and focus stops on elements with no role and no accessible name.

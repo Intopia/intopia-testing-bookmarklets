@@ -1,5 +1,126 @@
 // Track focus order
 // Tracks each focusable element on the page.
 // Click to activate, then `TAB` through the page.
-// Each element is numbered in order. `ESC` to stop.
-!function(){if(window._a11yFocusOrderActive)return void window._a11yFocusOrderCleanup();window._a11yFocusOrderActive=!0;let e=0,t=!1;const n=[],o=document.createElement("div");function i(e){const t=e.getBoundingClientRect();o.style.left=t.left+window.scrollX+"px",o.style.top=t.top+window.scrollY-34+"px",o.style.display="block"}function d(e){"Tab"===e.key&&(t=e.shiftKey)}function s(d){const s=d.target;s&&s!==document.body&&s!==document.documentElement&&(t?e=Math.max(0,e-1):e++,t=!1,s.dataset.a11yFocusVisited||(s.style.outline="3px solid #111",s.dataset.a11yFocusVisited="1",n.push(s)),o.textContent=e+". "+function(e){const t=e.tagName.toLowerCase(),n=e.id?"#"+e.id:"",o=e.getAttribute("role"),i=(e.getAttribute("aria-label")||"").trim()||(e.textContent||"").trim().replace(/\s+/g," ").slice(0,40);return t+n+(o?'[role="'+o+'"]':"")+(i?' "'+i+'"':"")}(s),i(s))}function c(){const e=document.activeElement;e&&e!==document.body&&e!==document.documentElement&&i(e)}function r(e){"Escape"===e.key&&l()}function l(){window._a11yFocusOrderActive=!1,o.remove(),n.forEach(function(e){e.style.outline="",delete e.dataset.a11yFocusVisited}),document.removeEventListener("keydown",d,!0),document.removeEventListener("focusin",s,!0),document.removeEventListener("keyup",r,!0),window.removeEventListener("scroll",c,!0),window.removeEventListener("resize",c,!0),delete window._a11yFocusOrderCleanup}o.style.position="absolute",o.style.background="#111",o.style.color="#fff",o.style.padding="5px 8px",o.style.borderRadius="6px",o.style.fontSize="16px",o.style.fontFamily="Arial, sans-serif",o.style.whiteSpace="nowrap",o.style.pointerEvents="none",o.style.zIndex="999999",o.style.display="none",document.body.appendChild(o),window._a11yFocusOrderCleanup=l,document.addEventListener("keydown",d,!0),document.addEventListener("focusin",s,!0),document.addEventListener("keyup",r,!0),window.addEventListener("scroll",c,!0),window.addEventListener("resize",c,!0)}();
+// Each element is numbered in order, and keeps its number. `ESC` to stop.
+// Numbers are assigned on first focus only, so returning to an element by
+// clicking or by shift-tabbing shows the number it already had.
+// A focus stop on an element that is not rendered is flagged: focus moving
+// somewhere invisible is a focus order bug in itself.
+(function () {
+  if (window._a11yFocusOrderActive) {
+    window._a11yFocusOrderCleanup();
+    return;
+  }
+  window._a11yFocusOrderActive = true;
+
+  var DARK = '#111111';
+  var RED = '#b00020';
+
+  var counter = 0;
+  var tracked = [];
+
+  var overlay = document.createElement('div');
+  overlay.id = 'a11y-focus-order-overlay';
+  overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;' +
+    'pointer-events:none;z-index:999999;';
+  document.body.appendChild(overlay);
+
+  function isRendered(el, rect) {
+    if (rect.width === 0 && rect.height === 0) return false;
+    return window.getComputedStyle(el).visibility !== 'hidden';
+  }
+
+  // Text content alone misses an icon button named by an image
+  function describe(el) {
+    var tag = el.tagName.toLowerCase();
+    var id = el.id ? '#' + el.id : '';
+    var role = el.getAttribute('role');
+
+    var name = (el.getAttribute('aria-label') || '').trim();
+    if (!name) {
+      var clone = el.cloneNode(true);
+      clone.querySelectorAll('img, area, input[type="image" i]').forEach(function (img) {
+        var alt = img.getAttribute('alt');
+        img.replaceWith(document.createTextNode(alt && alt.trim() ? ' ' + alt.trim() + ' ' : ''));
+      });
+      name = clone.textContent.trim().replace(/\s+/g, ' ');
+    }
+    if (!name) {
+      var value = el.getAttribute('value');
+      if (value && value.trim()) name = value.trim();
+    }
+    name = name.slice(0, 40);
+
+    return tag + id + (role ? '[role="' + role + '"]' : '') + (name ? ' "' + name + '"' : '');
+  }
+
+  function position(badge, el) {
+    var rect = el.getBoundingClientRect();
+    badge.style.left = (rect.left + window.scrollX) + 'px';
+    badge.style.top = (rect.top + window.scrollY - 34) + 'px';
+  }
+
+  function makeBadge(el, number, hidden) {
+    var badge = document.createElement('div');
+    badge.textContent = number + '. ' + describe(el) + (hidden ? ' (NOT RENDERED)' : '');
+    badge.style.cssText = 'position:absolute;background:' + (hidden ? RED : DARK) + ';color:#fff;' +
+      'padding:5px 8px;border-radius:6px;font-size:16px;font-family:Arial, sans-serif;' +
+      'white-space:nowrap;pointer-events:none;z-index:999999;';
+    overlay.appendChild(badge);
+    position(badge, el);
+    return badge;
+  }
+
+  function onFocusIn(e) {
+    var el = e.target;
+    if (!el || el === document.body || el === document.documentElement) return;
+
+    // Already numbered: leave the number it was given the first time
+    if (el.dataset.a11yFocusOrder) return;
+
+    counter++;
+    el.dataset.a11yFocusOrder = counter;
+
+    var rect = el.getBoundingClientRect();
+    var hidden = !isRendered(el, rect);
+    var colour = hidden ? RED : DARK;
+
+    el.style.outline = '3px solid ' + colour;
+    el.style.outlineOffset = '2px';
+
+    var badge = makeBadge(el, counter, hidden);
+    tracked.push({ el: el, badge: badge });
+  }
+
+  function reposition() {
+    tracked.forEach(function (entry) {
+      position(entry.badge, entry.el);
+    });
+  }
+
+  function onKeyUp(e) {
+    if (e.key === 'Escape') cleanup();
+  }
+
+  function cleanup() {
+    window._a11yFocusOrderActive = false;
+    overlay.remove();
+    tracked.forEach(function (entry) {
+      entry.el.style.outline = '';
+      entry.el.style.outlineOffset = '';
+      delete entry.el.dataset.a11yFocusOrder;
+    });
+    tracked.length = 0;
+    document.removeEventListener('focusin', onFocusIn, true);
+    document.removeEventListener('keyup', onKeyUp, true);
+    window.removeEventListener('scroll', reposition, true);
+    window.removeEventListener('resize', reposition, true);
+    delete window._a11yFocusOrderCleanup;
+  }
+
+  window._a11yFocusOrderCleanup = cleanup;
+  document.addEventListener('focusin', onFocusIn, true);
+  document.addEventListener('keyup', onKeyUp, true);
+  window.addEventListener('scroll', reposition, true);
+  window.addEventListener('resize', reposition, true);
+})();

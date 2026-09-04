@@ -307,13 +307,22 @@ Row and cell roles — badge inside at bottom of element.
 
 ## Track focus order
 
-Active listener — click to start, Tab or `n` to navigate, Esc to stop.
-Badge follows current focused element. Visited elements retain dark outline until Esc is pressed.
-Shift+Tab decrements the counter.
+Active listener — click to start, Tab through the page, Esc to stop. Re-running switches it off.
+
+Every element keeps the badge it was given, so the whole sequence stays on the page and can be read as a trail rather than one element at a time.
+
+Numbers are assigned on **first focus only**. Returning to an element by clicking, by shift-tabbing, or through scripted focus shows the number it already had, rather than incrementing. The old counter counted focus events, which drifted on any page that manages focus.
+
+A focus stop on an element that is not rendered is red and annotated: focus moving somewhere invisible is a focus order bug in itself.
+
+Names resolve from `aria-label`, then content including image `alt`, then `value`, so an icon button is not reported as unnamed.
+
+Badges reposition on scroll and resize.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark | `#111111` | [N]. [tag][#id][role="…"]["name"] |
+| Red | `#b00020` | [N]. [tag][#id][role="…"]["name"] (NOT RENDERED) |
 
 ---
 
