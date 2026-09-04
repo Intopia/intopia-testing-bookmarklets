@@ -1,6 +1,8 @@
 // Highlight aria-valuetext
 // Highlights all elements with aria-valuetext.
-// Shows the text alternative value. Flags empty values.
+// Shows the text alternative value. Flags empty values, and a missing or empty
+// aria-valuenow, which ARIA requires wherever aria-valuetext is used.
+// Re-run after interacting with a widget to see updated values.
 (function(){
 var existing = document.getElementById('a11y-valuetext-overlay');
 if (existing) existing.remove();
@@ -17,10 +19,19 @@ var flaggedEls = [];
 
 document.querySelectorAll('[aria-valuetext]').forEach(function(el) {
   var value = el.getAttribute('aria-valuetext').trim();
+  var nowVal = el.getAttribute('aria-valuenow');
+  // ARIA requires aria-valuenow wherever aria-valuetext is used. An empty or
+  // non-numeric valuenow is reported by the aria-valuenow bookmarklet; here it
+  // just means there is no usable numeric value behind the text.
+  var nowMissing = nowVal === null || nowVal.trim() === '';
   var colour, label;
   if (value === '') {
     colour = '#e65100';
     label = 'aria-valuetext: (empty)';
+  } else if (nowMissing) {
+    colour = '#e65100';
+    label = 'aria-valuetext: "' + value + '"  |  aria-valuenow: ' +
+      (nowVal === null ? '(missing)' : '(empty)');
   } else {
     colour = '#1b5e20';
     label = 'aria-valuetext: "' + value + '"';

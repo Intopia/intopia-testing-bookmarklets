@@ -500,10 +500,15 @@ Missing IDs annotated inline in the source badge.
 
 ## Highlight aria-valuetext
 
+ARIA requires `aria-valuenow` wherever `aria-valuetext` is used, so a missing or empty `aria-valuenow` is flagged here. Whether the `aria-valuenow` value itself is a valid number is left to the aria-valuenow bookmarklet.
+Re-run after interacting with a widget to see updated values.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | aria-valuetext: "[value]" |
 | Amber | `#e65100` | aria-valuetext: (empty) |
+| Amber | `#e65100` | aria-valuetext: "[value]"  \|  aria-valuenow: (missing) |
+| Amber | `#e65100` | aria-valuetext: "[value]"  \|  aria-valuenow: (empty) |
 
 ---
 
