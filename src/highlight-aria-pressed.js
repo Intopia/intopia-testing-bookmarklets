@@ -1,6 +1,8 @@
 // Highlight aria-pressed
 // Highlights all aria-pressed attributes on custom toggle buttons.
 // Distinguishes between true, false and mixed states. Flags invalid values.
+// `undefined` is also valid per the tristate value type.
+// Re-run after interacting with a widget to see updated values.
 (function(){
 var existing = document.getElementById('a11y-pressed-overlay');
 if (existing) existing.remove();
@@ -27,6 +29,11 @@ document.querySelectorAll('[aria-pressed]').forEach(function(el) {
   } else if (value === 'mixed') {
     colour = '#0a558c';
     label = 'aria-pressed="mixed"';
+  } else if (value === 'undefined') {
+    // Valid per the tristate value type (true/false/mixed/undefined). Means
+    // the element is not a toggle button, the same as omitting it.
+    colour = '#1b5e20';
+    label = 'aria-pressed="undefined"';
   } else {
     colour = '#b00020';
     label = 'aria-pressed="' + el.getAttribute('aria-pressed') + '" (INVALID VALUE)';
