@@ -1,6 +1,7 @@
 // Highlight aria-roledescription
 // Highlights all elements with aria-roledescription.
-// Shows the custom role description value. Flags empty values and missing roles.
+// Shows the custom role description value. Flags empty values, elements with no
+// role, and elements whose role has no semantics (generic, presentation, none).
 (function(){
 var existing = document.getElementById('a11y-roledescription-overlay');
 if (existing) existing.remove();
@@ -15,6 +16,10 @@ overlay.style.zIndex = '999999';
 document.body.appendChild(overlay);
 var flaggedEls = [];
 
+// Roles with no semantics of their own. aria-roledescription must not be used
+// on these, so an explicit one counts as no role rather than as a role.
+var semanticlessRoles = new Set(['generic', 'presentation', 'none']);
+
 // Elements with meaningful implicit ARIA roles (not generic)
 var meaningfulImplicit = new Set([
   'a','button','input','select','textarea','fieldset',
@@ -23,18 +28,53 @@ var meaningfulImplicit = new Set([
   'img','figure','table','tr','th','td','caption',
   'ul','ol','li','dl','dt','dd',
   'article','dialog','details','summary',
-  'meter','progress','output','search'
+  'meter','progress','output','search',
+  'blockquote','hr','p','option','optgroup','label','iframe','video','audio'
 ]);
+
+function hasAccessibleName(el) {
+  var labelledBy = el.getAttribute('aria-labelledby');
+  if (labelledBy && labelledBy.trim()) {
+    var text = labelledBy.trim().split(/\s+/).map(function(id) {
+      var ref = document.getElementById(id);
+      return ref ? ref.textContent.trim() : '';
+    }).filter(Boolean).join(' ');
+    if (text) return true;
+  }
+  var ariaLabel = el.getAttribute('aria-label');
+  if (ariaLabel && ariaLabel.trim()) return true;
+  var title = el.getAttribute('title');
+  return !!(title && title.trim());
+}
+
+// Returns 'ok', 'semanticless' (explicit role with no semantics) or 'none'.
+function roleStatus(el) {
+  var explicit = el.getAttribute('role');
+  if (explicit && explicit.trim() !== '') {
+    var role = explicit.trim().toLowerCase().split(/\s+/)[0];
+    return semanticlessRoles.has(role) ? 'semanticless' : 'ok';
+  }
+  var tag = el.tagName.toLowerCase();
+  // <section> only maps to region when it has an accessible name.
+  // Unnamed, it maps to generic.
+  if (tag === 'section') return hasAccessibleName(el) ? 'ok' : 'none';
+  return meaningfulImplicit.has(tag) ? 'ok' : 'none';
+}
 
 document.querySelectorAll('[aria-roledescription]').forEach(function(el) {
   var value = el.getAttribute('aria-roledescription').trim();
-  var hasRole = !!el.getAttribute('role') || meaningfulImplicit.has(el.tagName.toLowerCase());
+  var status = roleStatus(el);
   var colour, label;
 
   if (value === '') {
     colour = '#e65100';
     label = 'aria-roledescription: (empty)';
-  } else if (!hasRole) {
+  } else if (status === 'semanticless') {
+    colour = '#e65100';
+    label = 'aria-roledescription: "' + value + '" (role="' +
+      el.getAttribute('role').trim().toLowerCase().split(/\s+/)[0] +
+      '" has no semantics \u2014 misuse)';
+  } else if (status === 'none') {
     colour = '#e65100';
     label = 'aria-roledescription: "' + value + '" (no role \u2014 possible misuse)';
   } else {
