@@ -64,7 +64,7 @@ Highlights form fields and their accessible names. Flags fields with no name, an
 Highlights native buttons and elements with `role="button"`, and their accessible names. Covers `<button>` and `input` types `submit`, `reset`, `button` and `image`. Custom buttons are marked with a `[role="button"]` suffix. Flags buttons with no accessible name, and names that come from `title` alone.
 
 ## 20. Highlight fieldsets
-Highlights `<fieldset>`, `<legend>` and `radiogroup` elements. Flags `<fieldset>` elements missing a `<legend>`.
+Highlights `<fieldset>`, `<legend>`, `radiogroup` and `group` elements. Flags fieldsets with no accessible name, and legends that are not the first child of their fieldset and so do not label it. A fieldset named by `aria-label` or `aria-labelledby` is not flagged. An unnamed `radiogroup` is flagged, since that role requires a name; an unnamed `group` is not.
 
 ## 21. Highlight required fields
 Highlights required form fields. Distinguishes between native `required`, `aria-required`, and redundant combinations.

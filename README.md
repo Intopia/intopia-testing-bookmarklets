@@ -374,12 +374,23 @@ An image button takes its name from `alt`, not from `value`. Elements that are n
 
 Legend badge positioned below legend element to avoid overlap with fieldset badge.
 
+A `<legend>` only labels its fieldset when it is the first child, so a legend anywhere else, including inside a nested fieldset, does not count.
+`aria-label` and `aria-labelledby` override the legend in AccName, so a fieldset named that way is not an error.
+`radiogroup` requires an accessible name. `group` does not, so an unnamed group is shown but not flagged as a failure.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | Fieldset |
+| Dark green | `#1b5e20` | Fieldset (named by aria-label): [name] |
+| Dark green | `#1b5e20` | Fieldset (named by aria-labelledby): [name] |
 | Red | `#b00020` | Fieldset (no legend) |
+| Red | `#b00020` | Fieldset (legend is not the first child) |
 | Dark blue | `#0a558c` | Legend: [text] |
-| Amber | `#e65100` | role="radiogroup" [: name] |
+| Amber | `#e65100` | Legend: [text] (not the first child of a fieldset) |
+| Amber | `#e65100` | role="radiogroup": [name] |
+| Red | `#b00020` | role="radiogroup" NO ACCESSIBLE NAME |
+| Amber | `#e65100` | role="group": [name] |
+| Amber | `#e65100` | role="group" (no accessible name, not required) |
 
 ---
 
