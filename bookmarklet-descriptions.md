@@ -22,7 +22,7 @@ Highlights the page language defined on the `<html>` element. Validates the lang
 Displays the document title from the `<title>` element as a fixed banner at the top of the page. Flags missing titles, empty titles, and pages with more than one `<title>` element. Click to activate, Esc to clear.
 
 ## 7. Highlight page encoding
-Displays the character encoding declaration as a fixed banner at the top of the page. Detects both `<meta charset>` and `http-equiv Content-Type` forms. Flags missing, empty and non-UTF-8 declarations, conflicting declarations and charset outside `<head>`. Click to activate, Esc to clear.
+Displays the character encoding declaration as a fixed banner at the top of the page. Detects both `<meta charset>` and `http-equiv Content-Type` forms. Flags missing, empty and non-UTF-8 declarations, duplicate and conflicting declarations, and charset outside `<head>`. Where more than one message applies, banners stack. Click to activate, Esc to clear.
 
 ## 8. Highlight captions and headers
 Highlights accessibility features within tables. Flags header cells with and without `scope`, invalid `scope` values, and tables missing a `<caption>`.

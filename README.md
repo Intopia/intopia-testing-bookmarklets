@@ -199,10 +199,15 @@ Document-level fixed banner appended directly to body. No overlay or outline —
 
 Document-level fixed banner appended directly to body. Detects both `<meta charset>` and `http-equiv Content-Type` forms.
 
+Where more than one message applies, banners stack vertically rather than overlapping.
+All UTF-8 labels from the Encoding Standard are accepted: `utf-8`, `utf8` and `unicode-1-1-utf-8`.
+More than one `<meta charset>` is amber, since the page still works and the first declaration wins.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | Charset: "UTF-8" via `<meta charset>` |
 | Amber | `#e65100` | Charset: "[value]" via [source] — UTF-8 is recommended |
+| Amber | `#e65100` | Warning: [N] `<meta charset>` declarations found ("[value]", "[value]") — browsers use the first. |
 | Amber | `#e65100` | Warning: conflicting charset declarations — meta charset: "[value]" and http-equiv: "[value]" |
 | Amber | `#e65100` | Warning: charset declaration found outside `<head>` |
 | Red | `#b00020` | Charset: (empty) — charset attribute is present but has no value |
