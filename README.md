@@ -258,14 +258,22 @@ Captions and header cells are only attributed to the table that owns them, so ne
 
 ## Highlight table IDs and headers
 
-Interactive — makes all `<th>` and `<td>` elements focusable. Floating badge follows focused cell. Referenced header cells highlighted in green.
+Interactive — makes all `<th>` and `<td>` elements focusable. Floating badge follows focused cell. Referenced header cells are outlined and numbered.
 
-Click to activate, then Tab or `n` to navigate between cells. Esc restores original tabindex values.
+Click to activate, then Tab or `n` to navigate between cells. Esc restores original tabindex values. Re-running the bookmarklet switches it off.
+
+Each referenced header gets a small numbered marker, and the same numbers appear in the badge against the id they came from. This makes the relationship explicit without drawing connector lines, which would drift on tables with sticky headers.
+
+A `headers` value must reference a `<th>` or `<td>`. A reference that resolves to something else is amber and annotated, and a reference that resolves to nothing is annotated inline rather than silently skipped.
 
 | Colour | Hex | Badge / outline text |
 |--------|-----|----------------------|
-| Dark blue | `#0a558c` | Focused cell outline + badge: TH/TD: [text] \| id: [value] \| headers: [value] |
-| Dark green | `#1b5e20` | Referenced header cell outline |
+| Dark blue | `#0a558c` | Focused cell outline + badge: TH/TD: [text] \| id: [value] \| headers: [1] [id] [2] [id] |
+| Dark green | `#1b5e20` | Referenced header cell outline + numbered marker |
+| Amber | `#e65100` | Referenced element that is not a table cell, outline + numbered marker |
+| — | — | badge annotation: [N] [id] (missing) |
+| — | — | badge annotation: [N] [id] (not a table cell) |
+| — | — | badge annotation: headers: (empty) |
 
 ---
 

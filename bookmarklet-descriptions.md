@@ -30,7 +30,7 @@ Click to activate, then press 1 through 3 in order to step through `<table>`, `<
 
 ## 9. Highlight table IDs and headers
 Highlights the relationship between `headers` and ids within complex tables.
-Click to activate, then press `TAB` or `n` to move through each cell. Related headers and ids are highlighted.
+Click to activate, then press `TAB` or `n` to move through each cell. Related header cells are outlined and numbered, and the same numbers appear on the focused cell's badge. Flags header references that are missing or point at something that is not a table cell. Re-run the bookmarklet to switch it off.
 
 ## 10. Highlight ARIA table roles
 Highlights ARIA roles relating to tables.
