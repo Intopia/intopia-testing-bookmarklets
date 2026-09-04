@@ -1,6 +1,8 @@
 // Highlight aria-valuenow
 // Highlights all elements with aria-valuenow.
-// Shows the current numeric value of a range widget. Flags empty and non-numeric values.
+// Shows the current numeric value of a range widget. Flags empty and non-numeric values,
+// and a value outside a declared aria-valuemin to aria-valuemax range.
+// Re-run after interacting with a widget to see updated values.
 (function(){
 var existing = document.getElementById('a11y-valuenow-overlay');
 if (existing) existing.remove();
@@ -15,6 +17,15 @@ overlay.style.zIndex = '999999';
 document.body.appendChild(overlay);
 var flaggedEls = [];
 
+// ARIA number type. HTML's rules for parsing floating-point numbers allow an
+// optional sign, decimals and exponent notation (1e2), but not hex (0x10) or
+// Infinity — both of which Number() would happily accept.
+var NUMBER_PATTERN = /^[-+]?(\d+(\.\d+)?|\.\d+)([eE][-+]?\d+)?$/;
+
+function isNumeric(val) {
+  return val !== null && NUMBER_PATTERN.test(val.trim());
+}
+
 document.querySelectorAll('[aria-valuenow]').forEach(function(el) {
   var raw = el.getAttribute('aria-valuenow');
   var trimmed = raw.trim();
@@ -23,12 +34,27 @@ document.querySelectorAll('[aria-valuenow]').forEach(function(el) {
   if (trimmed === '') {
     colour = '#e65100';
     label = 'aria-valuenow: (empty)';
-  } else if (isNaN(Number(trimmed))) {
+  } else if (!isNumeric(trimmed)) {
     colour = '#b00020';
     label = 'aria-valuenow: "' + raw + '" (invalid \u2014 must be a number)';
   } else {
     colour = '#1b5e20';
     label = 'aria-valuenow: ' + trimmed;
+
+    // Only compare against a range the author has actually declared, and only
+    // when that range is coherent. An inverted range is the valuemin/valuemax
+    // bookmarklet's job to report, not this one's.
+    var minVal = el.getAttribute('aria-valuemin');
+    var maxVal = el.getAttribute('aria-valuemax');
+    if (isNumeric(minVal) && isNumeric(maxVal)) {
+      var min = parseFloat(minVal.trim());
+      var max = parseFloat(maxVal.trim());
+      var now = parseFloat(trimmed);
+      if (min <= max && (now < min || now > max)) {
+        colour = '#b00020';
+        label += ' (outside range ' + min + '\u2013' + max + ')';
+      }
+    }
   }
 
   el.style.outline = '3px solid ' + colour;

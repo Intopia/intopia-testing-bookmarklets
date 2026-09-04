@@ -509,11 +509,16 @@ Missing IDs annotated inline in the source badge.
 
 ## Highlight aria-valuenow
 
+ARIA number type, so decimals and exponent notation (`1e2`) are valid. Hex and `Infinity` are not.
+Where the element also declares a coherent `aria-valuemin` to `aria-valuemax` range, a value outside that range is flagged. An inverted range is left to the aria-valuemin and aria-valuemax bookmarklet.
+Re-run after interacting with a widget to see updated values.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | aria-valuenow: [N] |
 | Amber | `#e65100` | aria-valuenow: (empty) |
 | Red | `#b00020` | aria-valuenow: "[value]" (invalid — must be a number) |
+| Red | `#b00020` | aria-valuenow: [N] (outside range [min]–[max]) |
 
 ---
 
