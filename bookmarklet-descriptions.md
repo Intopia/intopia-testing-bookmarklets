@@ -70,7 +70,7 @@ Highlights `<fieldset>`, `<legend>`, `radiogroup` and `group` elements. Flags fi
 Highlights required form fields. Distinguishes between native `required`, `aria-required`, and redundant combinations.
 
 ## 22. Highlight readonly fields
-Highlights native `readonly` and `aria-readonly` for teaching purposes. Native `readonly` is browser-enforced and automatically announced correctly to AT, no ARIA needed. `aria-readonly="true"` alone only affects the AT announcement — it does not stop the user typing unless the field is functionally restricted some other way. Flags the redundant and conflicting combinations, and invalid values.
+Highlights native `readonly` and `aria-readonly` for teaching purposes. Native `readonly` is browser-enforced and automatically announced correctly to AT, no ARIA needed. `aria-readonly="true"` alone only affects the AT announcement — it does not stop the user typing unless the field is functionally restricted some other way. Flags the redundant and conflicting combinations, invalid values, and cases where the attribute has no effect at all, such as `readonly` on a `<select>` or a checkbox, or `aria-readonly` on a role that does not support it.
 
 ## 23. Highlight aria-invalid
 Highlights all `aria-invalid` states: `true`, `grammar`, `spelling` and `false`. Flags empty and unrecognised values.

@@ -480,6 +480,10 @@ A `<legend>` only labels its fieldset when it is the first child, so a legend an
 
 Native `readonly` (`<input>`, `<textarea>`) is browser-enforced and implicitly sets `aria-readonly="true"` in the accessibility tree — no ARIA needed. `aria-readonly="true"` alone only affects the AT announcement; it does not stop the user typing unless the field is also restricted some other way. Teaching bookmarklet — the blue badge is deliberately informational rather than pass/fail.
 
+`readonly` only does something on `<textarea>` and text-like `<input>` types (`text`, `search`, `url`, `tel`, `email`, `password`, `date`, `month`, `week`, `time`, `datetime-local`, `number`). On a `<select>`, a checkbox, a radio or anything else it has no effect, which is flagged.
+`aria-readonly` is only supported on `checkbox`, `combobox`, `grid`, `gridcell`, `listbox`, `radiogroup`, `slider`, `spinbutton`, `textbox`, `columnheader`, `rowheader` and `treegrid`, plus the native controls carrying those roles implicitly.
+Elements that are not rendered are skipped.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | readonly |
@@ -488,6 +492,9 @@ Native `readonly` (`<input>`, `<textarea>`) is browser-enforced and implicitly s
 | Amber | `#e65100` | readonly + aria-readonly="true" (redundant) |
 | Red | `#b00020` | readonly + aria-readonly="false" (CONFLICTING — native readonly wins) |
 | Red | `#b00020` | INVALID VALUE: aria-readonly="[value]" |
+| Red | `#b00020` | readonly HAS NO EFFECT: `<[tag]>` does not support readonly |
+| Red | `#b00020` | readonly HAS NO EFFECT: input type="[type]" does not support readonly |
+| Red | `#b00020` | aria-readonly="[value]" HAS NO EFFECT: this role does not support aria-readonly |
 
 ---
 
