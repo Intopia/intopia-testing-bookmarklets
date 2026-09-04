@@ -1,6 +1,7 @@
 // Highlight aria-valuemin and aria-valuemax
 // Highlights elements with aria-valuemin and/or aria-valuemax.
-// Flags missing values from the pair and non-numeric values.
+// Flags missing values from the pair, non-numeric values, an inverted range
+// where valuemin exceeds valuemax, and an empty range where the two are equal.
 (function(){
 var existing = document.getElementById('a11y-valuerange-overlay');
 if (existing) existing.remove();
@@ -15,13 +16,22 @@ overlay.style.zIndex = '999999';
 document.body.appendChild(overlay);
 var flaggedEls = [];
 
+// ARIA number type. HTML's rules for parsing floating-point numbers allow an
+// optional sign, decimals and exponent notation (1e2), but not hex (0x10) or
+// Infinity — both of which Number() would happily accept.
+var NUMBER_PATTERN = /^[-+]?(\d+(\.\d+)?|\.\d+)([eE][-+]?\d+)?$/;
+
 function isNumeric(val) {
-  return val !== null && val.trim() !== '' && !isNaN(Number(val.trim()));
+  return val !== null && NUMBER_PATTERN.test(val.trim());
+}
+
+function toNum(val) {
+  return parseFloat(val.trim());
 }
 
 function formatAttr(name, val) {
   if (val === null) return name + ': (missing)';
-  if (val.trim() === '' || isNaN(Number(val.trim()))) return name + ': "' + val + '" (invalid)';
+  if (!isNumeric(val)) return name + ': "' + val + '" (invalid)';
   return name + ': ' + val.trim();
 }
 
@@ -31,19 +41,31 @@ document.querySelectorAll('[aria-valuemin],[aria-valuemax]').forEach(function(el
 
   var minOk = minVal !== null && isNumeric(minVal);
   var maxOk = maxVal !== null && isNumeric(maxVal);
-  var minInvalid = minVal !== null && !isNumeric(minVal);
-  var maxInvalid = maxVal !== null && !isNumeric(maxVal);
+  var minInvalid = minVal !== null && !minOk;
+  var maxInvalid = maxVal !== null && !maxOk;
+
+  var minNum = minOk ? toNum(minVal) : null;
+  var maxNum = maxOk ? toNum(maxVal) : null;
+
+  // An inverted range is incoherent; an empty one cannot be adjusted
+  var inverted = minNum !== null && maxNum !== null && minNum > maxNum;
+  var equal = minNum !== null && maxNum !== null && minNum === maxNum;
 
   var colour;
-  if (minInvalid || maxInvalid) {
+  if (minInvalid || maxInvalid || inverted) {
     colour = '#b00020';
-  } else if (!minOk || !maxOk) {
+  } else if (!minOk || !maxOk || equal) {
     colour = '#e65100';
   } else {
     colour = '#1b5e20';
   }
 
   var label = formatAttr('aria-valuemin', minVal) + '  |  ' + formatAttr('aria-valuemax', maxVal);
+  if (inverted) {
+    label += '  |  valuemin exceeds valuemax';
+  } else if (equal) {
+    label += '  |  empty range (min equals max)';
+  }
 
   el.style.outline = '3px solid ' + colour;
   el.style.outlineOffset = '2px';
