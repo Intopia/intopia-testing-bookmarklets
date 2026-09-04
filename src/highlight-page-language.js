@@ -1,11 +1,24 @@
 // Highlight page language
 // Highlights the lang attribute on the <html> element and any inline lang attributes.
-// Validates values against BCP 47. Flags missing, empty, unrecognised and invalid values.
+// Validates against the BCP 47 grammar, which is stable and needs no lists, and
+// separately reports whether the primary language subtag is registered.
+//
+// Two different checks, deliberately kept apart:
+//   NOT WELL-FORMED  the tag breaks the BCP 47 syntax. Always an error.
+//   UNREGISTERED     the syntax is fine but the primary subtag is not one we know.
+// Script, region and variant subtags are checked for well-formedness only.
+// Verifying that they are registered would need the IANA registry, which a
+// bookmarklet cannot carry, so this tool does not claim to do it.
+//
+// The code lists below are a convenience snapshot, not authoritative, and will
+// drift as the registry changes.
 (function(){
 var OVERLAY_ID = 'a11y-lang-overlay';
+var BANNER_CLASS = 'a11y-lang-banner';
+
 var existing = document.getElementById(OVERLAY_ID);
 if (existing) existing.remove();
-var docBanners = [];
+document.querySelectorAll('.' + BANNER_CLASS).forEach(function(el) { el.remove(); });
 
 var overlay = document.createElement('div');
 overlay.id = OVERLAY_ID;
@@ -18,6 +31,7 @@ overlay.style.zIndex = '999999';
 document.body.appendChild(overlay);
 
 var flaggedEls = [];
+var bannerCount = 0;
 
 var iso639_1 = new Set([
   'aa','ab','ae','af','ak','am','an','ar','as','av','ay','az',
@@ -34,7 +48,7 @@ var iso639_1 = new Set([
   'oc','oj','om','or','os','pa','pi','pl','ps','pt','qu',
   'rm','rn','ro','ru','rw','sa','sc','sd','se','sg','si','sk','sl','sm','sn','so',
   'sq','sr','ss','st','su','sv','sw','ta','te','tg','th','ti','tk','tl','tn','to',
-  'tr','ts','tt','tw','ty','ug','uk','ur','uz','va','ve','vi','vo',
+  'tr','ts','tt','tw','ty','ug','uk','ur','uz','ve','vi','vo',
   'wa','wo','xh','yi','yo','za','zh','zu'
 ]);
 
@@ -65,59 +79,210 @@ var suggestions = {
   'albanian':'sq','macedonian':'mk','bosnian':'bs','belarusian':'be'
 };
 
+// Grandfathered tags from BCP 47. All are well-formed but deprecated.
+var GRANDFATHERED = new Set([
+  'en-gb-oed','i-ami','i-bnn','i-default','i-enochian','i-hak','i-klingon',
+  'i-lux','i-mingo','i-navajo','i-pwn','i-tao','i-tay','i-tsu',
+  'sgn-be-fr','sgn-be-nl','sgn-ch-de',
+  'art-lojban','cel-gaulish','no-bok','no-nyn',
+  'zh-guoyu','zh-hakka','zh-min','zh-min-nan','zh-xiang'
+]);
+
 var GREEN = '#1b5e20';
 var BLUE  = '#0a558c';
 var AMBER = '#e65100';
 var RED   = '#b00020';
 
-function validateLang(value) {
-  if (!value || !value.trim()) {
-    return { state: 'empty', message: '(empty)' };
+var ALPHA = /^[a-zA-Z]+$/;
+var DIGIT = /^[0-9]+$/;
+var ALNUM = /^[a-zA-Z0-9]+$/;
+
+// Walks the BCP 47 langtag grammar:
+//   language ["-" script] ["-" region] *("-" variant) *("-" extension) ["-" privateuse]
+function parseLangtag(tag) {
+  var parts = tag.split('-');
+  var i = 0;
+
+  var language = parts[i];
+  if (!language || !ALPHA.test(language) || language.length < 2 || language.length > 8) {
+    return { ok: false, reason: '"' + (language || '') + '" is not a valid primary language subtag' };
   }
-  var raw = value.trim();
+  i++;
+
+  // extlang: up to three 3-letter subtags, only after a 2 or 3 letter language
+  if (language.length <= 3) {
+    var extlangs = 0;
+    while (extlangs < 3 && parts[i] && parts[i].length === 3 && ALPHA.test(parts[i])) {
+      i++;
+      extlangs++;
+    }
+  }
+
+  var script = null;
+  if (parts[i] && parts[i].length === 4 && ALPHA.test(parts[i])) {
+    script = parts[i];
+    i++;
+  }
+
+  var region = null;
+  if (parts[i] && ((parts[i].length === 2 && ALPHA.test(parts[i])) ||
+                   (parts[i].length === 3 && DIGIT.test(parts[i])))) {
+    region = parts[i];
+    i++;
+  }
+
+  var variants = [];
+  while (parts[i] && ((parts[i].length >= 5 && parts[i].length <= 8 && ALNUM.test(parts[i])) ||
+                      (parts[i].length === 4 && /^[0-9][a-zA-Z0-9]{3}$/.test(parts[i])))) {
+    variants.push(parts[i]);
+    i++;
+  }
+
+  var tailStart = i;
+
+  // extensions: a singleton other than x, then one or more 2-8 character subtags
+  while (parts[i] && parts[i].length === 1 && /^[0-9a-wy-zA-WY-Z]$/.test(parts[i])) {
+    var singleton = parts[i];
+    i++;
+    var extCount = 0;
+    while (parts[i] && parts[i].length >= 2 && parts[i].length <= 8 && ALNUM.test(parts[i])) {
+      i++;
+      extCount++;
+    }
+    if (extCount === 0) {
+      return { ok: false, reason: 'extension "' + singleton + '" has no subtags after it' };
+    }
+  }
+
+  if (parts[i] && /^[xX]$/.test(parts[i])) {
+    i++;
+    var privCount = 0;
+    while (parts[i] && parts[i].length >= 1 && parts[i].length <= 8 && ALNUM.test(parts[i])) {
+      i++;
+      privCount++;
+    }
+    if (privCount === 0) {
+      return { ok: false, reason: 'private use "x" has no subtags after it' };
+    }
+  }
+
+  if (i < parts.length) {
+    return { ok: false, reason: 'unexpected subtag "' + parts[i] + '"' };
+  }
+
+  return {
+    ok: true,
+    language: language,
+    script: script,
+    region: region,
+    variants: variants,
+    // extension and private use subtags, kept so the conventional form can
+    // round-trip the whole tag rather than truncating it
+    rest: parts.slice(tailStart)
+  };
+}
+
+// Conventional casing per BCP 47: language lowercase, script Titlecase,
+// region UPPERCASE. Case is not significant, so this is a note, not an error.
+function conventionalForm(parsed) {
+  var out = [parsed.language.toLowerCase()];
+  if (parsed.script) {
+    out.push(parsed.script.charAt(0).toUpperCase() + parsed.script.slice(1).toLowerCase());
+  }
+  if (parsed.region) out.push(parsed.region.toUpperCase());
+  parsed.variants.forEach(function (v) { out.push(v.toLowerCase()); });
+  (parsed.rest || []).forEach(function (v) { out.push(v.toLowerCase()); });
+  return out.join('-');
+}
+
+function validateLang(rawValue) {
+  if (rawValue === null) return { state: 'missing', message: '' };
+
+  // Do not trim silently: whitespace in the attribute value is itself a fault
+  if (rawValue !== rawValue.trim()) {
+    if (rawValue.trim() === '') {
+      return { state: 'empty', message: '(whitespace only)' };
+    }
+    return {
+      state: 'malformed',
+      message: '"' + rawValue + '" \u2014 NOT WELL-FORMED: leading or trailing whitespace'
+    };
+  }
+
+  var raw = rawValue;
+  if (raw === '') return { state: 'empty', message: '(empty)' };
+
   var lower = raw.toLowerCase();
+
+  if (raw.indexOf('_') > -1) {
+    return {
+      state: 'malformed',
+      message: '"' + raw + '" \u2014 NOT WELL-FORMED: subtags are separated by a hyphen, not an underscore. Did you mean "' +
+        raw.replace(/_/g, '-') + '"?'
+    };
+  }
+
   if (suggestions[lower]) {
-    return { state: 'invalid', message: '"' + raw + '" \u2014 did you mean "' + suggestions[lower] + '"?' };
+    return {
+      state: 'malformed',
+      message: '"' + raw + '" \u2014 NOT WELL-FORMED: this is a language name, not a code. Did you mean "' +
+        suggestions[lower] + '"?'
+    };
   }
-  var parts = raw.split('-');
-  if (!/^[a-zA-Z]{2,3}$/.test(parts[0])) {
-    return { state: 'invalid', message: '"' + raw + '" \u2014 invalid format' };
+
+  if (GRANDFATHERED.has(lower)) {
+    return { state: 'deprecated', message: '"' + raw + '" \u2014 grandfathered tag, well-formed but deprecated' };
   }
-  var primary = parts[0].toLowerCase();
+
+  // A private use only tag is well-formed but names no language
+  if (/^[xX](-[a-zA-Z0-9]{1,8})+$/.test(raw)) {
+    return { state: 'privateuse', message: '"' + raw + '" \u2014 private use only, names no language' };
+  }
+
+  var parsed = parseLangtag(raw);
+  if (!parsed.ok) {
+    return { state: 'malformed', message: '"' + raw + '" \u2014 NOT WELL-FORMED: ' + parsed.reason };
+  }
+
+  var primary = parsed.language.toLowerCase();
   if (!iso639_1.has(primary) && !iso639_23.has(primary)) {
-    return { state: 'unrecognised', message: '"' + raw + '" \u2014 unrecognised language code' };
+    return {
+      state: 'unregistered',
+      message: '"' + raw + '" \u2014 well-formed, but "' + parsed.language + '" is not a language subtag we recognise'
+    };
   }
-  if (parts.length > 1) {
-    if (parts[1].toLowerCase() === 'x') {
-      return { state: 'valid', message: raw };
-    }
-    for (var idx = 1; idx < parts.length; idx++) {
-      if (!/^[a-zA-Z0-9]{1,8}$/.test(parts[idx])) {
-        return { state: 'invalid', message: '"' + raw + '" \u2014 invalid subtag "' + parts[idx] + '"' };
-      }
-    }
+
+  var conventional = conventionalForm(parsed);
+  if (conventional !== raw) {
+    return { state: 'valid', message: raw + ' (conventional form: ' + conventional + ')' };
   }
   return { state: 'valid', message: raw };
 }
 
+function colourFor(state) {
+  if (state === 'valid') return GREEN;
+  if (state === 'malformed') return RED;
+  return AMBER;
+}
+
 function isRendered(el) {
-  // Skip elements inside collapsed <details>
   var ancestor = el.parentElement;
   while (ancestor) {
     if (ancestor.tagName === 'DETAILS' && !ancestor.open) return false;
     ancestor = ancestor.parentElement;
   }
-  // Skip elements with zero dimensions (hidden, display:none, etc.)
   var rect = el.getBoundingClientRect();
   if (rect.width === 0 && rect.height === 0) return false;
-  return true;
+  return window.getComputedStyle(el).visibility !== 'hidden';
 }
 
+// Banners stack rather than overlapping, so every message stays visible
 function makeDocBanner(text, colour) {
   var banner = document.createElement('div');
+  banner.className = BANNER_CLASS;
   banner.textContent = text;
   banner.style.position = 'fixed';
-  banner.style.top = '20px';
+  banner.style.top = (20 + bannerCount * 56) + 'px';
   banner.style.left = '50%';
   banner.style.transform = 'translateX(-50%)';
   banner.style.background = colour;
@@ -132,7 +297,7 @@ function makeDocBanner(text, colour) {
   banner.style.textAlign = 'center';
   banner.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
   document.body.appendChild(banner);
-  docBanners.push(banner);
+  bannerCount++;
 }
 
 function makeBadge(text, colour, el) {
@@ -174,16 +339,8 @@ if (effectiveLang === null) {
   makeDocBanner('NO DOCUMENT LANG \u2014 lang attribute missing from <html>', RED);
 } else {
   var docResult = validateLang(effectiveLang);
-  var attrPrefix = (xmlLangAttr !== null && langAttr === null) ? 'xml:lang: ' : 'lang: ';
-  if (docResult.state === 'valid') {
-    makeDocBanner('Document ' + attrPrefix + docResult.message, GREEN);
-  } else if (docResult.state === 'empty') {
-    makeDocBanner('Document lang: (empty) \u2014 lang attribute is present but has no value', AMBER);
-  } else if (docResult.state === 'unrecognised') {
-    makeDocBanner('Document lang: ' + docResult.message, AMBER);
-  } else {
-    makeDocBanner('Document lang: ' + docResult.message, RED);
-  }
+  var attrPrefix = (xmlLangAttr !== null && langAttr === null) ? 'xml:lang' : 'lang';
+  makeDocBanner('Document ' + attrPrefix + ': ' + docResult.message, colourFor(docResult.state));
 }
 
 if (langAttr !== null && xmlLangAttr !== null && langAttr !== xmlLangAttr) {
@@ -193,28 +350,21 @@ if (langAttr !== null && xmlLangAttr !== null && langAttr !== xmlLangAttr) {
 // --- inline lang attributes ---
 document.querySelectorAll('[lang],[xml\\:lang]').forEach(function(el) {
   if (el === htmlEl) return;
-  if (!isRendered(el)) return; // skip hidden/collapsed elements
+  if (!isRendered(el)) return;
   var langVal = el.getAttribute('lang');
   var xmlVal  = el.getAttribute('xml:lang');
   var attrName = langVal !== null ? 'lang' : 'xml:lang';
   var attrValue = langVal !== null ? langVal : xmlVal;
   var inlineResult = validateLang(attrValue);
-  if (inlineResult.state === 'valid') {
-    flagElement(el, BLUE, attrName + ': ' + inlineResult.message);
-  } else if (inlineResult.state === 'empty') {
-    flagElement(el, AMBER, attrName + ': (empty)');
-  } else if (inlineResult.state === 'unrecognised') {
-    flagElement(el, AMBER, attrName + ': ' + inlineResult.message);
-  } else {
-    flagElement(el, RED, attrName + ': ' + inlineResult.message);
-  }
+  var colour = inlineResult.state === 'valid' ? BLUE : colourFor(inlineResult.state);
+  flagElement(el, colour, attrName + ': ' + inlineResult.message);
 });
 
 // --- Esc to clear ---
 function onKey(e) {
   if (e.key !== 'Escape') return;
   overlay.remove();
-  docBanners.forEach(function(b) { b.remove(); });
+  document.querySelectorAll('.' + BANNER_CLASS).forEach(function(b) { b.remove(); });
   flaggedEls.forEach(function(el) {
     el.style.outline = '';
     el.style.outlineOffset = '';

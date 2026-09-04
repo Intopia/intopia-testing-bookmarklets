@@ -162,23 +162,38 @@ Nested `<aside>` without accessible name is not flagged (matches HTML-AAM mappin
 
 ## Highlight page language
 
-Document-level banner appended directly to body (position: fixed). Inline lang attributes use standard positioned badges.
+Document-level banner appended directly to body (position: fixed). Inline lang attributes use standard positioned badges. Where more than one document-level message applies, banners stack vertically.
 
-Validates against 184 ISO 639-1 codes, common ISO 639-2/3 three-letter codes, and 65 full-word mistake mappings with "did you mean" suggestions.
+Two separate checks, deliberately kept apart, because they lead to different advice:
+
+- **NOT WELL-FORMED** (red) — the value breaks the BCP 47 grammar. Always an error. Checked by walking the grammar, so nothing here can drift.
+- **Unregistered** (amber) — the syntax is fine, but the primary language subtag is not one the bundled list recognises.
+
+Grandfathered tags and private use only tags are well-formed but flagged amber, since neither names a language a browser can act on in the normal way.
+
+Script, region and variant subtags are checked for well-formedness only. Confirming they are *registered* would need the IANA registry, which a bookmarklet cannot carry, so this tool does not claim to. `en-Latn-UK-nonsense` is well-formed and passes.
+
+The bundled ISO 639-1 and 639-2/3 code lists and the 65 full-word mistake mappings are a convenience snapshot, not authoritative, and will drift as the registry changes.
+
+Case is not significant in BCP 47, so a valid tag in unconventional case stays green with a note giving the conventional form.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | Document lang: [value] |
-| Amber | `#e65100` | Document lang: (empty) — lang attribute is present but has no value |
-| Amber | `#e65100` | Document lang: "[value]" — unrecognised language code |
-| Red | `#b00020` | Document lang: "[value]" — did you mean "[suggestion]"? |
-| Red | `#b00020` | Document lang: "[value]" — invalid format |
+| Dark green | `#1b5e20` | Document lang: [value] (conventional form: [value]) |
+| Amber | `#e65100` | Document lang: (empty) |
+| Amber | `#e65100` | Document lang: (whitespace only) |
+| Amber | `#e65100` | Document lang: "[value]" — well-formed, but "[subtag]" is not a language subtag we recognise |
+| Amber | `#e65100` | Document lang: "[value]" — grandfathered tag, well-formed but deprecated |
+| Amber | `#e65100` | Document lang: "[value]" — private use only, names no language |
+| Red | `#b00020` | Document lang: "[value]" — NOT WELL-FORMED: subtags are separated by a hyphen, not an underscore. Did you mean "[value]"? |
+| Red | `#b00020` | Document lang: "[value]" — NOT WELL-FORMED: this is a language name, not a code. Did you mean "[suggestion]"? |
+| Red | `#b00020` | Document lang: "[value]" — NOT WELL-FORMED: leading or trailing whitespace |
+| Red | `#b00020` | Document lang: "[value]" — NOT WELL-FORMED: [grammar reason] |
 | Red | `#b00020` | NO DOCUMENT LANG — lang attribute missing from `<html>` |
 | Amber | `#e65100` | Warning: lang="[value]" and xml:lang="[value]" differ |
 | Dark blue | `#0a558c` | lang: [value] (inline, valid) |
-| Amber | `#e65100` | lang: (empty) (inline) |
-| Amber | `#e65100` | lang: "[value]" — unrecognised (inline) |
-| Red | `#b00020` | lang: "[value]" — invalid (inline) |
+| — | — | inline badges use the same messages, coloured as above |
 
 ---
 

@@ -16,7 +16,7 @@ Highlights native list elements and ARIA list roles with distinct colours per ty
 Highlights all landmark regions with distinct colours per role. Shows accessible name where present.
 
 ## 5. Highlight page language
-Highlights the page language defined on the `<html>` element. Validates the lang value against BCP 47 and flags missing, empty or unrecognised language codes. Also highlights inline `lang` attributes on page elements.
+Highlights the page language defined on the `<html>` element. Validates the lang value against the BCP 47 grammar and flags missing, empty and not well-formed values, separately from values that are well-formed but use an unrecognised language subtag. Also flags grandfathered and private use tags, and highlights inline `lang` attributes on page elements.
 
 ## 6. Highlight document title
 Displays the document title from the `<title>` element as a fixed banner at the top of the page. Flags missing titles, empty titles, and pages with more than one `<title>` element. Click to activate, Esc to clear.
