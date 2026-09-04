@@ -1,4 +1,113 @@
 // Highlight aria-label
-// Highlights all elements with `aria-label`. 
+// Highlights all elements with `aria-label`.
 // Flags empty values and use on roles where author-provided names are prohibited.
-!function(){const e=document.getElementById("a11y-aria-label-overlay");e&&e.remove();const t=document.createElement("div");t.id="a11y-aria-label-overlay",t.style.position="absolute",t.style.top="0",t.style.left="0",t.style.width="100%",t.style.pointerEvents="none",t.style.zIndex="999999",document.body.appendChild(t);const n=[],o=new Set(["caption","code","deletion","emphasis","generic","insertion","paragraph","presentation","strong","subscript","superscript","definition","mark","none","suggestion","term","time","tooltip"]),i=new Map([["caption","caption"],["code","code"],["del","deletion"],["s","deletion"],["em","emphasis"],["div","generic"],["span","generic"],["ins","insertion"],["p","paragraph"],["strong","strong"],["sub","subscript"],["sup","superscript"],["dfn","definition"],["mark","mark"],["time","time"]]);function s(e,o,i){e.style.outline="3px solid "+o,n.push(e),function(e,n,o){const i=document.createElement("div");i.textContent=e,i.style.position="absolute",i.style.left=o.left+window.scrollX+"px",i.style.top=o.top+window.scrollY-26+"px",i.style.background=n,i.style.color="#ffffff",i.style.padding="2px 5px",i.style.fontSize="14px",i.style.fontFamily="Arial, sans-serif",i.style.borderRadius="4px",i.style.whiteSpace="nowrap",i.style.pointerEvents="none",i.style.zIndex="999999",t.appendChild(i)}(i,o,e.getBoundingClientRect())}if(document.querySelectorAll("[aria-label]").forEach(function(e){const t=e.getAttribute("aria-label").trim(),n=function(e){const t=e.getAttribute("role");return t||i.get(e.tagName.toLowerCase())||null}(e);o.has(n)?s(e,"#b00020","aria-label on prohibited role: "+n):""===t?s(e,"#e65100","aria-label: (empty)"):s(e,"#1b5e20","aria-label: "+t)}),0===n.length){const e=document.createElement("div");e.textContent="No aria-label attributes found on this page.",e.style.position="fixed",e.style.top="20px",e.style.left="50%",e.style.transform="translateX(-50%)",e.style.background="#333",e.style.color="#fff",e.style.padding="10px 16px",e.style.borderRadius="6px",e.style.fontSize="16px",e.style.zIndex="999999",e.style.pointerEvents="none",t.appendChild(e)}document.addEventListener("keydown",function e(o){"Escape"===o.key&&(t.remove(),n.forEach(function(e){e.style.outline=""}),document.removeEventListener("keydown",e))})}();
+(function () {
+  var existing = document.getElementById('a11y-aria-label-overlay');
+  if (existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'a11y-aria-label-overlay';
+  overlay.style.position = 'absolute';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.pointerEvents = 'none';
+  overlay.style.zIndex = '999999';
+  document.body.appendChild(overlay);
+
+  var flaggedEls = [];
+
+  // Roles that must not carry an author-provided name.
+  // ARIA 1.2, plus the roles added in the ARIA 1.3 draft.
+  var prohibitedRoles = new Set([
+    'caption', 'code', 'deletion', 'emphasis', 'generic', 'insertion',
+    'paragraph', 'presentation', 'strong', 'subscript', 'superscript',
+    'definition', 'mark', 'none', 'suggestion', 'term', 'time', 'tooltip'
+  ]);
+
+  // Implicit roles for elements that map to a name-prohibited role.
+  var implicitRoles = new Map([
+    ['caption', 'caption'],
+    ['code', 'code'],
+    ['del', 'deletion'],
+    ['s', 'deletion'],
+    ['em', 'emphasis'],
+    ['div', 'generic'],
+    ['span', 'generic'],
+    ['ins', 'insertion'],
+    ['p', 'paragraph'],
+    ['strong', 'strong'],
+    ['sub', 'subscript'],
+    ['sup', 'superscript'],
+    ['dfn', 'definition'],
+    ['mark', 'mark'],
+    ['time', 'time']
+  ]);
+
+  function makeBadge(text, colour, rect) {
+    var b = document.createElement('div');
+    b.textContent = text;
+    b.style.position = 'absolute';
+    b.style.left = (rect.left + window.scrollX) + 'px';
+    b.style.top = (rect.top + window.scrollY - 26) + 'px';
+    b.style.background = colour;
+    b.style.color = '#ffffff';
+    b.style.padding = '2px 5px';
+    b.style.fontSize = '14px';
+    b.style.fontFamily = 'Arial, sans-serif';
+    b.style.borderRadius = '4px';
+    b.style.whiteSpace = 'nowrap';
+    b.style.pointerEvents = 'none';
+    b.style.zIndex = '999999';
+    overlay.appendChild(b);
+  }
+
+  function flag(el, colour, text) {
+    el.style.outline = '3px solid ' + colour;
+    flaggedEls.push(el);
+    makeBadge(text, colour, el.getBoundingClientRect());
+  }
+
+  function getRole(el) {
+    var explicit = el.getAttribute('role');
+    return explicit || implicitRoles.get(el.tagName.toLowerCase()) || null;
+  }
+
+  document.querySelectorAll('[aria-label]').forEach(function (el) {
+    var value = el.getAttribute('aria-label').trim();
+    var role = getRole(el);
+
+    if (prohibitedRoles.has(role)) {
+      flag(el, '#b00020', 'aria-label on prohibited role: ' + role);
+    } else if (value === '') {
+      flag(el, '#e65100', 'aria-label: (empty)');
+    } else {
+      flag(el, '#1b5e20', 'aria-label: ' + value);
+    }
+  });
+
+  if (flaggedEls.length === 0) {
+    var msg = document.createElement('div');
+    msg.textContent = 'No aria-label attributes found on this page.';
+    msg.style.position = 'fixed';
+    msg.style.top = '20px';
+    msg.style.left = '50%';
+    msg.style.transform = 'translateX(-50%)';
+    msg.style.background = '#333';
+    msg.style.color = '#fff';
+    msg.style.padding = '10px 16px';
+    msg.style.borderRadius = '6px';
+    msg.style.fontSize = '16px';
+    msg.style.zIndex = '999999';
+    msg.style.pointerEvents = 'none';
+    overlay.appendChild(msg);
+  }
+
+  function onKey(e) {
+    if (e.key !== 'Escape') return;
+    overlay.remove();
+    flaggedEls.forEach(function (el) { el.style.outline = ''; });
+    document.removeEventListener('keydown', onKey);
+  }
+  document.addEventListener('keydown', onKey);
+})();

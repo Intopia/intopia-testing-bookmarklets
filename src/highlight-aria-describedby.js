@@ -2,8 +2,8 @@
 // Highlights elements with aria-describedby and their targets.
 // Shows the concatenated description resolved from referenced IDs.
 // Flags missing IDs and self-references inline, and flags an empty attribute value.
-// Note: resolves text from hidden elements by design, per AccName. Hidden
-// referenced elements get no badge or outline of their own.
+// Note: resolves text from hidden elements by design, per AccName. Referenced
+// elements that are not rendered get no badge or outline of their own.
 (function(){
 var existing = document.getElementById('a11y-describedby-overlay');
 if (existing) existing.remove();
@@ -37,6 +37,14 @@ function makeBadge(text, colour, rect) {
   return b;
 }
 
+// An element is only badged if it is actually rendered. width/height catch
+// display:none; visibility must be checked separately because a hidden element
+// still occupies layout space.
+function isRendered(el, rect) {
+  if (rect.width === 0 && rect.height === 0) return false;
+  return window.getComputedStyle(el).visibility !== 'hidden';
+}
+
 var sources = document.querySelectorAll('[aria-describedby]');
 
 sources.forEach(function(el) {
@@ -61,8 +69,7 @@ sources.forEach(function(el) {
       idLabels.push(id + ' (missing)');
     } else {
       var refRect = ref.getBoundingClientRect();
-      var isVisible = refRect.width > 0 || refRect.height > 0;
-      if (isVisible) {
+      if (isRendered(ref, refRect)) {
         ref.style.outline = '4px solid #0a558c';
         makeBadge('ID: ' + id + (ref === el ? ' (self)' : ''), '#0a558c', refRect);
       }

@@ -18,13 +18,18 @@ var flaggedEls = [];
 document.querySelectorAll('[aria-level]').forEach(function(el) {
   var raw = el.getAttribute('aria-level');
   var trimmed = raw.trim();
-  var num = Number(trimmed);
+  // ARIA integer type: an optional sign followed by digits only. Number() is
+  // too permissive here — it would accept hex (0x10), exponential (1e2),
+  // a leading plus and decimal notation (3.0), then silently report the
+  // converted value rather than what the author wrote.
+  var isInteger = /^[-+]?\d+$/.test(trimmed);
+  var num = isInteger ? parseInt(trimmed, 10) : NaN;
   var colour, label;
 
   if (trimmed === '') {
     colour = '#e65100';
     label = 'aria-level: (empty)';
-  } else if (isNaN(num) || !Number.isInteger(num)) {
+  } else if (!isInteger) {
     colour = '#b00020';
     label = 'aria-level: "' + raw + '" (invalid — must be an integer)';
   } else if (num < 1) {

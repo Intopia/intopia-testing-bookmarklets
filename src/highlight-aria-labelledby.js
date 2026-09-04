@@ -1,7 +1,9 @@
 // Highlight aria-labelledby
 // Highlights elements with aria-labelledby and their targets.
 // Shows the concatenated accessible name resolved from referenced IDs.
-// Flags missing IDs inline. Note: resolves from hidden elements by design.
+// Flags missing IDs and self-references inline, and flags an empty attribute value.
+// Note: resolves text from hidden elements by design, per AccName. Referenced
+// elements that are not rendered get no badge or outline of their own.
 (function(){
 var existing = document.getElementById('a11y-labelledby-overlay');
 if (existing) existing.remove();
@@ -35,23 +37,39 @@ function makeBadge(text, colour, rect) {
   return b;
 }
 
-document.querySelectorAll('[aria-labelledby]').forEach(function(el) {
-  var ids = el.getAttribute('aria-labelledby').trim().split(/\s+/);
+// An element is only badged if it is actually rendered. width/height catch
+// display:none; visibility must be checked separately because a hidden element
+// still occupies layout space.
+function isRendered(el, rect) {
+  if (rect.width === 0 && rect.height === 0) return false;
+  return window.getComputedStyle(el).visibility !== 'hidden';
+}
+
+var sources = document.querySelectorAll('[aria-labelledby]');
+
+sources.forEach(function(el) {
+  var raw = el.getAttribute('aria-labelledby').trim();
   var rect = el.getBoundingClientRect();
 
+  // Empty or whitespace-only attribute value
+  if (raw === '') {
+    el.style.outline = '4px solid #b00020';
+    flaggedEls.push(el);
+    makeBadge('aria-labelledby: (empty) \u2192 NO NAME', '#b00020', rect);
+    return;
+  }
+
+  var ids = raw.split(/\s+/);
   var idLabels = [];
   var resolvedTexts = [];
-  var hasMissing = false;
 
   ids.forEach(function(id) {
     var ref = document.getElementById(id);
     if (!ref) {
       idLabels.push(id + ' (missing)');
-      hasMissing = true;
     } else {
       var refRect = ref.getBoundingClientRect();
-      var isVisible = refRect.width > 0 || refRect.height > 0;
-      if (isVisible) {
+      if (isRendered(ref, refRect)) {
         ref.style.outline = '4px solid #0a558c';
         makeBadge('ID: ' + id + (ref === el ? ' (self)' : ''), '#0a558c', refRect);
       }
@@ -83,6 +101,23 @@ document.querySelectorAll('[aria-labelledby]').forEach(function(el) {
   flaggedEls.push(el);
   makeBadge(sourceBadgeText, sourceBadgeColour, rect);
 });
+
+if (sources.length === 0) {
+  var msg = document.createElement('div');
+  msg.textContent = 'No aria-labelledby attributes found on this page.';
+  msg.style.position = 'fixed';
+  msg.style.top = '20px';
+  msg.style.left = '50%';
+  msg.style.transform = 'translateX(-50%)';
+  msg.style.background = '#333';
+  msg.style.color = '#fff';
+  msg.style.padding = '10px 16px';
+  msg.style.borderRadius = '6px';
+  msg.style.fontSize = '16px';
+  msg.style.zIndex = '999999';
+  msg.style.pointerEvents = 'none';
+  overlay.appendChild(msg);
+}
 
 function onKey(e) {
   if (e.key !== 'Escape') return;
