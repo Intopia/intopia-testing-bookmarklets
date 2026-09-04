@@ -118,6 +118,8 @@ Items (li, dt, dd, role="listitem") — badge inside at bottom of element.
 
 Nested `<aside>` without accessible name is not flagged (matches HTML-AAM mapping). Nested `<aside>` with accessible name is flagged as complementary.
 
+`<form>` and `<section>` are only flagged when they have an accessible name, matching HTML-AAM. An explicit non-landmark role excludes the element entirely, so `<nav role="presentation">` is not flagged. Accessible names resolve in AccName order: `aria-labelledby` before `aria-label`.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark blue | `#0a558c` | Banner [: name] |
@@ -225,7 +227,7 @@ Press `n` to cycle through the role hierarchy in sequence.
 Container roles (table, grid, treegrid, rowgroup) — badge above element.
 Row and cell roles — badge inside at bottom of element.
 
-`columnheader` badges also show `aria-sort` value where present. Re-run after sorting to refresh values.
+`columnheader` and `rowheader` badges also show `aria-sort` value where present. Re-run after sorting to refresh values.
 
 | Colour | Hex | Badge text | Key |
 |--------|-----|------------|-----|
@@ -235,8 +237,9 @@ Row and cell roles — badge inside at bottom of element.
 | Teal | `#006064` | role="rowgroup" | 2 |
 | Amber | `#e65100` | role="row" | 3 |
 | Red | `#b00020` | role="columnheader" [(sort: [value])] | 4 |
-| Red | `#b00020` | role="columnheader" (sort: INVALID VALUE) | 4 |
-| Deep purple | `#4a148c` | role="rowheader" | 5 |
+| Red | `#b00020` | role="columnheader" (sort: "[value]" INVALID VALUE) | 4 |
+| Deep purple | `#4a148c` | role="rowheader" [(sort: [value])] | 5 |
+| Deep purple | `#4a148c` | role="rowheader" (sort: "[value]" INVALID VALUE) | 5 |
 | Dark green | `#1b5e20` | role="cell" | 6 |
 | Dark green | `#1b5e20` | role="gridcell" | 6 |
 
@@ -287,7 +290,9 @@ Referenced elements — blue outline, blue badge at each element.
 | Dark green | `#1b5e20` | aria-labelledby: [ids] (self annotation inline) → "[resolved name]" |
 | Red | `#b00020` | aria-labelledby: [id] (missing) → NO NAME |
 | Red | `#b00020` | aria-labelledby: [ids] → EMPTY TEXT STRING = NO NAME |
+| Red | `#b00020` | aria-labelledby: (empty) → NO NAME |
 | Dark blue | `#0a558c` | ID: [id] (on referenced element) |
+| Dark blue | `#0a558c` | ID: [id] (self) (on a self-referencing element) |
 
 ---
 
@@ -299,9 +304,12 @@ Referenced elements — blue outline, blue badge at each element.
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | aria-describedby: [ids] → "[resolved description]" |
+| Dark green | `#1b5e20` | aria-describedby: [ids] (self annotation inline) → "[resolved description]" |
 | Red | `#b00020` | aria-describedby: [id] (missing) → NO DESCRIPTION |
 | Red | `#b00020` | aria-describedby: [ids] → EMPTY TEXT STRING = NO DESCRIPTION |
+| Red | `#b00020` | aria-describedby: (empty) → NO DESCRIPTION |
 | Dark blue | `#0a558c` | ID: [id] (on referenced element) |
+| Dark blue | `#0a558c` | ID: [id] (self) (on a self-referencing element) |
 
 ---
 
@@ -394,7 +402,7 @@ Native `readonly` (`<input>`, `<textarea>`) is browser-enforced and implicitly s
 
 ## Highlight aria-invalid
 
-All recognised values are green. Only unrecognised values get red.
+All recognised values are green. Empty and unrecognised values get red. `aria-invalid` is a token type with a closed list, so `undefined` is not valid here.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
@@ -402,6 +410,7 @@ All recognised values are green. Only unrecognised values get red.
 | Dark green | `#1b5e20` | aria-invalid: false |
 | Dark green | `#1b5e20` | aria-invalid: grammar |
 | Dark green | `#1b5e20` | aria-invalid: spelling |
+| Red | `#b00020` | aria-invalid: (empty) |
 | Red | `#b00020` | INVALID VALUE: aria-invalid="[value]" |
 
 ---
@@ -424,6 +433,7 @@ Re-run after activating a widget to see updated values.
 |--------|-----|------------|
 | Dark green | `#1b5e20` | aria-expanded="true" |
 | Amber | `#e65100` | aria-expanded="false" |
+| Dark green | `#1b5e20` | aria-expanded="undefined" |
 | Red | `#b00020` | aria-expanded="[value]" (INVALID VALUE) |
 
 ---
@@ -437,6 +447,7 @@ Re-run after interacting with a widget to see updated values.
 | Dark green | `#1b5e20` | aria-checked="true" |
 | Amber | `#e65100` | aria-checked="false" |
 | Dark blue | `#0a558c` | aria-checked="mixed" |
+| Dark green | `#1b5e20` | aria-checked="undefined" |
 | Red | `#b00020` | aria-checked="[value]" (INVALID VALUE) |
 
 ---
@@ -450,6 +461,7 @@ Intended for toggle buttons — `<button>` or elements with `role="button"`. Re-
 | Dark green | `#1b5e20` | aria-pressed="true" |
 | Amber | `#e65100` | aria-pressed="false" |
 | Dark blue | `#0a558c` | aria-pressed="mixed" |
+| Dark green | `#1b5e20` | aria-pressed="undefined" |
 | Red | `#b00020` | aria-pressed="[value]" (INVALID VALUE) |
 
 ---
@@ -460,9 +472,12 @@ Intended for toggle buttons — `<button>` or elements with `role="button"`. Re-
 |--------|-----|------------|
 | Dark green | `#1b5e20` | aria-roledescription: "[value]" |
 | Amber | `#e65100` | aria-roledescription: "[value]" (no role — possible misuse) |
+| Amber | `#e65100` | aria-roledescription: "[value]" (role="[role]" has no semantics — misuse) |
 | Amber | `#e65100` | aria-roledescription: (empty) |
 
 Note: elements with meaningful implicit roles (fieldset, button, nav, h1–h6 etc.) are treated as having a role even without an explicit `role` attribute.
+An explicit `role` of `generic`, `presentation` or `none` counts as no role, since those roles carry no semantics to describe.
+`<section>` is only treated as having a role when it has an accessible name; unnamed it maps to generic.
 
 ---
 
@@ -474,9 +489,12 @@ Missing IDs annotated inline in the source badge.
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | aria-details: [ids] |
+| Dark green | `#1b5e20` | aria-details: [ids] (self annotation inline) |
 | Amber | `#e65100` | aria-details: [id] [id] (missing) |
 | Red | `#b00020` | aria-details: [id] (missing) (all missing) |
+| Red | `#b00020` | aria-details: (empty) |
 | Dark blue | `#0a558c` | ID: [id] (on referenced element) |
+| Dark blue | `#0a558c` | ID: [id] (self) (on a self-referencing element) |
 
 ---
 
@@ -502,13 +520,16 @@ Missing IDs annotated inline in the source badge.
 ## Highlight aria-valuemin and aria-valuemax
 
 Shows both attributes together on each element.
+Both are ARIA number type, so decimals and exponent notation (`1e2`) are valid. Hex and `Infinity` are not.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | aria-valuemin: [N]  \|  aria-valuemax: [N] |
 | Amber | `#e65100` | aria-valuemin: [N]  \|  aria-valuemax: (missing) |
 | Amber | `#e65100` | aria-valuemin: (missing)  \|  aria-valuemax: [N] |
+| Amber | `#e65100` | aria-valuemin: [N]  \|  aria-valuemax: [N]  \|  empty range (min equals max) |
 | Red | `#b00020` | aria-valuemin: "[value]" (invalid)  \|  aria-valuemax: [N] |
+| Red | `#b00020` | aria-valuemin: [N]  \|  aria-valuemax: [N]  \|  valuemin exceeds valuemax |
 
 ---
 
@@ -520,10 +541,14 @@ Shows both attributes together on each element. Where `aria-level` is also prese
 |--------|-----|------------|
 | Dark green | `#1b5e20` | [N] of [M]  (posinset: [N]  \|  setsize: [M]) |
 | Dark green | `#1b5e20` | level: [N]  \|  [N] of [M]  (posinset: [N]  \|  setsize: [M]) |
+| Dark green | `#1b5e20` | level: (empty)  \|  [N] of [M]  (posinset: [N]  \|  setsize: [M]) |
 | Amber | `#e65100` | posinset: [N]  \|  setsize: -1 (unknown total) |
 | Amber | `#e65100` | posinset: [N]  \|  setsize: (missing) |
 | Amber | `#e65100` | posinset: (missing)  \|  setsize: [N] |
 | Red | `#b00020` | posinset: "[value]" (invalid)  \|  setsize: [N] |
+| Red | `#b00020` | [N] of [M] (posinset exceeds setsize)  (posinset: [N]  \|  setsize: [M]) |
+
+`aria-setsize` accepts `-1` (unknown total) or 1 and above. Zero is flagged, since a set an element belongs to has at least one item.
 
 ---
 
@@ -599,3 +624,5 @@ Resolves the accessible name of every `<a>` element regardless of source (aria-l
 | Red | `#b00020` | (empty href) |
 | Red | `#b00020` | (no href — not a link in the accessibility tree) |
 | Red | `#b00020` | (no accessible name) |
+
+---
