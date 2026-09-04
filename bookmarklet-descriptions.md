@@ -115,7 +115,7 @@ Highlights elements with `aria-controls` and their referenced targets. Shows whe
 Highlights all elements with `aria-haspopup`. All seven recognised values are displayed: `false`, `true`, `menu`, `listbox`, `tree`, `grid` and `dialog`. Flags empty and unrecognised values.
 
 ## 37. Highlight shadow DOM
-Highlights open shadow DOM hosts and custom elements. Flags where shadow DOM cannot be confirmed.
+Reports whether shadow DOM on this page will hide content from extension-based testing tools. Walks into open shadow roots recursively and counts how many elements sit inside them. Highlights open shadow hosts, custom elements whose shadow DOM cannot be confirmed because a closed root is undetectable, and undefined custom elements whose script may not have loaded. The summary panel is the main output.
 
 ## 38. Highlight links
 Highlights `<a>` elements and elements with `role="link"`. Resolves the accessible name from any source (text content, image alt, aria-label, aria-labelledby). Flags duplicate names pointing to different URLs, links named by title only, title attribute mismatches, empty href and missing href. Click to activate, Esc to clear.

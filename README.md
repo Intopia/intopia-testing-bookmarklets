@@ -725,12 +725,28 @@ All seven recognised values are green. Unrecognised and empty values are red.
 
 ## Highlight shadow DOM
 
-Fixed summary banner at bottom of page shows element counts.
+Reconnaissance rather than annotation. The audience is an auditor arriving at an unfamiliar page who needs to know, before running an extension-based tool, whether shadow DOM will hide content from it. The **report panel is the primary output**; the badges are supporting detail.
+
+Walks into open shadow roots recursively, so nested hosts are found. Elements inside shadow roots are counted but not badged — the count is what matters, and badging every node would bury the page.
+
+A registered custom element with no open shadow root may have a closed one. Nothing can tell the difference from outside, including this bookmarklet, so it is reported as unconfirmed rather than guessed at. An **undefined** custom element is different and worse: the script probably did not load, so the content may not be enhanced at all.
+
+Report panel lines:
+
+| Colour | Line |
+|--------|------|
+| Dark green | No shadow DOM or custom elements found. / Extension-based tools should see the whole page. |
+| Dark green | [N] open shadow roots, nested [N] levels deep |
+| — | [N] elements inside shadow DOM — many extensions will not see these |
+| Amber | [N] custom elements with no open shadow root — may be closed, cannot be confirmed |
+| Red | [N] undefined custom elements — script may not have loaded |
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
-| Dark green | `#1b5e20` | Open shadow DOM: [tag][#id or .class] |
-| Amber | `#e65100` | Custom element: [tag][#id or .class] |
+| Dark green | `#1b5e20` | Open shadow root: [tag][#id or .class] |
+| Dark green | `#1b5e20` | Open shadow root: [tag] (nested, depth [N]) |
+| Amber | `#e65100` | Custom element: [tag][#id or .class] (shadow DOM unconfirmed) |
+| Red | `#b00020` | Undefined custom element: [tag] (script may not have loaded) |
 
 ---
 
