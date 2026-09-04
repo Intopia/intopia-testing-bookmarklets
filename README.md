@@ -311,13 +311,21 @@ Shift+Tab decrements the counter.
 
 ## Highlight tabindex
 
+Values are parsed with the HTML integer rules, so hex, exponent and decimal forms are rejected. A value the browser cannot parse means the attribute is ignored entirely and the element is not focusable at all, which the badge says rather than reporting a parsed number.
+
+`tabindex="0"` on a natively focusable element is redundant. `tabindex="0"` on an element with no role and no accessible name creates a focus stop that is announced as nothing; the check only fires when there is no role **and** no name from any source, so a focusable container with text content is not flagged.
+
+Elements that are not rendered are skipped.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | tabindex="0" |
 | Amber | `#e65100` | tabindex="-1" |
+| Amber | `#e65100` | tabindex="0" (redundant — `<[tag]>` is already in the tab order) |
+| Amber | `#e65100` | tabindex="0" (focusable, but no role and no accessible name) |
 | Red | `#b00020` | tabindex="[N]" (AVOID positive values) |
 | Red | `#b00020` | tabindex="[value]" (INVALID — use -1 or 0) |
-| Red | `#b00020` | tabindex="[value]" (INVALID VALUE) |
+| Red | `#b00020` | tabindex="[value]" (INVALID — not an integer, so the attribute is ignored and the element is not focusable) |
 
 ---
 
