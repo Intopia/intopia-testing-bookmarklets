@@ -417,11 +417,15 @@ All recognised values are green. Empty and unrecognised values get red. `aria-in
 
 ## Highlight autocomplete
 
+Follows the HTML autofill grammar: `[section-*] [shipping|billing] [home|work|mobile|fax|pager] field-name [webauthn]`.
+Exactly one field name is allowed. A contact token (`home`, `work`, `mobile`, `fax`, `pager`) is only valid before a contact field name (`tel*`, `email`, `impp`). `on` and `off` are valid only on their own.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | autocomplete: [value] (valid) |
 | Dark blue | `#0a558c` | autocomplete: [value] (generic) |
 | Red | `#b00020` | autocomplete: [value] (invalid) |
+| Red | `#b00020` | autocomplete: (empty) (invalid) |
 
 ---
 
