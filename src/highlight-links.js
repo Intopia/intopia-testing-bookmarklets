@@ -1,7 +1,8 @@
 // Highlight links
-// Highlights all <a> elements with an href attribute.
+// Highlights <a> elements and elements with role="link".
 // Checks for unique names, duplicate names pointing to different URLs,
 // empty href, missing href, title attribute issues, and links named by title only.
+// A link containing only an image is named by that image's alt text.
 (function(){
 var existing = document.getElementById('a11y-links-overlay');
 if (existing) existing.remove();
@@ -20,6 +21,25 @@ var GREEN = '#1b5e20';
 var AMBER = '#e65100';
 var RED   = '#b00020';
 
+// An element is only badged if it is actually rendered. width/height catch
+// display:none; visibility must be checked separately because a hidden element
+// still occupies layout space.
+function isRendered(el, rect) {
+  if (rect.width === 0 && rect.height === 0) return false;
+  return window.getComputedStyle(el).visibility !== 'hidden';
+}
+
+// Text content alone misses a link named by an image, which is common for a
+// logo or icon link. Swap embedded images for their alt text first.
+function contentName(el) {
+  var clone = el.cloneNode(true);
+  clone.querySelectorAll('img, area, input[type="image" i]').forEach(function(img) {
+    var alt = img.getAttribute('alt');
+    img.replaceWith(document.createTextNode(alt && alt.trim() ? ' ' + alt.trim() + ' ' : ''));
+  });
+  return clone.textContent.trim().replace(/\s+/g, ' ');
+}
+
 function getAccessibleName(el) {
   // aria-labelledby
   var labelledBy = el.getAttribute('aria-labelledby');
@@ -33,27 +53,35 @@ function getAccessibleName(el) {
   // aria-label
   var ariaLabel = el.getAttribute('aria-label');
   if (ariaLabel && ariaLabel.trim()) return { name: ariaLabel.trim(), source: 'aria-label' };
-  // text content
-  var textContent = el.textContent.trim().replace(/\s+/g, ' ');
-  if (textContent) return { name: textContent, source: 'text' };
+  // content, including image alt text
+  var content = contentName(el);
+  if (content) return { name: content, source: 'text' };
   // title
   var title = el.getAttribute('title');
   if (title && title.trim()) return { name: title.trim(), source: 'title' };
   return null;
 }
 
-// Collect all links
-var links = Array.from(document.querySelectorAll('a'));
+function isAnchor(el) {
+  return el.tagName.toLowerCase() === 'a';
+}
 
-// Build name→urls map for duplicate detection
+// Collect links
+var links = Array.from(document.querySelectorAll('a, [role="link" i]'));
+
+// Build name→urls map for duplicate detection. Compare resolved URLs, since
+// /page and ./page point at the same place but differ as attribute strings.
 var nameUrlMap = {};
 links.forEach(function(el) {
+  if (!isAnchor(el)) return;
+  var raw = el.getAttribute('href');
+  if (raw === null || raw.trim() === '') return;
   var nameResult = getAccessibleName(el);
   if (!nameResult) return;
   var name = nameResult.name.toLowerCase();
-  var href = (el.getAttribute('href') || '').trim();
+  var resolved = el.href;
   if (!nameUrlMap[name]) nameUrlMap[name] = [];
-  if (href && nameUrlMap[name].indexOf(href) === -1) nameUrlMap[name].push(href);
+  if (nameUrlMap[name].indexOf(resolved) === -1) nameUrlMap[name].push(resolved);
 });
 
 function makeBadge(text, colour, rect) {
@@ -68,7 +96,6 @@ function makeBadge(text, colour, rect) {
   b.style.fontSize = '14px';
   b.style.fontFamily = 'Arial, sans-serif';
   b.style.borderRadius = '4px';
-  b.style.whiteSpace = 'nowrap';
   b.style.pointerEvents = 'none';
   b.style.zIndex = '999999';
   b.style.maxWidth = '500px';
@@ -77,45 +104,38 @@ function makeBadge(text, colour, rect) {
   overlay.appendChild(b);
 }
 
+function flag(el, colour, label, suffix) {
+  el.style.outline = '3px solid ' + colour;
+  el.style.outlineOffset = '2px';
+  flaggedEls.push(el);
+  makeBadge(label + (suffix || ''), colour, el.getBoundingClientRect());
+}
+
 links.forEach(function(el) {
+  var rect = el.getBoundingClientRect();
+  if (!isRendered(el, rect)) return;
+
+  var anchor = isAnchor(el);
+  var suffix = anchor ? '' : ' [role="link"]';
   var href = el.getAttribute('href');
   var hrefVal = href !== null ? href.trim() : null;
   var title = el.getAttribute('title');
   var titleVal = title ? title.trim() : null;
   var nameResult = getAccessibleName(el);
-  var rect = el.getBoundingClientRect();
-  var colour, label;
 
-  // No href attribute — not a real link
-  if (href === null) {
-    colour = RED;
-    label = '(no href — not a link in the accessibility tree)';
-    el.style.outline = '3px solid ' + colour;
-    el.style.outlineOffset = '2px';
-    flaggedEls.push(el);
-    makeBadge(label, colour, rect);
+  // href checks only apply to <a>. A role="link" element is activated by script.
+  if (anchor && href === null) {
+    flag(el, RED, '(no href \u2014 not a link in the accessibility tree)', suffix);
     return;
   }
 
-  // Empty href
-  if (hrefVal === '') {
-    colour = RED;
-    label = '(empty href)';
-    el.style.outline = '3px solid ' + colour;
-    el.style.outlineOffset = '2px';
-    flaggedEls.push(el);
-    makeBadge(label, colour, rect);
+  if (anchor && hrefVal === '') {
+    flag(el, RED, '(empty href)', suffix);
     return;
   }
 
-  // No accessible name and no title
   if (!nameResult) {
-    colour = RED;
-    label = '(no accessible name)';
-    el.style.outline = '3px solid ' + colour;
-    el.style.outlineOffset = '2px';
-    flaggedEls.push(el);
-    makeBadge(label, colour, rect);
+    flag(el, RED, '(no accessible name)', suffix);
     return;
   }
 
@@ -124,50 +144,29 @@ links.forEach(function(el) {
 
   // Title only as name source
   if (nameResult.source === 'title') {
-    colour = AMBER;
-    label = '(no name — title only: "' + name + '")';
-    el.style.outline = '3px solid ' + colour;
-    el.style.outlineOffset = '2px';
-    flaggedEls.push(el);
-    makeBadge(label, colour, rect);
+    flag(el, AMBER, '(no name \u2014 title only: "' + name + '")', suffix);
     return;
   }
 
-  // Check for duplicate name pointing to different URLs
+  // Duplicate name pointing to different URLs
   var urls = nameUrlMap[nameLower] || [];
   if (urls.length > 1) {
-    colour = RED;
-    label = '\u201c' + name + '\u201d (duplicate name, different URL)';
-    el.style.outline = '3px solid ' + colour;
-    el.style.outlineOffset = '2px';
-    flaggedEls.push(el);
-    makeBadge(label, colour, rect);
+    flag(el, RED, '\u201c' + name + '\u201d (duplicate name, different URL)', suffix);
     return;
   }
 
   // Title attribute checks
   if (titleVal) {
     if (titleVal.toLowerCase() === nameLower) {
-      colour = AMBER;
-      label = '\u201c' + name + '\u201d (title matches — may double-announce)';
+      flag(el, AMBER, '\u201c' + name + '\u201d (title matches \u2014 may double-announce)', suffix);
     } else {
-      colour = AMBER;
-      label = '\u201c' + name + '\u201d (title mismatch: "' + titleVal + '" — may double-announce differently)';
+      flag(el, AMBER, '\u201c' + name + '\u201d (title mismatch: "' + titleVal +
+        '" \u2014 may double-announce differently)', suffix);
     }
-    el.style.outline = '3px solid ' + colour;
-    el.style.outlineOffset = '2px';
-    flaggedEls.push(el);
-    makeBadge(label, colour, rect);
     return;
   }
 
-  // Pass — unique name, no title issues
-  colour = GREEN;
-  label = '\u201c' + name + '\u201d';
-  el.style.outline = '3px solid ' + colour;
-  el.style.outlineOffset = '2px';
-  flaggedEls.push(el);
-  makeBadge(label, colour, rect);
+  flag(el, GREEN, '\u201c' + name + '\u201d', suffix);
 });
 
 if (flaggedEls.length === 0) {

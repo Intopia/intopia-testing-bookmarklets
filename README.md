@@ -668,7 +668,12 @@ Fixed summary banner at bottom of page shows element counts.
 
 ## Highlight links
 
-Resolves the accessible name of every `<a>` element regardless of source (aria-labelledby, aria-label, text content). Checks for duplicate names pointing to different URLs, title attribute issues, empty and missing href.
+Resolves the accessible name of every `<a>` element and any element with `role="link"`, regardless of source (aria-labelledby, aria-label, text content, image alt). Checks for duplicate names pointing to different URLs, title attribute issues, empty and missing href.
+
+A link whose only content is an image takes its name from that image's `alt`.
+Duplicate detection compares resolved URLs, so `/page` and `./page` are the same target rather than two.
+The `href` checks apply to `<a>` only, since a `role="link"` element is activated by script. Custom links carry a `[role="link"]` suffix on the badge.
+Elements that are not rendered are skipped.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
@@ -680,5 +685,6 @@ Resolves the accessible name of every `<a>` element regardless of source (aria-l
 | Red | `#b00020` | (empty href) |
 | Red | `#b00020` | (no href — not a link in the accessibility tree) |
 | Red | `#b00020` | (no accessible name) |
+| — | — | any of the above with a `[role="link"]` suffix |
 
 ---
