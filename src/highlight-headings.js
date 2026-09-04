@@ -1,4 +1,150 @@
 // Highlight headings
 // Highlights all heading levels (H1–H6) with distinct colours.
 // Flags empty headings and duplicate `h1` elements.
-!function(){const e=document.getElementById("a11y-headings-overlay");e&&e.remove();const t=document.createElement("div");t.id="a11y-headings-overlay",t.style.position="absolute",t.style.top="0",t.style.left="0",t.style.width="100%",t.style.pointerEvents="none",t.style.zIndex="999999",document.body.appendChild(t);const n=[],o={h1:"#0a558c",h2:"#1b5e20",h3:"#e65100",h4:"#006064",h5:"#4a148c",h6:"#37474f"};document.querySelectorAll("h1");let l=0;if(document.querySelectorAll("h1,h2,h3,h4,h5,h6").forEach(function(e){const s=e.tagName.toLowerCase(),i=e.textContent.trim().replace(/\s+/g," ");let d,y;""===i?(d="#b00020",y=s.toUpperCase()+": (empty heading)"):"h1"===s?(l++,l>1?(d="#b00020",y="H1: "+i+" (avoid more than one H1)"):(d=o.h1,y="H1: "+i)):(d=o[s],y=s.toUpperCase()+": "+i),e.style.outline="4px solid "+d,e.style.outlineOffset="2px",n.push(e),function(e,n,o){const l=document.createElement("div");l.textContent=e,l.style.position="absolute",l.style.left=o.left+window.scrollX+"px",l.style.top=o.top+window.scrollY-26+"px",l.style.background=n,l.style.color="#ffffff",l.style.padding="4px 6px",l.style.fontSize="14px",l.style.fontFamily="Arial, sans-serif",l.style.borderRadius="4px",l.style.whiteSpace="nowrap",l.style.pointerEvents="none",l.style.zIndex="999999",t.appendChild(l)}(y,d,e.getBoundingClientRect())}),0===n.length){const e=document.createElement("div");e.textContent="No headings found on this page.",e.style.position="fixed",e.style.top="20px",e.style.left="50%",e.style.transform="translateX(-50%)",e.style.background="#333",e.style.color="#fff",e.style.padding="10px 16px",e.style.borderRadius="6px",e.style.fontSize="16px",e.style.zIndex="999999",e.style.pointerEvents="none",t.appendChild(e)}document.addEventListener("keydown",function e(o){"Escape"===o.key&&(t.remove(),n.forEach(function(e){e.style.outline="",e.style.outlineOffset=""}),document.removeEventListener("keydown",e))})}();
+// A heading whose only content is an image is named by that image's alt text,
+// so it is not empty. A heading is only empty when nothing resolves a name.
+(function () {
+  var existing = document.getElementById('a11y-headings-overlay');
+  if (existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'a11y-headings-overlay';
+  overlay.style.position = 'absolute';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.pointerEvents = 'none';
+  overlay.style.zIndex = '999999';
+  document.body.appendChild(overlay);
+
+  var flaggedEls = [];
+
+  var COLOURS = {
+    h1: '#0a558c',
+    h2: '#1b5e20',
+    h3: '#e65100',
+    h4: '#006064',
+    h5: '#4a148c',
+    h6: '#37474f'
+  };
+
+  // An element is only badged if it is actually rendered. width/height catch
+  // display:none; visibility must be checked separately because a hidden element
+  // still occupies layout space.
+  function isRendered(el, rect) {
+    if (rect.width === 0 && rect.height === 0) return false;
+    return window.getComputedStyle(el).visibility !== 'hidden';
+  }
+
+  // Text content alone misses a heading named by an image, which is common for
+  // a logo inside an h1. Swap embedded images for their alt text first.
+  function contentName(el) {
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll('img, area, input[type="image" i]').forEach(function (img) {
+      var alt = img.getAttribute('alt');
+      img.replaceWith(document.createTextNode(alt && alt.trim() ? ' ' + alt.trim() + ' ' : ''));
+    });
+    return clone.textContent.trim().replace(/\s+/g, ' ');
+  }
+
+  function getName(el) {
+    var labelledBy = el.getAttribute('aria-labelledby');
+    if (labelledBy) {
+      var refText = labelledBy.trim().split(/\s+/).map(function (id) {
+        var ref = document.getElementById(id);
+        return ref ? ref.textContent.trim() : '';
+      }).filter(Boolean).join(' ').trim();
+      if (refText) return { name: refText, source: 'aria-labelledby' };
+    }
+
+    var ariaLabel = el.getAttribute('aria-label');
+    if (ariaLabel && ariaLabel.trim()) {
+      return { name: ariaLabel.trim(), source: 'aria-label' };
+    }
+
+    var name = contentName(el);
+    if (!name) return null;
+
+    // Distinguish a heading you can read on screen from one named only by alt
+    var visibleText = el.textContent.trim() !== '';
+    return { name: name, source: visibleText ? 'text' : 'image alt' };
+  }
+
+  var h1Count = 0;
+
+  document.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(function (el) {
+    var rect = el.getBoundingClientRect();
+    if (!isRendered(el, rect)) return;
+
+    var tag = el.tagName.toLowerCase();
+    var result = getName(el);
+    var colour, text;
+
+    if (!result) {
+      colour = '#b00020';
+      text = tag.toUpperCase() + ': (empty heading)';
+    } else {
+      var shown = result.name;
+      if (result.source !== 'text') shown += ' (from ' + result.source + ')';
+
+      if (tag === 'h1') {
+        h1Count++;
+        if (h1Count > 1) {
+          colour = '#b00020';
+          text = 'H1: ' + shown + ' (avoid more than one H1)';
+        } else {
+          colour = COLOURS.h1;
+          text = 'H1: ' + shown;
+        }
+      } else {
+        colour = COLOURS[tag];
+        text = tag.toUpperCase() + ': ' + shown;
+      }
+    }
+
+    el.style.outline = '4px solid ' + colour;
+    el.style.outlineOffset = '2px';
+    flaggedEls.push(el);
+
+    var badge = document.createElement('div');
+    badge.textContent = text;
+    badge.style.position = 'absolute';
+    badge.style.left = (rect.left + window.scrollX) + 'px';
+    badge.style.top = (rect.top + window.scrollY - 26) + 'px';
+    badge.style.background = colour;
+    badge.style.color = '#ffffff';
+    badge.style.padding = '4px 6px';
+    badge.style.fontSize = '14px';
+    badge.style.fontFamily = 'Arial, sans-serif';
+    badge.style.borderRadius = '4px';
+    badge.style.whiteSpace = 'nowrap';
+    badge.style.pointerEvents = 'none';
+    badge.style.zIndex = '999999';
+    overlay.appendChild(badge);
+  });
+
+  if (flaggedEls.length === 0) {
+    var msg = document.createElement('div');
+    msg.textContent = 'No headings found on this page.';
+    msg.style.position = 'fixed';
+    msg.style.top = '20px';
+    msg.style.left = '50%';
+    msg.style.transform = 'translateX(-50%)';
+    msg.style.background = '#333';
+    msg.style.color = '#fff';
+    msg.style.padding = '10px 16px';
+    msg.style.borderRadius = '6px';
+    msg.style.fontSize = '16px';
+    msg.style.zIndex = '999999';
+    msg.style.pointerEvents = 'none';
+    overlay.appendChild(msg);
+  }
+
+  function onKey(e) {
+    if (e.key !== 'Escape') return;
+    overlay.remove();
+    flaggedEls.forEach(function (el) { el.style.outline = ''; el.style.outlineOffset = ''; });
+    document.removeEventListener('keydown', onKey);
+  }
+  document.addEventListener('keydown', onKey);
+})();

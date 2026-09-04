@@ -71,6 +71,9 @@ Badge text system:
 
 ## Highlight headings
 
+A heading is only empty when nothing resolves a name. A heading whose only content is an image takes its name from that image's `alt`, and `aria-label` or `aria-labelledby` override the content. Where the name is not the visible text, the badge says where it came from.
+Elements that are not rendered are skipped.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark blue | `#0a558c` | H1: [text] |
@@ -81,6 +84,7 @@ Badge text system:
 | Blue-grey | `#37474f` | H6: [text] |
 | Red | `#b00020` | H1: [text] (avoid more than one H1) |
 | Red | `#b00020` | H[N]: (empty heading) |
+| — | — | any of the above with a `(from image alt)`, `(from aria-label)` or `(from aria-labelledby)` suffix |
 
 ---
 
@@ -338,11 +342,16 @@ Referenced elements — blue outline, blue badge at each element.
 
 ## Highlight form field names
 
+Targets `input` (excluding `hidden`, `submit`, `reset`, `button` and `image`), `select` and `textarea`. Button-like inputs are covered by the buttons bookmarklet.
+Where a control has more than one associated `<label>`, all of them are joined, matching AccName, and the badge shows the count.
+Elements that are not rendered are skipped.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | aria-labelledby: [name] |
 | Dark green | `#1b5e20` | aria-label: [name] |
 | Dark green | `#1b5e20` | label: [name] |
+| Dark green | `#1b5e20` | label ×[N]: [joined name] |
 | Dark green | `#1b5e20` | implicit label: [name] |
 | Amber | `#e65100` | title: [name] |
 | Amber | `#e65100` | placeholder: [name] |
