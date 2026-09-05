@@ -523,7 +523,7 @@ Elements that are not rendered are skipped.
 
 ## Highlight readonly fields
 
-Native `readonly` (`<input>`, `<textarea>`) is browser-enforced and implicitly sets `aria-readonly="true"` in the accessibility tree — no ARIA needed. `aria-readonly="true"` alone only affects the AT announcement; it does not stop the user typing unless the field is also restricted some other way. Teaching bookmarklet — the blue badge is deliberately informational rather than pass/fail.
+Native `readonly` (`<input>`, `<textarea>`) is browser-enforced and implicitly sets `aria-readonly="true"` in the accessibility tree — no ARIA needed. `aria-readonly="true"` alone only affects the AT announcement; it does not stop the user typing unless the field is also restricted some other way. Teaching bookmarklet — the blue badge is deliberately informational rather than pass/fail, and the badge text carries the lesson rather than leaving it to the colour. Blue on its own reads as "fine", which is the opposite of the point: `aria-readonly="true"` changes what assistive technology announces and does nothing to stop the user typing.
 
 `readonly` only does something on `<textarea>` and text-like `<input>` types (`text`, `search`, `url`, `tel`, `email`, `password`, `date`, `month`, `week`, `time`, `datetime-local`, `number`). On a `<select>`, a checkbox, a radio or anything else it has no effect, which is flagged.
 `aria-readonly` is only supported on `checkbox`, `combobox`, `grid`, `gridcell`, `listbox`, `radiogroup`, `slider`, `spinbutton`, `textbox`, `columnheader`, `rowheader` and `treegrid`, plus the native controls carrying those roles implicitly.
@@ -531,8 +531,8 @@ Elements that are not rendered are skipped.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
-| Dark green | `#1b5e20` | readonly |
-| Dark blue | `#0a558c` | aria-readonly="true" |
+| Dark green | `#1b5e20` | readonly (enforced by the browser and announced) |
+| Dark blue | `#0a558c` | aria-readonly="true" (announced only — does not prevent typing) |
 | Amber | `#e65100` | aria-readonly="false" (redundant — default value) |
 | Amber | `#e65100` | readonly + aria-readonly="true" (redundant) |
 | Red | `#b00020` | readonly + aria-readonly="false" (CONFLICTING — native readonly wins) |

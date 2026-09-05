@@ -127,12 +127,15 @@
     }
 
     if (hasReadonly) {
-      badge(el, '#1b5e20', 'readonly', rect);
+      badge(el, '#1b5e20', 'readonly (enforced by the browser and announced)', rect);
       return;
     }
 
     if (isTrue) {
-      badge(el, '#0a558c', 'aria-readonly="true"', rect);
+      // The whole point of this bookmarklet. Blue is deliberately not a verdict,
+      // but the badge has to say why, or blue reads as "fine".
+      badge(el, '#0a558c',
+        'aria-readonly="true" (announced only \u2014 does not prevent typing)', rect);
       return;
     }
 
