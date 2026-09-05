@@ -3,6 +3,8 @@
 // A legend only labels its fieldset when it is the first child. aria-label and
 // aria-labelledby override the legend, so a fieldset named that way is not an error.
 // radiogroup requires an accessible name; group does not.
+// A correctly named group is green whether it is a native fieldset or an ARIA
+// role, so the colours never imply that one approach is worse than the other.
 (function () {
   var existing = document.getElementById('a11y-fieldset-overlay');
   if (existing) existing.remove();
@@ -125,11 +127,14 @@
     }
 
     if (name) {
-      flag(el, AMBER, 'role="' + role + '": ' + name);
+      // A correctly named group is correct, whether it is native or ARIA.
+      // Amber here implied the ARIA version was worse than a fieldset.
+      flag(el, GREEN, 'role="' + role + '": ' + name);
     } else if (role === 'radiogroup') {
       flag(el, RED, 'role="radiogroup" NO ACCESSIBLE NAME');
     } else {
-      flag(el, AMBER, 'role="group" (no accessible name, not required)');
+      // group does not require a name, so this is information, not a caution
+      flag(el, BLUE, 'role="group" (no accessible name, not required)');
     }
   });
 
