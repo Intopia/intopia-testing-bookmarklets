@@ -7,6 +7,27 @@ A set of accessibility testing bookmarklets. Each one highlights a specific HTML
 Bookmarklets main reference page: 
 [Intopia's accessibility testing bookmarklets](https://intopia.github.io/exercise/testing-bookmarklets-intopia.html)
 
+## Colour meaning
+
+Two palettes, and the difference matters more than any individual colour.
+
+A colour is either a **verdict** or a **category**, never both. Most bookmarklets judge something — is this name resolving, is this value valid — and use the verdict palette:
+
+| Colour | Hex | Meaning |
+|--------|-----|---------|
+| Dark green | `#1b5e20` | Valid, present, correctly implemented |
+| Dark blue | `#0a558c` | Informational, secondary reference, non-verdict |
+| Amber | `#e65100` | Caution, unreliable, unconfirmed, redundant |
+| Red | `#b00020` | Missing, broken, prohibited, invalid |
+
+A few bookmarklets only identify what an element is — this is a banner, this is a rowgroup, this is a `<th>` — and use the category palette: dark blue, deep purple, teal, deep pink, blue-grey, brown `#4e342e`, indigo `#1a237e` and slate `#455a64`. **Green, amber and red never appear there**, so a correctly marked-up element is never mistaken for a pass or a failure.
+
+Landmarks and ARIA table roles use category colours throughout. Captions and headers uses both: category colours for table, caption, TH and scope, with amber and red reserved for the two things that really are verdicts.
+
+Where blue marks a deliberate non-verdict, the badge text says why. Where something is a convention rather than a specification requirement, the badge says that too.
+
+---
+
 ## The current bookmarklets
 
 1. Highlight headings
@@ -71,6 +92,8 @@ Badge text system:
 
 ## Highlight headings
 
+More than one `<h1>` is valid HTML. One per page is a widely followed convention, not a rule, so an additional H1 is amber rather than red.
+
 A heading is only empty when nothing resolves a name. A heading whose only content is an image takes its name from that image's `alt`, and `aria-label` or `aria-labelledby` override the content. Where the name is not the visible text, the badge says where it came from.
 Elements that are not rendered are skipped.
 
@@ -82,7 +105,7 @@ Elements that are not rendered are skipped.
 | Teal | `#006064` | H4: [text] |
 | Deep purple | `#4a148c` | H5: [text] |
 | Blue-grey | `#37474f` | H6: [text] |
-| Red | `#b00020` | H1: [text] (avoid more than one H1) |
+| Amber | `#e65100` | H1: [text] (additional H1 — valid HTML, but one per page is the convention) |
 | Red | `#b00020` | H[N]: (empty heading) |
 | — | — | any of the above with a `(from image alt)`, `(from aria-label)` or `(from aria-labelledby)` suffix |
 
@@ -482,7 +505,9 @@ Legend badge positioned below legend element to avoid overlap with fieldset badg
 
 A `<legend>` only labels its fieldset when it is the first child, so a legend anywhere else, including inside a nested fieldset, does not count.
 `aria-label` and `aria-labelledby` override the legend in AccName, so a fieldset named that way is not an error.
-`radiogroup` requires an accessible name. `group` does not, so an unnamed group is shown but not flagged as a failure.
+`radiogroup` requires an accessible name. `group` does not, so an unnamed group is blue: information, not a caution.
+
+A correctly named group is green whether it is a native `<fieldset>` with a `<legend>` or an ARIA role. Amber on the ARIA versions implied they were worse than the native equivalent, which is not what this bookmarklet is saying.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
@@ -493,10 +518,10 @@ A `<legend>` only labels its fieldset when it is the first child, so a legend an
 | Red | `#b00020` | Fieldset (legend is not the first child) |
 | Dark blue | `#0a558c` | Legend: [text] |
 | Amber | `#e65100` | Legend: [text] (not the first child of a fieldset) |
-| Amber | `#e65100` | role="radiogroup": [name] |
+| Dark green | `#1b5e20` | role="radiogroup": [name] |
 | Red | `#b00020` | role="radiogroup" NO ACCESSIBLE NAME |
-| Amber | `#e65100` | role="group": [name] |
-| Amber | `#e65100` | role="group" (no accessible name, not required) |
+| Dark green | `#1b5e20` | role="group": [name] |
+| Dark blue | `#0a558c` | role="group" (no accessible name, not required) |
 
 ---
 
