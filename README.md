@@ -338,6 +338,8 @@ Badges reposition on scroll and resize.
 
 Values are parsed with the HTML integer rules, so hex, exponent and decimal forms are rejected. A value the browser cannot parse means the attribute is ignored entirely and the element is not focusable at all, which the badge says rather than reporting a parsed number.
 
+`tabindex="-1"` is blue, not amber. Removing an element from the tab order is the correct roving tabindex pattern for tabs, menus and grids, so the badge reports what the value does rather than implying something is wrong. Amber previously made a correctly built composite widget look like a page of cautions.
+
 `tabindex="0"` on a natively focusable element is redundant. `tabindex="0"` on an element with no role and no accessible name creates a focus stop that is announced as nothing; the check only fires when there is no role **and** no name from any source, so a focusable container with text content is not flagged.
 
 Elements that are not rendered are skipped.
@@ -345,7 +347,7 @@ Elements that are not rendered are skipped.
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark green | `#1b5e20` | tabindex="0" |
-| Amber | `#e65100` | tabindex="-1" |
+| Dark blue | `#0a558c` | tabindex="-1" (focusable by script only, not in the tab order) |
 | Amber | `#e65100` | tabindex="0" (redundant — `<[tag]>` is already in the tab order) |
 | Amber | `#e65100` | tabindex="0" (focusable, but no role and no accessible name) |
 | Red | `#b00020` | tabindex="[N]" (AVOID positive values) |

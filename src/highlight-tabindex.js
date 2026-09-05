@@ -5,6 +5,9 @@
 // element is not focusable at all. That is reported rather than the parsed number.
 // Also flags tabindex="0" where it is redundant, and where it creates a focus
 // stop on an element with no role and no name.
+// tabindex="-1" is blue, not amber: removing an element from the tab order is
+// the correct roving tabindex pattern, so the badge reports what it does rather
+// than implying something is wrong.
 (function () {
   var existing = document.getElementById('a11y-tabindex-overlay');
   if (existing) existing.remove();
@@ -22,6 +25,7 @@
   var flaggedEls = [];
 
   var GREEN = '#1b5e20';
+  var BLUE = '#0a558c';
   var AMBER = '#e65100';
   var RED = '#b00020';
 
@@ -113,7 +117,10 @@
     }
 
     if (value === -1) {
-      flag(el, AMBER, 'tabindex="-1"', rect);
+      // Removing an element from the tab order is the correct roving tabindex
+      // pattern for composite widgets. Blue is deliberately not a verdict: this
+      // is information about what the value does, not a judgement on it.
+      flag(el, BLUE, 'tabindex="-1" (focusable by script only, not in the tab order)', rect);
       return;
     }
 

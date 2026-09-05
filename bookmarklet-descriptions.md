@@ -40,7 +40,7 @@ Click to activate, then press `1` through `6` in order to step through the `role
 Tracks each focusable element on the page. Click to activate, then `TAB` through the page. Each element is numbered in order and keeps its number, so the whole sequence stays visible as a trail. Flags focus stops on elements that are not rendered. `ESC` to stop.
 
 ## 12. Highlight tabindex
-Highlights all tabindex attributes. Distinguishes between `tabindex="0"` (in natural tab order), `tabindex="-1"` (removed from tab order) and positive values (avoid — overrides natural tab order). Flags values the browser cannot parse, which make the element not focusable at all, `tabindex="0"` where it is redundant, and focus stops on elements with no role and no accessible name.
+Highlights all tabindex attributes. Distinguishes between `tabindex="0"` (in natural tab order), `tabindex="-1"` (focusable by script only, the correct roving tabindex pattern) and positive values (avoid — overrides natural tab order). Flags values the browser cannot parse, which make the element not focusable at all, `tabindex="0"` where it is redundant, and focus stops on elements with no role and no accessible name.
 
 ## 13. Highlight aria-label
 Highlights all elements with `aria-label`. Flags empty values and use on roles where author-provided names are prohibited, following the ARIA 1.2 and 1.3 tables. An explicit role overrides the implicit one, so a `<span role="button">` may be named.
