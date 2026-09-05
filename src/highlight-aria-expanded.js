@@ -32,7 +32,7 @@
       // Valid per the true/false/undefined value type. Means the element does
       // not own or control a grouping element, the same as omitting it.
       colour = '#1b5e20';
-      label = 'aria-expanded="undefined"';
+      label = 'aria-expanded="undefined" (same as omitting the attribute)';
     } else {
       colour = '#b00020';
       label = 'aria-expanded="' + el.getAttribute('aria-expanded') + '" (INVALID VALUE)';
