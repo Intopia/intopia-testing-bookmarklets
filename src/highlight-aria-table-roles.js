@@ -1,5 +1,8 @@
 // Highlight ARIA table roles
 // Highlights ARIA roles relating to tables.
+// The colours identify the role and carry no verdict. Green, amber and red are
+// not used here, so a role is never mistaken for a pass or a failure.
+// Role values are matched case-insensitively.
 // Click to activate, then press `1` through `6` in order to step through the role hierarchy from container to cell.
 // Press `n` to step through each role type in sequence.
 // Note: re-run the bookmarklet after sorting to see updated aria-sort values.
@@ -18,13 +21,17 @@
   overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:999999;';
   document.body.appendChild(overlay);
 
+  // Category colours, not verdicts. This bookmarklet says what role each element
+  // has, never whether it is right or wrong, so green, amber and red are
+  // deliberately excluded: every cell of a valid grid used to be outlined green
+  // and every column header red.
   var COLOURS = {
     container: '#0a558c',
     rowgroup: '#006064',
-    row: '#e65100',
-    columnheader: '#b00020',
+    row: '#4e342e',
+    columnheader: '#880e4f',
     rowheader: '#4a148c',
-    cell: '#1b5e20'
+    cell: '#37474f'
   };
 
   var groups = {
@@ -117,13 +124,21 @@
     groups[group].push({ el: el, badge: badge, colour: colour });
   }
 
+  // Role values are matched case-insensitively, and only the first token is read
   var selector = Object.keys(badgePosition).map(function (role) {
-    return '[role="' + role + '"]';
+    return '[role="' + role + '" i]';
   }).join(',');
+
+  function roleOf(el) {
+    var raw = el.getAttribute('role');
+    return raw ? raw.trim().toLowerCase().split(/\s+/)[0] : '';
+  }
 
   var found = document.querySelectorAll(selector);
   found.forEach(function (el) {
-    annotate(el, el.getAttribute('role'));
+    var role = roleOf(el);
+    if (!badgePosition[role]) return;
+    annotate(el, role);
   });
 
   // Legend panel
