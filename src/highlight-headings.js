@@ -90,8 +90,10 @@
       if (tag === 'h1') {
         h1Count++;
         if (h1Count > 1) {
-          colour = '#b00020';
-          text = 'H1: ' + shown + ' (avoid more than one H1)';
+          // More than one H1 is valid HTML. One per page is a widely followed
+          // convention, not a rule, so this is a caution rather than an error.
+          colour = '#e65100';
+          text = 'H1: ' + shown + ' (additional H1 \u2014 valid HTML, but one per page is the convention)';
         } else {
           colour = COLOURS.h1;
           text = 'H1: ' + shown;
