@@ -36,7 +36,7 @@
       // Valid per the tristate value type (true/false/mixed/undefined). Means
       // the element is not checkable, the same as omitting it.
       colour = '#1b5e20';
-      label = 'aria-checked="undefined"';
+      label = 'aria-checked="undefined" (same as omitting the attribute)';
     } else {
       colour = '#b00020';
       label = 'aria-checked="' + el.getAttribute('aria-checked') + '" (INVALID VALUE)';

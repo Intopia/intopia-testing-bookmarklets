@@ -79,13 +79,13 @@ Highlights all `aria-invalid` states: `true`, `grammar`, `spelling` and `false`.
 Highlights `autocomplete` attributes. Flags valid, generic and invalid values with distinct colours. Follows the HTML autofill grammar, including section, shipping and billing, contact tokens and `webauthn`.
 
 ## 25. Highlight aria-expanded
-Highlights all `aria-expanded` attributes. Distinguishes between `true` (expanded) and `false` (collapsed) states. `undefined` is also a valid value. Re-run after activating a widget to see updated values.
+Highlights all `aria-expanded` attributes. Distinguishes between `true` (expanded) and `false` (collapsed) states. `undefined` is also a valid value, and means the same as omitting the attribute. Re-run after activating a widget to see updated values.
 
 ## 26. Highlight aria-checked
-Highlights all `aria-checked` attributes on custom widgets. Distinguishes between `true`, `false` and `mixed` states. `undefined` is also a valid value. Re-run after interacting with a widget to see updated values.
+Highlights all `aria-checked` attributes on custom widgets. Distinguishes between `true`, `false` and `mixed` states. `undefined` is also a valid value, and means the same as omitting the attribute. Re-run after interacting with a widget to see updated values.
 
 ## 27. Highlight aria-pressed
-Highlights all `aria-pressed` attributes on custom toggle buttons. Distinguishes between `true` (pressed), `false` (not pressed) and `mixed` states. `undefined` is also a valid value. Re-run after interacting with a widget to see updated values.
+Highlights all `aria-pressed` attributes on custom toggle buttons. Distinguishes between `true` (pressed), `false` (not pressed) and `mixed` states. `undefined` is also a valid value, and means the same as omitting the attribute. Re-run after interacting with a widget to see updated values.
 
 ## 28. Highlight aria-roledescription
 Highlights all elements with `aria-roledescription`. Shows the custom role description value. Flags empty values, elements with no underlying role, and elements whose role has no semantics of its own (`generic`, `presentation`, `none`). Both are a misuse of the attribute.

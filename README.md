@@ -582,7 +582,7 @@ Re-run after activating a widget to see updated values.
 |--------|-----|------------|
 | Dark green | `#1b5e20` | aria-expanded="true" |
 | Amber | `#e65100` | aria-expanded="false" |
-| Dark green | `#1b5e20` | aria-expanded="undefined" |
+| Dark green | `#1b5e20` | aria-expanded="undefined" (same as omitting the attribute) |
 | Red | `#b00020` | aria-expanded="[value]" (INVALID VALUE) |
 
 ---
@@ -596,7 +596,7 @@ Re-run after interacting with a widget to see updated values.
 | Dark green | `#1b5e20` | aria-checked="true" |
 | Amber | `#e65100` | aria-checked="false" |
 | Dark blue | `#0a558c` | aria-checked="mixed" |
-| Dark green | `#1b5e20` | aria-checked="undefined" |
+| Dark green | `#1b5e20` | aria-checked="undefined" (same as omitting the attribute) |
 | Red | `#b00020` | aria-checked="[value]" (INVALID VALUE) |
 
 ---
@@ -610,7 +610,7 @@ Intended for toggle buttons — `<button>` or elements with `role="button"`. Re-
 | Dark green | `#1b5e20` | aria-pressed="true" |
 | Amber | `#e65100` | aria-pressed="false" |
 | Dark blue | `#0a558c` | aria-pressed="mixed" |
-| Dark green | `#1b5e20` | aria-pressed="undefined" |
+| Dark green | `#1b5e20` | aria-pressed="undefined" (same as omitting the attribute) |
 | Red | `#b00020` | aria-pressed="[value]" (INVALID VALUE) |
 
 ---
