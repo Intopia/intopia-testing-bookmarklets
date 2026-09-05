@@ -147,16 +147,18 @@ Nested `<aside>` without accessible name is not flagged (matches HTML-AAM mappin
 
 `<form>` and `<section>` are only flagged when they have an accessible name, matching HTML-AAM. An explicit non-landmark role excludes the element entirely, so `<nav role="presentation">` is not flagged. Role values are matched case-insensitively. Accessible names resolve in AccName order: `aria-labelledby` before `aria-label`. Landmarks that are not rendered are skipped.
 
+These are **category colours, not verdicts**. This bookmarklet says what each landmark is, never whether it is right or wrong, so green, amber and red are deliberately excluded. Reusing them made correct markup look broken: a valid `<form aria-label="Search">` was outlined in red.
+
 | Colour | Hex | Badge text |
 |--------|-----|------------|
 | Dark blue | `#0a558c` | Banner [: name] |
-| Amber | `#e65100` | Navigation [: name] |
-| Dark green | `#1b5e20` | Main [: name] |
-| Teal | `#006064` | Complementary [: name] |
-| Deep purple | `#4a148c` | Contentinfo [: name] |
-| Deep pink | `#880e4f` | Search [: name] |
-| Blue-grey | `#37474f` | Region [: name] |
-| Red | `#b00020` | Form [: name] |
+| Deep purple | `#4a148c` | Navigation [: name] |
+| Teal | `#006064` | Main [: name] |
+| Deep pink | `#880e4f` | Complementary [: name] |
+| Blue-grey | `#37474f` | Contentinfo [: name] |
+| Brown | `#4e342e` | Search [: name] |
+| Indigo | `#1a237e` | Region [: name] |
+| Slate | `#455a64` | Form [: name] |
 
 ---
 

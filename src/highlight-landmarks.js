@@ -1,5 +1,7 @@
 // Highlight landmarks
 // Highlights all landmark regions with distinct colours per role.
+// The colours identify the role and carry no verdict. Green, amber and red are
+// not used here, so a landmark is never mistaken for a pass or a failure.
 // Shows accessible name where present.
 // Name resolution follows AccName precedence: aria-labelledby before aria-label.
 // An explicit non-landmark role (for example role="presentation") excludes the
@@ -22,15 +24,19 @@
 
   var flaggedEls = [];
 
+  // These are category colours, not verdicts. Green, amber and red are
+  // deliberately excluded: this bookmarklet says what each landmark is, never
+  // whether it is right or wrong, and reusing the verdict colours made correct
+  // markup look broken.
   var COLOURS = {
     banner: '#0a558c',
-    navigation: '#e65100',
-    main: '#1b5e20',
-    complementary: '#006064',
-    contentinfo: '#4a148c',
-    search: '#880e4f',
-    region: '#37474f',
-    form: '#b00020'
+    navigation: '#4a148c',
+    main: '#006064',
+    complementary: '#880e4f',
+    contentinfo: '#37474f',
+    search: '#4e342e',
+    region: '#1a237e',
+    form: '#455a64'
   };
 
   var LANDMARK_ROLES = Object.keys(COLOURS);
