@@ -33,7 +33,7 @@ document.querySelectorAll('[aria-pressed]').forEach(function(el) {
     // Valid per the tristate value type (true/false/mixed/undefined). Means
     // the element is not a toggle button, the same as omitting it.
     colour = '#1b5e20';
-    label = 'aria-pressed="undefined"';
+    label = 'aria-pressed="undefined" (same as omitting the attribute)';
   } else {
     colour = '#b00020';
     label = 'aria-pressed="' + el.getAttribute('aria-pressed') + '" (INVALID VALUE)';
