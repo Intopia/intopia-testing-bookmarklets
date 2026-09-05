@@ -243,18 +243,22 @@ Press `n` to cycle through groups in sequence.
 TH badges (key 3) positioned above element — show cell text only, no scope information.
 Scope badges (key 4) positioned below element — show scope value or flag missing scope.
 
-A caption is not required, so a table without one is amber rather than red, annotated on the table badge itself.
+Table, caption, TH and scope colours are **categories, not verdicts** — they say what an element is, not whether it is correct. Only two things here are verdicts: a missing caption (amber) and an invalid scope value (red).
+
+`scope` is **not required**. Browsers and assistive technology infer header association in simple tables, so a `<th>` without scope is shown in its own category colour and labelled as such, not flagged as a failure. Previously it was red, which taught that scope is mandatory.
+
+A caption is not required either, so a table without one is amber rather than red, annotated on the table badge itself.
 Captions and header cells are only attributed to the table that owns them, so nested tables are not double-counted.
 
 | Colour | Hex | Badge text | Key |
 |--------|-----|------------|-----|
 | Dark blue | `#0a558c` | Table [N] | 1 |
 | Amber | `#e65100` | Table [N] (no caption) | 1 |
-| Dark green | `#1b5e20` | Caption: [text] | 2 |
-| Red | `#b00020` | TH: [text] | 3 |
-| Amber | `#e65100` | scope: [value] | 4 |
+| Teal | `#006064` | Caption: [text] | 2 |
+| Deep purple | `#4a148c` | TH: [text] | 3 |
+| Blue-grey | `#37474f` | scope: [value] | 4 |
+| Brown | `#4e342e` | no scope (not required in simple tables) | 4 |
 | Red | `#b00020` | scope: "[value]" INVALID VALUE | 4 |
-| Red | `#b00020` | no scope | 4 |
 
 ---
 
@@ -291,19 +295,21 @@ Row and cell roles — badge inside at bottom of element.
 
 `columnheader` and `rowheader` badges also show `aria-sort` value where present. Re-run after sorting to refresh values.
 
+These are **category colours, not verdicts**. This bookmarklet says what role each element has, never whether it is right or wrong, so green, amber and red are deliberately excluded. Reusing them meant every cell of a valid grid was outlined green and every column header red.
+
 | Colour | Hex | Badge text | Key |
 |--------|-----|------------|-----|
 | Dark blue | `#0a558c` | role="table" [: name] | 1 |
 | Dark blue | `#0a558c` | role="grid" [: name] | 1 |
 | Dark blue | `#0a558c` | role="treegrid" [: name] | 1 |
 | Teal | `#006064` | role="rowgroup" | 2 |
-| Amber | `#e65100` | role="row" | 3 |
-| Red | `#b00020` | role="columnheader" [(sort: [value])] | 4 |
-| Red | `#b00020` | role="columnheader" (sort: "[value]" INVALID VALUE) | 4 |
+| Brown | `#4e342e` | role="row" | 3 |
+| Deep pink | `#880e4f` | role="columnheader" [(sort: [value])] | 4 |
+| Deep pink | `#880e4f` | role="columnheader" (sort: "[value]" INVALID VALUE) | 4 |
 | Deep purple | `#4a148c` | role="rowheader" [(sort: [value])] | 5 |
 | Deep purple | `#4a148c` | role="rowheader" (sort: "[value]" INVALID VALUE) | 5 |
-| Dark green | `#1b5e20` | role="cell" | 6 |
-| Dark green | `#1b5e20` | role="gridcell" | 6 |
+| Blue-grey | `#37474f` | role="cell" | 6 |
+| Blue-grey | `#37474f` | role="gridcell" | 6 |
 
 ---
 

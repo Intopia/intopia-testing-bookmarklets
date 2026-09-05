@@ -25,7 +25,7 @@ Displays the document title from the `<title>` element as a fixed banner at the 
 Displays the character encoding declaration as a fixed banner at the top of the page. Detects both `<meta charset>` and `http-equiv Content-Type` forms. Flags missing, empty and non-UTF-8 declarations, duplicate and conflicting declarations, and charset outside `<head>`. Where more than one message applies, banners stack. Click to activate, Esc to clear.
 
 ## 8. Highlight captions and headers
-Highlights accessibility features within tables. Flags header cells with and without `scope`, invalid `scope` values, and tables missing a `<caption>`.
+Highlights accessibility features within tables. Shows header cells with and without `scope`, and flags invalid `scope` values and tables missing a `<caption>`. `scope` is not required in simple tables, so a header cell without it is shown rather than flagged.
 Click to activate, then press 1 through 3 in order to step through `<table>`, `<caption>` and `<th>` elements individually. Press `n` to step through each element type in sequence.
 
 ## 9. Highlight table IDs and headers

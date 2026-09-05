@@ -1,6 +1,10 @@
 // Highlight captions and headers
-// Highlights accessibility features within tables. Flags header cells with and without `scope`,
-// invalid `scope` values, and tables missing a `<caption>`.
+// Highlights accessibility features within tables. Shows header cells with and without `scope`,
+// and flags invalid `scope` values and tables missing a `<caption>`.
+// Table, caption, TH and scope colours identify what an element is, not whether
+// it is correct. Only a missing caption (amber) and an invalid scope value (red)
+// are verdicts. `scope` itself is not required: browsers and AT infer header
+// association in simple tables.
 // Click to activate, then press `1` through `3` in order to step through `table`, `caption` and `th` elements individually.
 // Press `n` to step through each element type in sequence.
 (function () {
@@ -35,10 +39,16 @@
   var defaultOn = new Set(['table', 'caption', 'th']);
   var groupOrder = ['table', 'caption', 'th', 'scope'];
 
-  var BLUE = '#0a558c';
-  var GREEN = '#1b5e20';
-  var RED = '#b00020';
+  // Category colours: they say what an element is, not whether it is right.
+  var TABLE = '#0a558c';       // dark blue
+  var CAPTION = '#006064';     // teal
+  var TH = '#4a148c';          // deep purple
+  var SCOPE = '#37474f';       // blue-grey
+  var NO_SCOPE = '#4e342e';    // brown
+
+  // Verdict colours, used only where something is actually wrong or worth caution
   var AMBER = '#e65100';
+  var RED = '#b00020';
 
   var VALID_SCOPES = new Set(['row', 'col', 'rowgroup', 'colgroup']);
 
@@ -97,7 +107,7 @@
     // A caption is not required, so a missing one is a caution, not a failure
     addItem(
       table,
-      caption ? BLUE : AMBER,
+      caption ? TABLE : AMBER,
       caption ? 'Table ' + (index + 1) : 'Table ' + (index + 1) + ' (no caption)',
       'above',
       'table',
@@ -105,23 +115,25 @@
     );
 
     if (caption) {
-      addItem(caption, GREEN, 'Caption: ' + (caption.textContent.trim() || '(empty)'),
+      addItem(caption, CAPTION, 'Caption: ' + (caption.textContent.trim() || '(empty)'),
         'above', 'caption', true);
     }
 
     ownHeaderCells(table).forEach(function (th) {
       var text = th.textContent.trim() || '(empty)';
-      addItem(th, RED, 'TH: ' + text, 'above', 'th', true);
+      addItem(th, TH, 'TH: ' + text, 'above', 'th', true);
 
       var raw = th.getAttribute('scope');
       var scope = raw === null ? null : raw.trim();
       var scopeColour, scopeText;
 
       if (!scope) {
-        scopeColour = RED;
-        scopeText = 'no scope';
+        // scope is not required. Browsers and AT infer header association in
+        // simple tables, so this is information, not a failure.
+        scopeColour = NO_SCOPE;
+        scopeText = 'no scope (not required in simple tables)';
       } else if (VALID_SCOPES.has(scope.toLowerCase())) {
-        scopeColour = AMBER;
+        scopeColour = SCOPE;
         scopeText = 'scope: ' + scope;
       } else {
         scopeColour = RED;
@@ -134,10 +146,10 @@
 
   // Legend
   var legendItems = [
-    { key: '1', group: 'table', colour: BLUE, colour2: AMBER, label: 'Table' },
-    { key: '2', group: 'caption', colour: GREEN, label: 'Caption' },
-    { key: '3', group: 'th', colour: RED, label: 'TH' },
-    { key: '4', group: 'scope', colour: AMBER, colour2: RED, label: 'Scope' }
+    { key: '1', group: 'table', colours: [TABLE, AMBER], label: 'Table' },
+    { key: '2', group: 'caption', colours: [CAPTION], label: 'Caption' },
+    { key: '3', group: 'th', colours: [TH], label: 'TH' },
+    { key: '4', group: 'scope', colours: [SCOPE, NO_SCOPE, RED], label: 'Scope' }
   ];
 
   var legend = document.createElement('div');
@@ -151,7 +163,7 @@
     var wrap = document.createElement('span');
     wrap.dataset.group = item.group;
 
-    var swatches = item.colour2 ? [item.colour, item.colour2] : [item.colour];
+    var swatches = item.colours;
     swatches.forEach(function (colour, i) {
       var sw = document.createElement('span');
       sw.style.cssText = 'display:inline-block;width:10px;height:10px;background:' + colour +
