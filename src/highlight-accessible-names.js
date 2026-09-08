@@ -135,10 +135,24 @@
     outlined = null;
   }
 
+  // Sit above the element, but flip below when there is not enough room, so a
+  // control near the top of the page does not push the badge out of view.
+  // Also keep the badge inside the viewport horizontally.
   function position(el) {
     var rect = el.getBoundingClientRect();
-    badge.style.left = (rect.left + window.scrollX) + 'px';
-    badge.style.top = (rect.top + window.scrollY - 40) + 'px';
+    var height = badge.offsetHeight || 34;
+    var width = badge.offsetWidth || 200;
+    var GAP = 6;
+
+    var top = rect.top - height - GAP;
+    if (top < 0) top = rect.bottom + GAP;
+    badge.style.top = (top + window.scrollY) + 'px';
+
+    var left = rect.left;
+    var maxLeft = document.documentElement.clientWidth - width - GAP;
+    if (left > maxLeft) left = maxLeft;
+    if (left < GAP) left = GAP;
+    badge.style.left = (left + window.scrollX) + 'px';
   }
 
   function onFocusIn(e) {
