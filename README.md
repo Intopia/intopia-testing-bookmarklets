@@ -42,32 +42,33 @@ Where blue marks a deliberate non-verdict, the badge text says why. Where someth
 10. Highlight ARIA table roles
 11. Track focus order
 12. Highlight tabindex
-13. Highlight aria-label
-14. Highlight aria-labelledby
-15. Highlight aria-describedby
-16. Highlight name mismatches
-17. Highlight name-prohibited roles
-18. Highlight form field names
-19. Highlight buttons
-20. Highlight fieldsets
-21. Highlight required fields
-22. Highlight readonly fields
-23. Highlight aria-invalid
-24. Highlight autocomplete
-25. Highlight aria-expanded
-26. Highlight aria-checked
-27. Highlight aria-pressed
-28. Highlight aria-roledescription
-29. Highlight aria-details
-30. Highlight aria-valuetext
-31. Highlight aria-valuenow
-32. Highlight aria-valuemin and aria-valuemax
-33. Highlight aria-setsize and aria-posinset
-34. Highlight aria-level
-35. Highlight aria-controls
-36. Highlight aria-haspopup
-37. Highlight shadow DOM
-38. Highlight links
+13. Highlight accessible names
+14. Highlight aria-label
+15. Highlight aria-labelledby
+16. Highlight aria-describedby
+17. Highlight name mismatches
+18. Highlight name-prohibited roles
+19. Highlight form field names
+20. Highlight buttons
+21. Highlight fieldsets
+22. Highlight required fields
+23. Highlight readonly fields
+24. Highlight aria-invalid
+25. Highlight autocomplete
+26. Highlight aria-expanded
+27. Highlight aria-checked
+28. Highlight aria-pressed
+29. Highlight aria-roledescription
+30. Highlight aria-details
+31. Highlight aria-valuetext
+32. Highlight aria-valuenow
+33. Highlight aria-valuemin and aria-valuemax
+34. Highlight aria-setsize and aria-posinset
+35. Highlight aria-level
+36. Highlight aria-controls
+37. Highlight aria-haspopup
+38. Highlight shadow DOM
+39. Highlight links
 
 ---
 
@@ -376,6 +377,37 @@ Elements that are not rendered are skipped.
 | Red | `#b00020` | tabindex="[N]" (AVOID positive values) |
 | Red | `#b00020` | tabindex="[value]" (INVALID — use -1 or 0) |
 | Red | `#b00020` | tabindex="[value]" (INVALID — not an integer, so the attribute is ignored and the element is not focusable) |
+
+---
+
+## Highlight accessible names
+
+Interactive — click to activate, then Tab through the page. One badge at a time, on the element that has focus. Esc to stop, or re-run the bookmarklet to switch it off.
+
+The general counterpart to the links, buttons and form field names bookmarklets. Those three cover one element type each in detail; this one follows the name wherever focus goes, so a student can see the precedence chain applied across a whole form or page in one pass.
+
+Source precedence, highest first: `aria-labelledby`, `aria-label`, `label` / implicit label, content, `value`, `alt`, default (Submit / Reset), `title`, `placeholder`.
+
+`title` and `placeholder` are amber. Both are unreliable name sources: `title` is not shown on touch and is inconsistently announced, and `placeholder` disappears as soon as the field has content.
+
+Content includes image `alt`, so an icon button or a logo link resolves rather than reporting no name. The badge carries the tag name, since precedence differs by element type.
+
+**This is a simplified name computation.** The browser's accessibility tree is not exposed to JavaScript, so this is a teaching aid rather than an authority. Check anything surprising in a real screen reader.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Dark green | `#1b5e20` | `<tag>` aria-labelledby: [name] |
+| Dark green | `#1b5e20` | `<tag>` aria-label: [name] |
+| Dark green | `#1b5e20` | `<tag>` label: [name] |
+| Dark green | `#1b5e20` | `<tag>` label ×[N]: [joined name] |
+| Dark green | `#1b5e20` | `<tag>` implicit label: [name] |
+| Dark green | `#1b5e20` | `<tag>` content: [name] |
+| Dark green | `#1b5e20` | `<tag>` value: [name] |
+| Dark green | `#1b5e20` | `<tag>` alt: [name] |
+| Dark green | `#1b5e20` | `<tag>` default: Submit / default: Reset |
+| Amber | `#e65100` | `<tag>` title: [name] (unreliable name source) |
+| Amber | `#e65100` | `<tag>` placeholder: [name] (unreliable name source) |
+| Red | `#b00020` | `<tag>` NO ACCESSIBLE NAME |
 
 ---
 
