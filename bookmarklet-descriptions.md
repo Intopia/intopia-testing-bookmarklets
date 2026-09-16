@@ -122,3 +122,19 @@ Reports whether shadow DOM on this page will hide content from extension-based t
 
 ## 39. Highlight links
 Highlights `<a>` elements and elements with `role="link"`. Resolves the accessible name from any source (text content, image alt, aria-label, aria-labelledby). Flags duplicate names pointing to different URLs, links named by title only, title attribute mismatches, empty href and missing href. Click to activate, Esc to clear.
+
+## 40. ContrastChecker
+This bookmarklet allows you to check the contrast between two colours by either sampling the colours with an eyedropper or directly inputting values. The checker will automatically calculate the contrast ratio and give a pass or fail status for 3:1, 4.5:1 and 7:1. Created for and works best on Windows/Chrome.
+
+Features:
+* Accepts HEX, HEXA, RGB, RGBA values
+* Has a 'HEX:left_right_arrow:RGB' convert toggle for quick conversion
+* Supports keyboard shortcuts for Eyedroppers, Reset, Convert, Copy, Toggle panel and Close
+* With eyedropper keyboard shortcut, allows capture of elusive focus style and on hover elements
+* Has a ‘Reset’ button to quickly reset the colour values
+* Has a ‘Copy’ button to copy the colour values and contrast details onto the clipboard
+* Has an expandable 'Explanation' section with links to the WCAG understanding docs
+* Able to toggle between top and side panels
+* Panel edges are resizable by dragging, keyboard, and onscreen buttons
+* Multiple ways to close the bookmarklet (toggle off, click the ‘X' button or press ‘Esc’)
+* Accessibility tested
