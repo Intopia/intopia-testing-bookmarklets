@@ -42,34 +42,35 @@ Where blue marks a deliberate non-verdict, the badge text says why. Where someth
 10. Highlight ARIA table roles
 11. Track focus order
 12. Highlight tabindex
-13. Highlight accessible names
-14. Highlight aria-label
-15. Highlight aria-labelledby
-16. Highlight aria-describedby
-17. Highlight name mismatches
-18. Highlight name-prohibited roles
-19. Highlight form field names
-20. Highlight buttons
-21. Highlight fieldsets
-22. Highlight required fields
-23. Highlight readonly fields
-24. Highlight aria-invalid
-25. Highlight autocomplete
-26. Highlight aria-expanded
-27. Highlight aria-checked
-28. Highlight aria-pressed
-29. Highlight aria-roledescription
-30. Highlight aria-details
-31. Highlight aria-valuetext
-32. Highlight aria-valuenow
-33. Highlight aria-valuemin and aria-valuemax
-34. Highlight aria-setsize and aria-posinset
-35. Highlight aria-level
-36. Highlight aria-controls
-37. Highlight aria-haspopup
-38. Highlight shadow DOM
-39. Highlight links
-40. ContrastChecker
+13. Highlight target size
+14. Highlight accessible names
+15. Highlight aria-label
+16. Highlight aria-labelledby
+17. Highlight aria-describedby
+18. Highlight name mismatches
+19. Highlight name-prohibited roles
+20. Highlight form field names
+21. Highlight buttons
+22. Highlight fieldsets
+23. Highlight required fields
+24. Highlight readonly fields
+25. Highlight aria-invalid
+26. Highlight autocomplete
+27. Highlight aria-expanded
+28. Highlight aria-checked
+29. Highlight aria-pressed
+30. Highlight aria-roledescription
+31. Highlight aria-details
+32. Highlight aria-valuetext
+33. Highlight aria-valuenow
+34. Highlight aria-valuemin and aria-valuemax
+35. Highlight aria-setsize and aria-posinset
+36. Highlight aria-level
+37. Highlight aria-controls
+38. Highlight aria-haspopup
+39. Highlight shadow DOM
+40. Highlight links
+41. ContrastChecker
 
 ---
 
@@ -378,6 +379,46 @@ Elements that are not rendered are skipped.
 | Red | `#b00020` | tabindex="[N]" (AVOID positive values) |
 | Red | `#b00020` | tabindex="[value]" (INVALID — use -1 or 0) |
 | Red | `#b00020` | tabindex="[value]" (INVALID — not an integer, so the attribute is ignored and the element is not focusable) |
+
+---
+
+## Highlight target size
+
+Flags pointer targets smaller than 24 × 24 CSS pixels, for WCAG 2.2 **2.5.8 Target Size (Minimum)**, Level AA.
+
+**Warnings only.** Targets that already meet 24 × 24 are not badged, because badging every link and button would bury the page. The summary panel reports how many targets were measured, so nothing is silently skipped.
+
+**Nothing here is a pass or a fail.** 2.5.8 has exceptions that need human judgement and this tool cannot evaluate any of them:
+
+- inline links inside a sentence or block of text
+- the same function available through another control that is large enough
+- controls whose size is set by the browser and not modified by the author
+
+Where the first two look likely, the badge says so as a prompt, not a verdict.
+
+**What is measured.** The clickable region, not the visible icon, so a small icon inside a padded button measures the padded box. Where a control has an adjacent `<label>`, the label is included, since clicking it activates the control. Without that, almost every labelled checkbox would warn on width when the real finding is its height.
+
+**The spacing test is drawn.** Each undersized target gets a dashed 24 px circle centred on it. Amber when the circle is clear, red when it overlaps another target. Two undersized targets are compared circle to circle. This covers horizontal and vertical neighbours in one pass.
+
+**Excluded from measurement**, and counted out of the total rather than dropped silently: disabled controls, since they do not accept a pointer action, and elements that are not rendered.
+
+**Limits worth knowing.** A hit area extended by a `::before` or `::after` overlay is not measurable, so those read as undersized when they may not be. Controls that appear dynamically (menus, dialogs, toolbars, popovers) must be open when the bookmarklet runs, so re-run with them open.
+
+| Colour | Hex | Badge text |
+|--------|-----|------------|
+| Amber | `#e65100` | [W] × [H] — under 24 × 24. Spacing clear |
+| Red | `#b00020` | [W] × [H] — under 24 × 24. 24px circle overlaps [N] other targets |
+| — | — | either of the above with `. Inline text link, exception may apply` |
+| — | — | either of the above with `. Native control, check whether the author changed its size` |
+
+Summary panel lines:
+
+| Colour | Line |
+|--------|------|
+| — | [N] pointer targets measured |
+| — | None under 24 × 24 CSS pixels |
+| Amber | [N] under 24 × 24, of which [N] have clear spacing |
+| Red | [N] with a 24px circle overlapping another target |
 
 ---
 
@@ -889,3 +930,5 @@ Features:
 * Multiple ways to close the bookmarklet (toggle off, click the ‘X' button or press ‘Esc’)
 * Accessibility tested
 
+
+---
