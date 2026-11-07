@@ -26,7 +26,7 @@ Displays the character encoding declaration as a fixed banner at the top of the 
 
 ## 8. Highlight captions and headers
 Highlights accessibility features within tables. Shows header cells with and without `scope`, and flags invalid `scope` values and tables missing a `<caption>`. `scope` is not required in simple tables, so a header cell without it is shown rather than flagged.
-Click to activate, then press 1 through 3 in order to step through `<table>`, `<caption>` and `<th>` elements individually. Press `n` to step through each element type in sequence.
+Click to activate, then press 1 through 3 in order to step through `<table>`, `<caption>` and `<th>` elements individually. Press 4 to show `scope` information, which is off by default. Press `n` to step through each element type in sequence.
 
 ## 9. Highlight table IDs and headers
 Highlights the relationship between `headers` and ids within complex tables.
