@@ -7,6 +7,8 @@ A set of accessibility testing bookmarklets. Each one highlights a specific HTML
 Bookmarklets main reference page: 
 [Intopia's accessibility testing bookmarklets](https://intopia.github.io/exercise/testing-bookmarklets-intopia.html)
 
+ContrastChecker was built by Ani Chiang and is maintained separately from the rest of the set. Everything else here follows the shared conventions described below.
+
 ## Colour meaning
 
 Two palettes, and the difference matters more than any individual colour.
@@ -23,6 +25,8 @@ A colour is either a **verdict** or a **category**, never both. Most bookmarklet
 A few bookmarklets only identify what an element is — this is a banner, this is a rowgroup, this is a `<th>` — and use the category palette: dark blue, deep purple, teal, deep pink, blue-grey, brown `#4e342e`, indigo `#1a237e` and slate `#455a64`. **Green, amber and red never appear there**, so a correctly marked-up element is never mistaken for a pass or a failure.
 
 Landmarks and ARIA table roles use category colours throughout. Captions and headers uses both: category colours for table, caption, TH and scope, with amber and red reserved for the two things that really are verdicts.
+
+Two bookmarklets report rather than judge, and use neither palette: Track focus order and Inspect text styles both use the neutral dark panel `#111111`, because a focus number and a font size are observations, not findings.
 
 Where blue marks a deliberate non-verdict, the badge text says why. Where something is a convention rather than a specification requirement, the badge says that too.
 
@@ -43,34 +47,35 @@ Where blue marks a deliberate non-verdict, the badge text says why. Where someth
 11. Track focus order
 12. Highlight tabindex
 13. Highlight target size
-14. Highlight accessible names
-15. Highlight aria-label
-16. Highlight aria-labelledby
-17. Highlight aria-describedby
-18. Highlight name mismatches
-19. Highlight name-prohibited roles
-20. Highlight form field names
-21. Highlight buttons
-22. Highlight fieldsets
-23. Highlight required fields
-24. Highlight readonly fields
-25. Highlight aria-invalid
-26. Highlight autocomplete
-27. Highlight aria-expanded
-28. Highlight aria-checked
-29. Highlight aria-pressed
-30. Highlight aria-roledescription
-31. Highlight aria-details
-32. Highlight aria-valuetext
-33. Highlight aria-valuenow
-34. Highlight aria-valuemin and aria-valuemax
-35. Highlight aria-setsize and aria-posinset
-36. Highlight aria-level
-37. Highlight aria-controls
-38. Highlight aria-haspopup
-39. Highlight shadow DOM
-40. Highlight links
-41. ContrastChecker
+14. Inspect text styles
+15. Highlight accessible names
+16. Highlight aria-label
+17. Highlight aria-labelledby
+18. Highlight aria-describedby
+19. Highlight name mismatches
+20. Highlight name-prohibited roles
+21. Highlight form field names
+22. Highlight buttons
+23. Highlight fieldsets
+24. Highlight required fields
+25. Highlight readonly fields
+26. Highlight aria-invalid
+27. Highlight autocomplete
+28. Highlight aria-expanded
+29. Highlight aria-checked
+30. Highlight aria-pressed
+31. Highlight aria-roledescription
+32. Highlight aria-details
+33. Highlight aria-valuetext
+34. Highlight aria-valuenow
+35. Highlight aria-valuemin and aria-valuemax
+36. Highlight aria-setsize and aria-posinset
+37. Highlight aria-level
+38. Highlight aria-controls
+39. Highlight aria-haspopup
+40. Highlight shadow DOM
+41. Highlight links
+42. ContrastChecker
 
 ---
 
@@ -85,7 +90,7 @@ Colour palette used across the set:
 - Teal `#006064` — used in specific bookmarklets (landmarks, ARIA tables)
 - Deep pink `#880e4f` — used in landmarks
 - Blue-grey `#37474f` — used in specific bookmarklets (landmarks, ARIA tables)
-- Dark `#111111` — used in focus order tracker
+- Dark `#111111` — neutral panel surface: focus order tracker, text styles panel
 
 Badge text system:
 - **Informational** — sentence case, source/element first: `aria-label: Close`
@@ -419,6 +424,45 @@ Summary panel lines:
 | — | None under 24 × 24 CSS pixels |
 | Amber | [N] under 24 × 24, of which [N] have clear spacing |
 | Red | [N] with a 24px circle overlapping another target |
+
+---
+
+## Inspect text styles
+
+Interactive — click to activate, then click any element on the page. A fixed panel reports the text styles that actually apply to it. Esc to stop, or re-run the bookmarklet to switch it off.
+
+**The page is in test mode while this is on.** Pointer activation is suppressed on `mousedown`, `mouseup`, `click` and `dblclick` in the capture phase, so clicking a link or button inspects it rather than following or pressing it. The panel itself is exempt. Everything is restored on teardown.
+
+**No verdicts.** This is a snapshot, so the panel is neutral dark `#111111` with a single blue outline on the inspected element. Green, amber and red are deliberately absent: nothing here passes or fails, and judging a line height or a letter spacing needs the context the tool cannot see.
+
+**Line height, letter spacing and word spacing are shown twice.** Line height in px and as a multiple of the font size; letter and word spacing in px and in `em`. Those derived forms are what WCAG 2.2 **1.4.12 Text Spacing** is written in, so a student can read the relevant number straight off the panel instead of dividing.
+
+**The font row reports what is rendering, not what was asked for.** `getComputedStyle().fontFamily` returns the whole stack even when the first choice is not installed, and `document.fonts.check()` does not help — it returns `true` for a missing family because it accounts for fallback. The only reliable test is measuring a probe string on a canvas against the generic fallbacks, which is what this does. Where the rendering family is not the author's first choice, a note lists the ones that were skipped.
+
+**Style is reported, not judged.** Italic is often applied in CSS rather than with `<em>` or `<i>`, so the slant a sighted reader sees may carry no emphasis in the accessibility tree at all. The panel shows the computed value and leaves the comparison with the markup to the person.
+
+**Colour is reported as hex with the full `rgb()` underneath**, rather than alongside, so a long `rgba()` value does not wrap the row. The swatch is composited over white so a semi-transparent colour looks the way it would on a page rather than against the dark panel, and carries a light border so a dark colour stays visible. Where alpha is below 1 the panel says so, since the hex alone is then misleading. Alpha is read as the fourth component where there is one, so `rgb(0, 0, 0)` is opaque black rather than a transparent colour. A colour computed in a newer colour space, such as `oklch()`, displays as its raw computed value rather than a converted hex.
+
+Background colour is out of scope. This is a snapshot of the text, not a contrast check — use ContrastChecker for that.
+
+| Row | Value shown |
+|-----|-------------|
+| Font | resolved family, with `(generic)` where that family is a generic keyword |
+| — | note: `Not available: [families]` where earlier stack entries were skipped |
+| — | note: `No family in the stack is available: [families]` where nothing resolves |
+| Size | `[N]px` |
+| Weight | `[N] ([name])` — thin, extra light, light, normal, medium, semibold, bold, extra bold, black |
+| Style | `normal`, `italic`, or `oblique [N]deg` |
+| Line height | `[N]px ([N]× size)`, or `normal` |
+| Letter sp. | `[N]px ([N]em)`, or `normal (0em)` |
+| Word sp. | `[N]px ([N]em)`, or `normal (0em)` |
+| Colour | swatch + `#RRGGBB`, with `rgb(...)` as a note underneath |
+| — | note: `Alpha [N], so the rendered colour depends on the background.` |
+
+| Colour | Hex | Use |
+|--------|-----|-----|
+| Dark | `#111111` | panel surface |
+| Dark blue | `#0a558c` | outline on the inspected element |
 
 ---
 
@@ -913,6 +957,8 @@ Elements that are not rendered are skipped.
 ---
 
 ## ContrastChecker
+
+Built by Ani Chiang. This is the one bookmarklet in the set that is not single-purpose: it is a full tool with panels, eyedroppers, keyboard shortcuts and a copy function, rather than a one-concept teaching aid. Its source is maintained separately, so the files here are overwritten from Ani's master rather than edited in place, and it does not follow the colour or badge conventions described above.
 
 This bookmarklet allows you to check the contrast between two colours by either sampling the colours with an eyedropper or directly inputting values. The checker will automatically calculate the contrast ratio and give a pass or fail status for 3:1, 4.5:1 and 7:1. Created for and works best on Windows/Chrome.
 
