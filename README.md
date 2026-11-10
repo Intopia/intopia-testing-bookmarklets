@@ -498,12 +498,22 @@ That last row is not hypothetical. On macOS with "Show scroll bars" set to Alway
 
 The same page can therefore report different numbers on different machines. That is a real platform difference, not a fault in the tool.
 
-### Gap below
+### The gap rows
 
-A declared bottom margin is often not the distance you get, so the panel measures the real gap to the next rendered sibling and explains any difference:
+A declared margin is often not the distance you get, so the panel measures the real gap to the nearest rendered sibling in each of the four directions, in CSS shorthand order: `Gap above`, `Gap right`, `Gap below`, `Gap left`. A direction with no sibling gets no row.
+
+It explains any difference between the measurement and the declared margins:
 
 - In block layout, adjacent vertical margins collapse to the larger of the two
 - In flex and grid, margins do not collapse and the parent's `gap` is added on top
+
+That second case is the one the panel could previously not see at all. Three buttons in a `display: flex` row with `gap: 16px` have no margins whatsoever, so the old panel reported `Margin: none` while 16px of real space sat either side of each button, accounted for nowhere.
+
+**The gaps are sibling-based, and the panel says so.** A neighbour in a different container is a neighbour on screen but not in the tree, so it is not measured. For the 2.5.8 spacing question use Highlight target size instead, which does full circle-to-circle geometry across every target on the page regardless of nesting.
+
+A candidate must also overlap on the perpendicular axis, so a sibling sitting in another row or column is not mistaken for a neighbour. In a two-column grid, the top-left cell correctly reports the column gap to its right and the row gap below, and nothing above or to the left.
+
+The panel element itself is excluded from the search. It is appended to `document.body`, so without that it becomes a sibling of every top-level element and, being fixed to the top right, frequently the nearest one.
 
 ### Other notes
 
@@ -522,8 +532,8 @@ Deliberately out of scope: `border-radius`, `box-shadow`, `gap` between children
 | Border | shorthand widths plus style, or `none` |
 | Outline | `[N]px [style], offset [N]px`, or `none` |
 | Margin | CSS shorthand, or `none` |
-| Gap below | measured distance to the next rendered sibling |
 | Total | `[W]px × [H]px`, border box |
+| Gap above / right / below / left | measured distance to the nearest rendered sibling in that direction, omitted where there is none |
 
 | Colour | Hex | Use |
 |--------|-----|-----|

@@ -84,6 +84,66 @@
     return out;
   }
 
+  // The four directions, in CSS shorthand order. "mine" indexes this element's
+  // margin array; "theirs" is the neighbour's facing margin.
+  var DIRS = [
+    { key: 'above', label: 'Gap above', mine: 0, theirs: 'marginBottom', vertical: true },
+    { key: 'right', label: 'Gap right', mine: 1, theirs: 'marginLeft', vertical: false },
+    { key: 'below', label: 'Gap below', mine: 2, theirs: 'marginTop', vertical: true },
+    { key: 'left', label: 'Gap left', mine: 3, theirs: 'marginRight', vertical: false }
+  ];
+
+  // Nearest rendered sibling in one direction. The box must also overlap on the
+  // perpendicular axis, so a sibling sitting in another row or column is not
+  // mistaken for a neighbour.
+  function nearest(el, rect, dir) {
+    var sibs = el.parentElement ? el.parentElement.children : [];
+    var best = null, bestEdge = 0;
+
+    for (var i = 0; i < sibs.length; i++) {
+      var s = sibs[i];
+      // The panel is appended to document.body, so it is a sibling of anything
+      // at the top level of the page. Measuring the gap to our own panel would
+      // be both wrong and hard to spot.
+      if (s === el || s === panel || !isRendered(s)) continue;
+      var r = s.getBoundingClientRect();
+      var edge, closer;
+
+      if (dir === 'above' || dir === 'below') {
+        if (r.right <= rect.left + 0.5 || r.left >= rect.right - 0.5) continue;
+        if (dir === 'above') {
+          if (r.bottom > rect.top + 0.5) continue;
+          edge = r.bottom;
+          closer = best === null || edge > bestEdge;
+        } else {
+          if (r.top < rect.bottom - 0.5) continue;
+          edge = r.top;
+          closer = best === null || edge < bestEdge;
+        }
+      } else {
+        if (r.bottom <= rect.top + 0.5 || r.top >= rect.bottom - 0.5) continue;
+        if (dir === 'left') {
+          if (r.right > rect.left + 0.5) continue;
+          edge = r.right;
+          closer = best === null || edge > bestEdge;
+        } else {
+          if (r.left < rect.right - 0.5) continue;
+          edge = r.left;
+          closer = best === null || edge < bestEdge;
+        }
+      }
+
+      if (closer) { best = s; bestEdge = edge; }
+    }
+
+    if (!best) return null;
+    var gap = dir === 'above' ? rect.top - bestEdge
+            : dir === 'below' ? bestEdge - rect.bottom
+            : dir === 'left' ? rect.left - bestEdge
+            : bestEdge - rect.right;
+    return { el: best, gap: gap };
+  }
+
   function isRendered(el) {
     var r = el.getBoundingClientRect();
     if (!r.width && !r.height) return false;
@@ -197,18 +257,40 @@
     }
     panel.appendChild(row('Scrollbar gutter', gutterText));
 
+    // A box can overflow and still never show a scrollbar. A text input is the
+    // everyday example: its overflow computes to clip, so it scrolls as you
+    // type without ever drawing a bar. The measurement below is only a
+    // scrollbar gutter when a scrollbar could actually appear.
+    var canShowBar = /auto|scroll/.test(cs.overflowY) || /auto|scroll/.test(cs.overflowX);
+
     // Explain where it sits, but only when there is one. Most elements have no
     // gutter, and a glossary line on every element would be noise.
     if (gutterV > 0 || gutterH > 0) {
-      panel.appendChild(note('The space a scrollbar is given. It sits between ' +
-        'the inner border edge and the outer padding edge, so it takes from ' +
-        'the content area rather than from the padding.'));
+      if (canShowBar) {
+        panel.appendChild(note('The space a scrollbar is given. It sits between ' +
+          'the inner border edge and the outer padding edge, so it takes from ' +
+          'the content area rather than from the padding.'));
+      } else {
+        // Measured, but it cannot be a scrollbar gutter: say so rather than
+        // mislabel it. Chrome reserves this inside a text input on a system
+        // set to always show scrollbars.
+        panel.appendChild(note('Reserved space, but not a scrollbar gutter: ' +
+          'overflow is "' + cs.overflowX + '", so no scrollbar can appear ' +
+          'here. The browser or the platform is holding this space for ' +
+          'something else.'));
+      }
     }
 
     if ((scrollsY || scrollsX) && gutterV <= 0 && gutterH <= 0) {
-      panel.appendChild(note('This box scrolls but reserves no gutter, so the ' +
-        'scrollbar is an overlay drawn on top. Expect a reserved gutter on ' +
-        'Windows, where it would take space from the content.'));
+      if (canShowBar) {
+        panel.appendChild(note('This box scrolls but reserves no gutter, so the ' +
+          'scrollbar is an overlay drawn on top. Expect a reserved gutter on ' +
+          'Windows, and on macOS when "Show scroll bars" is set to Always.'));
+      } else {
+        panel.appendChild(note('The content overflows and the box scrolls, but ' +
+          'overflow is "' + cs.overflowX + '", so no scrollbar is drawn and no ' +
+          'gutter is reserved. This is how a text input behaves.'));
+      }
     }
     if (cs.scrollbarGutter && cs.scrollbarGutter !== 'auto') {
       panel.appendChild(note('scrollbar-gutter: ' + cs.scrollbarGutter));
@@ -237,40 +319,6 @@
     // --- margin ---
     panel.appendChild(row('Margin', allZero(mar) ? 'none' : shorthand(mar)));
 
-    // --- the gap you actually get ---
-    // A declared bottom margin is often not the distance to the next box
-    var next = el.nextElementSibling;
-    while (next && !isRendered(next)) next = next.nextElementSibling;
-    if (next) {
-      var nextRect = next.getBoundingClientRect();
-      var gap = nextRect.top - rect.bottom;
-      // Only meaningful when the next box really is below this one
-      if (gap >= -1 && nextRect.top >= rect.top) {
-        var nextTop = px(getComputedStyle(next).marginTop);
-        var declared = mar[2] + nextTop;
-        panel.appendChild(row('Gap below', unit(gap)));
-
-        if (Math.abs(gap - declared) > 0.5) {
-          var parentDisplay = el.parentElement
-            ? getComputedStyle(el.parentElement).display : '';
-          if (/flex|grid/.test(parentDisplay)) {
-            panel.appendChild(note('Declared ' + unit(mar[2]) + ' + ' +
-              unit(nextTop) + ' = ' + unit(declared) + '. This is a ' +
-              parentDisplay + ' item, so margins do not collapse and any ' +
-              'gap property on the parent is added.'));
-          } else if (gap < declared) {
-            panel.appendChild(note('Declared ' + unit(mar[2]) + ' + ' +
-              unit(nextTop) + ' = ' + unit(declared) + ', but adjacent ' +
-              'vertical margins collapse to the larger of the two.'));
-          } else {
-            panel.appendChild(note('Declared ' + unit(mar[2]) + ' + ' +
-              unit(nextTop) + ' = ' + unit(declared) + '. Something else is ' +
-              'adding to the gap.'));
-          }
-        }
-      }
-    }
-
     // --- total ---
     // getBoundingClientRect is the border box: content, padding and border,
     // with margin and outline excluded
@@ -281,6 +329,49 @@
     if (cs.display === 'inline') {
       panel.appendChild(note('Inline box. Vertical padding and margin are ' +
         'drawn but do not push the surrounding lines apart.'));
+    }
+
+    // --- the gaps you actually get, in CSS shorthand order ---
+    // A declared margin is often not the distance to the neighbour: vertical
+    // margins collapse, and a gap property on a flex or grid parent produces
+    // space that appears in no margin at all.
+    var parentDisplay = el.parentElement
+      ? getComputedStyle(el.parentElement).display : '';
+    var flexy = /flex|grid/.test(parentDisplay);
+    var anyGap = false;
+    var flexNoteShown = false;
+
+    DIRS.forEach(function (d) {
+      var found = nearest(el, rect, d.key);
+      if (!found) return;
+      anyGap = true;
+      panel.appendChild(row(d.label, unit(found.gap)));
+
+      var theirs = px(getComputedStyle(found.el)[d.theirs]);
+      var declared = mar[d.mine] + theirs;
+      if (Math.abs(found.gap - declared) <= 0.5) return;
+
+      var sum = 'Declared ' + unit(mar[d.mine]) + ' + ' + unit(theirs) +
+        ' = ' + unit(declared) + '. ';
+      if (flexy) {
+        // The same explanation applies to every direction here, so say it once
+        if (flexNoteShown) return;
+        flexNoteShown = true;
+        panel.appendChild(note('This is a ' + parentDisplay + ' item, so margins ' +
+          'do not collapse and any gap property on the parent is added. The ' +
+          'space measured here comes from that gap, not from a margin.'));
+      } else if (d.vertical && found.gap < declared) {
+        panel.appendChild(note(sum.slice(0, -2) + ', but adjacent vertical ' +
+          'margins collapse to the larger of the two.'));
+      } else {
+        panel.appendChild(note(sum + 'Something else is adding to the gap.'));
+      }
+    });
+
+    if (anyGap) {
+      panel.appendChild(note('Gaps are measured to the nearest sibling in each ' +
+        'direction. A neighbour in a different container is not a sibling, so ' +
+        'it is not measured here.'));
     }
 
     var hint = document.createElement('div');
