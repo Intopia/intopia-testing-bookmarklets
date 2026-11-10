@@ -509,7 +509,13 @@ It explains any difference between the measurement and the declared margins:
 
 That second case is the one the panel could previously not see at all. Three buttons in a `display: flex` row with `gap: 16px` have no margins whatsoever, so the old panel reported `Margin: none` while 16px of real space sat either side of each button, accounted for nowhere.
 
-**The gaps are sibling-based, and the panel says so.** A neighbour in a different container is a neighbour on screen but not in the tree, so it is not measured. For the 2.5.8 spacing question use Highlight target size instead, which does full circle-to-circle geometry across every target on the page regardless of nesting.
+**An only child borrows from its nearest ancestor.** A nav link wrapped in its own `<li>` has no siblings at all, so there is nothing to measure against, yet there is obviously space either side. In that case the panel walks up to the nearest ancestor that has siblings **and still fills the same box on the axis being measured**, and says which element it used.
+
+That guard matters. A nav link and its `<li>` occupy an identical box, so the `li`'s 16px margin really is the space beside the link. A `<span>` inside a full-width `<p>` does not, so it gets no gap rows rather than the paragraph's gap reported as its own.
+
+The walk only applies to a true only child. An element that has siblings but none in a particular direction is simply at the end of its row or column, and gets no row that way.
+
+**Otherwise the gaps are sibling-based, and the panel says so.** A neighbour in a different container is a neighbour on screen but not in the tree, so it is not measured. For the 2.5.8 spacing question use Highlight target size instead, which does full circle-to-circle geometry across every target on the page regardless of nesting.
 
 A candidate must also overlap on the perpendicular axis, so a sibling sitting in another row or column is not mistaken for a neighbour. In a two-column grid, the top-left cell correctly reports the column gap to its right and the row gap below, and nothing above or to the left.
 

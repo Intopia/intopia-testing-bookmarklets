@@ -87,10 +87,10 @@
   // The four directions, in CSS shorthand order. "mine" indexes this element's
   // margin array; "theirs" is the neighbour's facing margin.
   var DIRS = [
-    { key: 'above', label: 'Gap above', mine: 0, theirs: 'marginBottom', vertical: true },
-    { key: 'right', label: 'Gap right', mine: 1, theirs: 'marginLeft', vertical: false },
-    { key: 'below', label: 'Gap below', mine: 2, theirs: 'marginTop', vertical: true },
-    { key: 'left', label: 'Gap left', mine: 3, theirs: 'marginRight', vertical: false }
+    { key: 'above', label: 'Gap above', mine: 'marginTop', theirs: 'marginBottom', vertical: true },
+    { key: 'right', label: 'Gap right', mine: 'marginRight', theirs: 'marginLeft', vertical: false },
+    { key: 'below', label: 'Gap below', mine: 'marginBottom', theirs: 'marginTop', vertical: true },
+    { key: 'left', label: 'Gap left', mine: 'marginLeft', theirs: 'marginRight', vertical: false }
   ];
 
   // Nearest rendered sibling in one direction. The box must also overlap on the
@@ -142,6 +142,45 @@
             : dir === 'left' ? rect.left - bestEdge
             : bestEdge - rect.right;
     return { el: best, gap: gap };
+  }
+
+  // An only child has no siblings to measure against, but the spacing usually
+  // lives on an ancestor: a nav link inside its own <li> is the everyday case,
+  // where the margin sits on the li and the <a> fills it exactly.
+  //
+  // Walk up only while the ancestor still occupies the same span on the axis
+  // being measured. That way the number reported really is the gap beside this
+  // element, rather than some wider wrapper's gap borrowed and mislabelled. A
+  // <span> inside a full-width <p> fails the test and gets no row, which is the
+  // honest answer.
+  function gapFor(el, rect, dir) {
+    var node = el, nodeRect = rect, horizontal = (dir === 'left' || dir === 'right');
+
+    // Only a true only child borrows from an ancestor. An element that has
+    // siblings but none in this particular direction is at the end of its row
+    // or column, and the honest answer there is no row at all rather than a
+    // wrapper's gap reported as its own.
+    var onlyChild = !!el.parentElement && el.parentElement.children.length === 1;
+
+    for (var depth = 0; depth < 5; depth++) {
+      var found = nearest(node, nodeRect, dir);
+      if (found) {
+        return { el: found.el, gap: found.gap, from: node === el ? null : node };
+      }
+      if (!onlyChild) return null;
+      var parent = node.parentElement;
+      if (!parent || parent === document.body || parent === document.documentElement) {
+        return null;
+      }
+      var pr = parent.getBoundingClientRect();
+      var aligned = horizontal
+        ? Math.abs(pr.left - nodeRect.left) < 1 && Math.abs(pr.right - nodeRect.right) < 1
+        : Math.abs(pr.top - nodeRect.top) < 1 && Math.abs(pr.bottom - nodeRect.bottom) < 1;
+      if (!aligned) return null;
+      node = parent;
+      nodeRect = pr;
+    }
+    return null;
   }
 
   function isRendered(el) {
@@ -335,23 +374,35 @@
     // A declared margin is often not the distance to the neighbour: vertical
     // margins collapse, and a gap property on a flex or grid parent produces
     // space that appears in no margin at all.
-    var parentDisplay = el.parentElement
-      ? getComputedStyle(el.parentElement).display : '';
-    var flexy = /flex|grid/.test(parentDisplay);
     var anyGap = false;
     var flexNoteShown = false;
+    var walkNoted = false;
 
     DIRS.forEach(function (d) {
-      var found = nearest(el, rect, d.key);
+      var found = gapFor(el, rect, d.key);
       if (!found) return;
       anyGap = true;
       panel.appendChild(row(d.label, unit(found.gap)));
 
+      // Margins come from whichever element's siblings were actually measured
+      var measured = found.from || el;
+      if (found.from && !walkNoted) {
+        walkNoted = true;
+        panel.appendChild(note('<' + el.tagName.toLowerCase() + '> is an only ' +
+          'child, so the gaps are measured from <' + found.from.tagName.toLowerCase() +
+          '>, the nearest ancestor that has siblings and fills the same box.'));
+      }
+
+      var mine = px(getComputedStyle(measured)[d.mine]);
       var theirs = px(getComputedStyle(found.el)[d.theirs]);
-      var declared = mar[d.mine] + theirs;
+      var declared = mine + theirs;
       if (Math.abs(found.gap - declared) <= 0.5) return;
 
-      var sum = 'Declared ' + unit(mar[d.mine]) + ' + ' + unit(theirs) +
+      var mp = measured.parentElement;
+      var parentDisplay = mp ? getComputedStyle(mp).display : '';
+      var flexy = /flex|grid/.test(parentDisplay);
+
+      var sum = 'Declared ' + unit(mine) + ' + ' + unit(theirs) +
         ' = ' + unit(declared) + '. ';
       if (flexy) {
         // The same explanation applies to every direction here, so say it once
