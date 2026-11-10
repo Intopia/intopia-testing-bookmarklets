@@ -281,11 +281,18 @@
 
   // ---- interaction -------------------------------------------------------
 
+  // Restore whatever inline outline the element had rather than blanking it,
+  // so clicking an element that was styled with an inline outline does not
+  // destroy that style when the bookmarklet is switched off.
+  var prevOutline = '', prevOffset = '';
+
   function clearOutline() {
     if (!outlined) return;
-    outlined.style.outline = '';
-    outlined.style.outlineOffset = '';
+    outlined.style.outline = prevOutline;
+    outlined.style.outlineOffset = prevOffset;
     outlined = null;
+    prevOutline = '';
+    prevOffset = '';
   }
 
   function insidePanel(node) {
@@ -309,6 +316,8 @@
     if (!el || el.nodeType !== 1) return;
 
     clearOutline();
+    prevOutline = el.style.outline;
+    prevOffset = el.style.outlineOffset;
     el.style.outline = '3px solid ' + BLUE;
     el.style.outlineOffset = '2px';
     outlined = el;
@@ -323,11 +332,7 @@
   function teardown() {
     var p = document.getElementById(PANEL_ID);
     if (p) p.remove();
-    if (outlined) {
-      outlined.style.outline = '';
-      outlined.style.outlineOffset = '';
-      outlined = null;
-    }
+    clearOutline();
     document.removeEventListener('mousedown', swallow, true);
     document.removeEventListener('mouseup', swallow, true);
     document.removeEventListener('dblclick', swallow, true);

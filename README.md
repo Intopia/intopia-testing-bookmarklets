@@ -26,7 +26,7 @@ A few bookmarklets only identify what an element is — this is a banner, this i
 
 Landmarks and ARIA table roles use category colours throughout. Captions and headers uses both: category colours for table, caption, TH and scope, with amber and red reserved for the two things that really are verdicts.
 
-Two bookmarklets report rather than judge, and use neither palette: Track focus order and Inspect text styles both use the neutral dark panel `#111111`, because a focus number and a font size are observations, not findings.
+Three bookmarklets report rather than judge, and use neither palette: Track focus order, Inspect text styles and Inspect box model all use the neutral dark panel `#111111`, because a focus number, a font size and a margin are observations, not findings.
 
 Where blue marks a deliberate non-verdict, the badge text says why. Where something is a convention rather than a specification requirement, the badge says that too.
 
@@ -48,34 +48,35 @@ Where blue marks a deliberate non-verdict, the badge text says why. Where someth
 12. Highlight tabindex
 13. Highlight target size
 14. Inspect text styles
-15. Highlight accessible names
-16. Highlight aria-label
-17. Highlight aria-labelledby
-18. Highlight aria-describedby
-19. Highlight name mismatches
-20. Highlight name-prohibited roles
-21. Highlight form field names
-22. Highlight buttons
-23. Highlight fieldsets
-24. Highlight required fields
-25. Highlight readonly fields
-26. Highlight aria-invalid
-27. Highlight autocomplete
-28. Highlight aria-expanded
-29. Highlight aria-checked
-30. Highlight aria-pressed
-31. Highlight aria-roledescription
-32. Highlight aria-details
-33. Highlight aria-valuetext
-34. Highlight aria-valuenow
-35. Highlight aria-valuemin and aria-valuemax
-36. Highlight aria-setsize and aria-posinset
-37. Highlight aria-level
-38. Highlight aria-controls
-39. Highlight aria-haspopup
-40. Highlight shadow DOM
-41. Highlight links
-42. ContrastChecker
+15. Inspect box model
+16. Highlight accessible names
+17. Highlight aria-label
+18. Highlight aria-labelledby
+19. Highlight aria-describedby
+20. Highlight name mismatches
+21. Highlight name-prohibited roles
+22. Highlight form field names
+23. Highlight buttons
+24. Highlight fieldsets
+25. Highlight required fields
+26. Highlight readonly fields
+27. Highlight aria-invalid
+28. Highlight autocomplete
+29. Highlight aria-expanded
+30. Highlight aria-checked
+31. Highlight aria-pressed
+32. Highlight aria-roledescription
+33. Highlight aria-details
+34. Highlight aria-valuetext
+35. Highlight aria-valuenow
+36. Highlight aria-valuemin and aria-valuemax
+37. Highlight aria-setsize and aria-posinset
+38. Highlight aria-level
+39. Highlight aria-controls
+40. Highlight aria-haspopup
+41. Highlight shadow DOM
+42. Highlight links
+43. ContrastChecker
 
 ---
 
@@ -90,7 +91,7 @@ Colour palette used across the set:
 - Teal `#006064` — used in specific bookmarklets (landmarks, ARIA tables)
 - Deep pink `#880e4f` — used in landmarks
 - Blue-grey `#37474f` — used in specific bookmarklets (landmarks, ARIA tables)
-- Dark `#111111` — neutral panel surface: focus order tracker, text styles panel
+- Dark `#111111` — neutral panel surface: focus order tracker, text styles panel, box model panel
 
 Badge text system:
 - **Informational** — sentence case, source/element first: `aria-label: Close`
@@ -463,6 +464,71 @@ Background colour is out of scope. This is a snapshot of the text, not a contras
 |--------|-----|-----|
 | Dark | `#111111` | panel surface |
 | Dark blue | `#0a558c` | outline on the inspected element |
+
+---
+
+## Inspect box model
+
+Interactive — click to activate, then click any element. A fixed panel reports how its box is put together. Esc to stop, or re-run the bookmarklet to switch it off.
+
+The companion to Inspect text styles. That one reports what the text inside the box looks like; this one reports the box itself. Same interaction, same panel, same no-verdicts stance, so green, amber and red are deliberately absent.
+
+**The page is in test mode while this is on**, exactly as in Inspect text styles: pointer activation is suppressed in the capture phase so clicking a control inspects it rather than using it.
+
+**The highlight is a box-shadow, not an outline.** Outline is one of the properties this tool measures, so drawing one would sit on top of the page's own and leave no way to tell which ring belongs to the page. A shadow takes no space either, so the numbers are unaffected.
+
+**Rows read from the inside out**, matching the order the box is built: content area, padding, scrollbar gutter, border, outline, margin. Four-sided values collapse to CSS shorthand, so `18px 24px` when the sides pair up and `1px 2px 3px 4px` when they do not.
+
+### The scrollbar gutter
+
+No CSS property reports it, so it is measured by subtraction: `offsetWidth − clientWidth − left border − right border`, because `clientWidth` includes padding but excludes border and scrollbar.
+
+The gutter sits between the inner border edge and the outer padding edge, so a scrollbar takes space from the **content area**, not from the padding. Most people assume the opposite.
+
+Three cases are reported differently, because they mean different things:
+
+| Condition | What the panel says |
+|---|---|
+| Space reserved, overflow allows a scrollbar | The gutter, with a note on where it sits |
+| Scrolls, no space reserved, overflow allows a scrollbar | Overlay scrollbar. Expect a reserved gutter on Windows, and on macOS when "Show scroll bars" is set to Always |
+| Scrolls, overflow is `clip` or `hidden` | No scrollbar can appear, so nothing is reserved. This is how a text input behaves |
+| Space reserved, but overflow is `clip` or `hidden` | Reserved space, explicitly **not** called a scrollbar gutter, since no scrollbar can appear there |
+
+That last row is not hypothetical. On macOS with "Show scroll bars" set to Always, Chrome reserves 16px inside every single-line text input, because its inner editor is a horizontal scroll container, and then `overflow: clip` stops the bar ever being painted. The field has 16px less usable width than its CSS says. A `<textarea>` reserves only once its content overflows, and a `<select>` reserves nothing, having no scrolling inner editor.
+
+The same page can therefore report different numbers on different machines. That is a real platform difference, not a fault in the tool.
+
+### Gap below
+
+A declared bottom margin is often not the distance you get, so the panel measures the real gap to the next rendered sibling and explains any difference:
+
+- In block layout, adjacent vertical margins collapse to the larger of the two
+- In flex and grid, margins do not collapse and the parent's `gap` is added on top
+
+### Other notes
+
+`Total` is the border box from `getBoundingClientRect`: content, padding and border, with margin and outline excluded.
+
+An inline box is flagged, since vertical padding and margin are drawn but do not push the surrounding lines apart. Inline boxes report no gutter, because they have no client box for one.
+
+Deliberately out of scope: `border-radius`, `box-shadow`, `gap` between children, position offsets and `transform`.
+
+| Row | Value shown |
+|-----|-------------|
+| box-sizing | `content-box` or `border-box` |
+| Content | `[W]px × [H]px`, the inner box |
+| Padding | CSS shorthand, or `none` |
+| Scrollbar gutter | `[N]px vertical`, `[N]px horizontal`, or `none` |
+| Border | shorthand widths plus style, or `none` |
+| Outline | `[N]px [style], offset [N]px`, or `none` |
+| Margin | CSS shorthand, or `none` |
+| Gap below | measured distance to the next rendered sibling |
+| Total | `[W]px × [H]px`, border box |
+
+| Colour | Hex | Use |
+|--------|-----|-----|
+| Dark | `#111111` | panel surface |
+| Dark blue | `#0a558c` | box-shadow highlight on the inspected element |
 
 ---
 
