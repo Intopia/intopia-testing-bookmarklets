@@ -14,9 +14,18 @@
 // It measures the clickable region, not the visible icon, and includes the
 // associated <label> where clicking that label activates the control.
 //
+// Undersized targets inside the viewport then get their real hit area measured
+// by hit testing. A 16 x 16 button with a ::before overlay stretching 8px past
+// every edge is genuinely 32 x 32 to a pointer, and reading the CSS cannot tell
+// you that. Probing with elementFromPoint can, and it gets pointer-events: none
+// right for free, which reading the pseudo-element's geometry would not. It also
+// catches hit areas extended any other way: transparent padding, a wrapper, an
+// overlapping sibling.
+//
 // Limits worth knowing:
-//   - a hit area extended by a ::before or ::after overlay is not measurable,
-//     so those read as undersized when they may not be
+//   - hit testing uses viewport coordinates, so targets scrolled out of view
+//     cannot be probed. Those keep their CSS measurement and say so. Scroll and
+//     re-run to measure them.
 //   - controls that appear dynamically (menus, dialogs, toolbars, popovers)
 //     must be open when the bookmarklet runs. Re-run with them open.
 (function () {
@@ -132,6 +141,113 @@
     });
   });
 
+  // ---- real hit area, measured rather than inferred ----------------------
+
+  var VIEW_W = document.documentElement.clientWidth;
+  var VIEW_H = document.documentElement.clientHeight;
+
+  // We only need to know whether the hit area reaches 24, so there is no point
+  // searching further than that past each edge
+  var MAX_REACH = MIN;
+
+  function inViewport(x, y) {
+    return x >= 0 && y >= 0 && x < VIEW_W && y < VIEW_H;
+  }
+
+  // A hit on the element, on anything inside it, or on a label that activates
+  // it, all mean the pointer would reach this target
+  function isOwnTarget(hit, t) {
+    if (!hit) return false;
+    if (hit === t.el || t.el.contains(hit)) return true;
+    if (t.el.labels) {
+      for (var i = 0; i < t.el.labels.length; i++) {
+        var l = t.el.labels[i];
+        if (hit === l || l.contains(hit)) return true;
+      }
+    }
+    return false;
+  }
+
+  // Hit testing snaps to device pixels, so a point a fraction of a pixel outside
+  // an element still lands on it. Probing at fractional distances therefore gave
+  // every target about a pixel of phantom reach and marked it as extended.
+  // Whole-pixel probes with a 2px floor keep that rounding out of the numbers.
+  var SLOP = 2;
+
+  // How far the hit area extends past one edge. Binary search, since stepping a
+  // pixel at a time across every undersized target on a page adds up. This
+  // assumes the hit area is contiguous, which is true of the patterns it is
+  // meant to catch; a hit area with a hole in it would read as the near edge.
+  function reach(t, dx, dy) {
+    var lo = 0, hi = MAX_REACH;
+    while (lo < hi) {
+      // Probe the far edge of the nth pixel, not its middle. Rounding bleeds
+      // outward by up to a pixel on the top and left edges, so probing the
+      // middle over-reported and could have cleared a 23px target as 24px. This
+      // way the measurement is short by up to a pixel instead, which at worst
+      // leaves a warning in place on something that passes.
+      var mid = Math.ceil((lo + hi) / 2);
+      var x = dx === 0 ? t.cx : (dx > 0 ? t.box.right + mid : t.box.left - mid);
+      var y = dy === 0 ? t.cy : (dy > 0 ? t.box.bottom + mid : t.box.top - mid);
+      // Outside the viewport we cannot know, so treat it as not reaching. That
+      // under-reports rather than over-reports, which is the safe direction.
+      if (!inViewport(x, y) || !isOwnTarget(document.elementFromPoint(x, y), t)) {
+        hi = mid - 1;
+      } else {
+        lo = mid;
+      }
+    }
+    return lo < SLOP ? 0 : lo;
+  }
+
+  // Returns true when the hit area could actually be measured
+  function measureHitArea(t) {
+    if (!inViewport(t.cx, t.cy)) return false;
+    // If the centre does not hit the target, something is covering it and any
+    // probe result would describe that something instead
+    if (!isOwnTarget(document.elementFromPoint(t.cx, t.cy), t)) return false;
+
+    var up = reach(t, 0, -1);
+    var right = reach(t, 1, 0);
+    var down = reach(t, 0, 1);
+    var left = reach(t, -1, 0);
+
+    if (up + right + down + left > 0) {
+      t.box = {
+        left: t.box.left - left,
+        top: t.box.top - up,
+        right: t.box.right + right,
+        bottom: t.box.bottom + down,
+        width: t.box.width + left + right,
+        height: t.box.height + up + down
+      };
+      t.cx = t.box.left + t.box.width / 2;
+      t.cy = t.box.top + t.box.height / 2;
+      t.extended = true;
+    }
+    t.verified = true;
+    return true;
+  }
+
+  // Measure before anything is drawn, so the overlay cannot be hit tested, and
+  // before spacing is calculated, so conflicts use the real boxes
+  var verifiedCount = 0;
+  var clearedCount = 0;
+  var unverifiedCount = 0;
+
+  targets.forEach(function (t) {
+    if (!t.undersized) return;
+    if (!measureHitArea(t)) {
+      unverifiedCount++;
+      return;
+    }
+    verifiedCount++;
+    if (t.box.width >= MIN && t.box.height >= MIN) {
+      t.undersized = false;
+      clearedCount++;
+    }
+  });
+
   // Nested targets share a region, so they are not spacing conflicts
   function isNested(a, b) {
     return a.el.contains(b.el) || b.el.contains(a.el);
@@ -218,6 +334,14 @@
       text += '. Native control, check whether the author changed its size';
     }
 
+    // Say where the number came from, so an unverified warning is not mistaken
+    // for a measured one
+    if (!t.verified) {
+      text += '. Hit area not verified: scroll it into view and re-run';
+    } else if (t.extended) {
+      text += '. Hit area measured, larger than the visible box';
+    }
+
     t.el.style.outline = '3px solid ' + colour;
     t.el.style.outlineOffset = '2px';
     flaggedEls.push(t.el);
@@ -252,19 +376,33 @@
 
   line(targets.length + ' pointer target' + (targets.length === 1 ? '' : 's') + ' measured');
 
+  if (clearedCount > 0) {
+    line(clearedCount + ' reached ' + MIN + ' \u00d7 ' + MIN +
+      ' once the real hit area was measured, so ' +
+      (clearedCount === 1 ? 'it is' : 'they are') + ' not flagged');
+  }
+
   if (undersizedCount === 0) {
-    line('None under ' + MIN + ' \u00d7 ' + MIN + ' CSS pixels');
+    line('None under ' + MIN + ' \u00d7 ' + MIN);
   } else {
+    var clear = undersizedCount - conflictCount;
     line(undersizedCount + ' under ' + MIN + ' \u00d7 ' + MIN +
-      ', of which ' + (undersizedCount - conflictCount) + ' have clear spacing', AMBER);
+      ', of which ' + clear + (clear === 1 ? ' has' : ' have') +
+      ' clear spacing', AMBER);
     if (conflictCount > 0) {
       line(conflictCount + ' with a 24px circle overlapping another target', RED);
     }
   }
 
+  if (unverifiedCount > 0) {
+    line(unverifiedCount + ' could not be hit tested, measured from CSS only. ' +
+      'Scroll ' + (unverifiedCount === 1 ? 'it' : 'them') + ' into view and re-run.');
+  }
+
   var note = document.createElement('div');
   note.textContent = 'Warnings, not failures. Exceptions need human judgement. ' +
-    'Re-run with menus and dialogs open. Esc to clear.';
+    'Hit areas are measured inside the viewport only. ' +
+    'Re-run with menus and dialogs open, and after scrolling. Esc to clear.';
   note.style.opacity = '0.7';
   note.style.marginTop = '8px';
   note.style.fontSize = '13px';

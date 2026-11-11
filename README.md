@@ -408,7 +408,19 @@ Where the first two look likely, the badge says so as a prompt, not a verdict.
 
 **Excluded from measurement**, and counted out of the total rather than dropped silently: disabled controls, since they do not accept a pointer action, and elements that are not rendered.
 
-**Limits worth knowing.** A hit area extended by a `::before` or `::after` overlay is not measurable, so those read as undersized when they may not be. Controls that appear dynamically (menus, dialogs, toolbars, popovers) must be open when the bookmarklet runs, so re-run with them open.
+**The real hit area is measured, not inferred.** Undersized targets inside the viewport are then probed with `document.elementFromPoint`, binary searching outward from each edge. A 16 × 16 button with a `::before` overlay stretching 8px past every edge is genuinely 32 × 32 to a pointer, and no amount of reading the CSS will tell you that.
+
+Probing beats reading the pseudo-element's geometry in two ways. `pointer-events: none` on the overlay is handled for free, correctly reporting no extension. And any *other* way of extending a hit area is caught too: transparent padding, a padded wrapper, an overlapping sibling. It measures what a pointer would actually reach.
+
+Three details that took a few attempts to get right:
+
+- **Probes are at whole pixels.** Hit testing snaps to device pixels, so a point a fraction outside an element still lands on it. Fractional probing gave every target about a pixel of phantom reach and marked it as extended.
+- **The probe hits the far edge of each pixel, not its middle.** Rounding bleeds outward by up to a pixel on the top and left edges. Probing the middle over-reported and could have cleared a 23px target as 24px. This way the measurement is short by up to a pixel instead, which at worst leaves a warning on something that passes. For a warnings-only tool that is the safe direction.
+- **A target whose centre does not hit test to itself is not probed.** Something is covering it, and any result would describe that something instead.
+
+**Targets outside the viewport cannot be probed**, because hit testing uses viewport coordinates. Those keep their CSS measurement, their badge says `Hit area not verified: scroll it into view and re-run`, and the summary panel counts them separately. Scrolling and re-running measures them.
+
+**Other limits.** Controls that appear dynamically (menus, dialogs, toolbars, popovers) must be open when the bookmarklet runs, so re-run with them open.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
@@ -416,15 +428,19 @@ Where the first two look likely, the badge says so as a prompt, not a verdict.
 | Red | `#b00020` | [W] × [H] — under 24 × 24. 24px circle overlaps [N] other targets |
 | — | — | either of the above with `. Inline text link, exception may apply` |
 | — | — | either of the above with `. Native control, check whether the author changed its size` |
+| — | — | either of the above with `. Hit area measured, larger than the visible box` |
+| — | — | either of the above with `. Hit area not verified: scroll it into view and re-run` |
 
 Summary panel lines:
 
 | Colour | Line |
 |--------|------|
 | — | [N] pointer targets measured |
-| — | None under 24 × 24 CSS pixels |
+| — | [N] reached 24 × 24 once the real hit area was measured, so they are not flagged |
+| — | None under 24 × 24 |
 | Amber | [N] under 24 × 24, of which [N] have clear spacing |
 | Red | [N] with a 24px circle overlapping another target |
+| — | [N] could not be hit tested, measured from CSS only. Scroll them into view and re-run. |
 
 ---
 
