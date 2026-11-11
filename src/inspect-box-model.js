@@ -94,15 +94,65 @@
   // The four directions, in CSS shorthand order. "mine" indexes this element's
   // margin array; "theirs" is the neighbour's facing margin.
   var DIRS = [
-    { key: 'above', label: 'Gap above', mine: 'marginTop', theirs: 'marginBottom', vertical: true },
-    { key: 'right', label: 'Gap right', mine: 'marginRight', theirs: 'marginLeft', vertical: false },
-    { key: 'below', label: 'Gap below', mine: 'marginBottom', theirs: 'marginTop', vertical: true },
-    { key: 'left', label: 'Gap left', mine: 'marginLeft', theirs: 'marginRight', vertical: false }
+    { key: 'above', label: 'Gap above', mine: 'marginTop', theirs: 'marginBottom',
+      vertical: true, mineName: 'top', theirsName: 'bottom', neighbour: 'the element above' },
+    { key: 'right', label: 'Gap right', mine: 'marginRight', theirs: 'marginLeft',
+      vertical: false },
+    { key: 'below', label: 'Gap below', mine: 'marginBottom', theirs: 'marginTop',
+      vertical: true, mineName: 'bottom', theirsName: 'top', neighbour: 'the element below' },
+    { key: 'left', label: 'Gap left', mine: 'marginLeft', theirs: 'marginRight',
+      vertical: false }
   ];
+
+  // Which margin wins a collapse depends on the signs, not simply on which is
+  // larger. Two positives collapse to the larger, two negatives collapse to the
+  // MORE NEGATIVE, and a mixed pair is added. "The larger wins" is the rule
+  // everybody remembers and it is only right for the first of those three.
+  function collapsed(a, b) {
+    if (a >= 0 && b >= 0) return Math.max(a, b);
+    if (a < 0 && b < 0) return Math.min(a, b);
+    return a + b;
+  }
+
+  function collapseNote(mine, theirs, gap, d) {
+    var a = 'this element\'s ' + d.mineName + ' margin (' + unit(mine) + ')';
+    var b = d.neighbour + '\'s ' + d.theirsName + ' margin (' + unit(theirs) + ')';
+    var text;
+
+    if (mine >= 0 && theirs >= 0) {
+      text = 'Adjacent vertical margins collapse. Both are positive, so the larger wins: ';
+      text += mine === theirs
+        ? 'they are equal at ' + unit(mine) + '.'
+        : (mine > theirs ? a + ' beats ' + b + '.' : b + ' beats ' + a + '.');
+    } else if (mine < 0 && theirs < 0) {
+      text = 'Both margins are negative, so they collapse to the more negative ' +
+        'of the two rather than the larger: ';
+      text += mine === theirs
+        ? 'they are equal at ' + unit(mine) + '.'
+        : (mine < theirs ? a + ' wins.' : b + ' wins.');
+    } else {
+      text = 'One margin is negative, so the two are added rather than one ' +
+        'winning: ' + unit(mine) + ' + ' + unit(theirs) + ' = ' + unit(mine + theirs) + '.';
+    }
+
+    // Collapsing explains the usual case. When the measurement disagrees with
+    // it, something else is in play and the note should not pretend otherwise.
+    if (Math.abs(gap - collapsed(mine, theirs)) > 0.5) {
+      text += ' The measured gap is ' + unit(gap) +
+        ', so something else is contributing as well.';
+    }
+    return text;
+  }
 
   // Nearest rendered sibling in one direction. The box must also overlap on the
   // perpendicular axis, so a sibling sitting in another row or column is not
   // mistaken for a neighbour.
+  //
+  // A neighbour counts as being in a direction when it STARTS further that way,
+  // not when it clears this box entirely. Requiring it to clear the box meant a
+  // sibling pulled up by a negative margin, and so overlapping, was reported as
+  // no neighbour at all. It is now found and its gap comes out negative, which
+  // is the honest description of two boxes that overlap.
   function nearest(el, rect, dir) {
     var sibs = el.parentElement ? el.parentElement.children : [];
     var best = null, bestEdge = 0;
@@ -119,22 +169,22 @@
       if (dir === 'above' || dir === 'below') {
         if (r.right <= rect.left + 0.5 || r.left >= rect.right - 0.5) continue;
         if (dir === 'above') {
-          if (r.bottom > rect.top + 0.5) continue;
+          if (r.bottom >= rect.bottom - 0.5) continue;
           edge = r.bottom;
           closer = best === null || edge > bestEdge;
         } else {
-          if (r.top < rect.bottom - 0.5) continue;
+          if (r.top <= rect.top + 0.5) continue;
           edge = r.top;
           closer = best === null || edge < bestEdge;
         }
       } else {
         if (r.bottom <= rect.top + 0.5 || r.top >= rect.bottom - 0.5) continue;
         if (dir === 'left') {
-          if (r.right > rect.left + 0.5) continue;
+          if (r.right >= rect.right - 0.5) continue;
           edge = r.right;
           closer = best === null || edge > bestEdge;
         } else {
-          if (r.left < rect.right - 0.5) continue;
+          if (r.left <= rect.left + 0.5) continue;
           edge = r.left;
           closer = best === null || edge < bestEdge;
         }
@@ -405,26 +455,31 @@
       var mine = px(getComputedStyle(measured)[d.mine]);
       var theirs = px(getComputedStyle(found.el)[d.theirs]);
       var declared = mine + theirs;
-      if (Math.abs(found.gap - declared) <= 0.5) return;
 
       var mp = measured.parentElement;
       var parentDisplay = mp ? getComputedStyle(mp).display : '';
-      var flexy = /flex|grid/.test(parentDisplay);
 
-      var sum = 'Declared ' + unit(mine) + ' + ' + unit(theirs) +
-        ' = ' + unit(declared) + '. ';
-      if (flexy) {
+      if (/flex|grid/.test(parentDisplay)) {
+        if (Math.abs(found.gap - declared) <= 0.5) return;
         // The same explanation applies to every direction here, so say it once
         if (flexNoteShown) return;
         flexNoteShown = true;
         panel.appendChild(note('This is a ' + parentDisplay + ' item, so margins ' +
           'do not collapse and any gap property on the parent is added. The ' +
           'space measured here comes from that gap, not from a margin.'));
-      } else if (d.vertical && found.gap < declared) {
-        panel.appendChild(note(sum.slice(0, -2) + ', but adjacent vertical ' +
-          'margins collapse to the larger of the two.'));
-      } else {
-        panel.appendChild(note(sum + 'Something else is adding to the gap.'));
+        return;
+      }
+
+      // Two vertical margins meeting is a contest worth narrating, so explain it
+      // whenever both are in play, not only when the result surprises
+      if (d.vertical && mine !== 0 && theirs !== 0) {
+        panel.appendChild(note(collapseNote(mine, theirs, found.gap, d)));
+        return;
+      }
+
+      if (Math.abs(found.gap - declared) > 0.5) {
+        panel.appendChild(note('Declared ' + unit(mine) + ' + ' + unit(theirs) +
+          ' = ' + unit(declared) + '. Something else is adding to the gap.'));
       }
     });
 

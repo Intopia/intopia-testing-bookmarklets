@@ -522,10 +522,19 @@ The same page can therefore report different numbers on different machines. That
 
 A declared margin is often not the distance you get, so the panel measures the real gap to the nearest rendered sibling in each of the four directions, in CSS shorthand order: `Gap above`, `Gap right`, `Gap below`, `Gap left`. A direction with no sibling gets no row.
 
-It explains any difference between the measurement and the declared margins:
+Where two vertical margins meet, the note names **which one wins**, because the rule is not the one most people carry around:
 
-- In block layout, adjacent vertical margins collapse to the larger of the two
-- In flex and grid, margins do not collapse and the parent's `gap` is added on top
+| Margins | What happens | Example |
+|---|---|---|
+| Both positive | The larger wins | 40 and 20 give 40 |
+| Both negative | The **more negative** wins, not the larger | -40 and -20 give -40 |
+| One of each | They are **added**, nobody wins | 40 and -20 give 20 |
+
+"The larger of the two wins" is right only for the first row. All three were verified against the browser rather than taken from the spec.
+
+In flex and grid, margins do not collapse at all and the parent's `gap` is added on top, which the note says instead.
+
+A negative collapse pulls the neighbour up so the boxes overlap, and the gap is reported as a negative number. If the overlap is so large that the neighbour starts above this element's own top edge, it is no longer meaningfully "below" and gets no row.
 
 That second case is the one the panel could previously not see at all. Three buttons in a `display: flex` row with `gap: 16px` have no margins whatsoever, so the old panel reported `Margin: none` while 16px of real space sat either side of each button, accounted for nowhere.
 
