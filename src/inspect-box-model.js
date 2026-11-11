@@ -53,6 +53,13 @@
     return num(n) + 'px';
   }
 
+  // Leftover space from a subtraction of rounded integers against fractional
+  // borders, so it arrives with sub-pixel noise, and page zoom adds more.
+  // Anything under a pixel is that noise rather than reserved space.
+  function spare(n) {
+    return n < 1 ? 0 : Math.round(n);
+  }
+
   // Four sides in CSS order: top, right, bottom, left
   function sides(cs, prefix, suffix) {
     return ['Top', 'Right', 'Bottom', 'Left'].map(function (side) {
@@ -272,18 +279,27 @@
     // --- padding ---
     panel.appendChild(row('Padding', allZero(pad) ? 'none' : shorthand(pad)));
 
-    // --- scrollbar gutter ---
+    // --- scrollbar gutter, or whatever else is holding the space ---
     // Not a CSS property you can read. The only way to it is subtraction: the
     // space between the inner border edge and the outer padding edge.
     // An inline box reports an offset size but a client size of zero, so the
-    // subtraction would produce a nonsense gutter. Inline boxes never have one.
+    // subtraction would produce a nonsense figure. Inline boxes never have one.
     var hasClientBox = el.clientWidth > 0 || el.clientHeight > 0;
     var gutterV = hasClientBox
-      ? el.offsetWidth - el.clientWidth - bor[1] - bor[3] : 0;
+      ? spare(el.offsetWidth - el.clientWidth - bor[1] - bor[3]) : 0;
     var gutterH = hasClientBox
-      ? el.offsetHeight - el.clientHeight - bor[0] - bor[2] : 0;
+      ? spare(el.offsetHeight - el.clientHeight - bor[0] - bor[2]) : 0;
     var scrollsY = el.scrollHeight > el.clientHeight + 1;
     var scrollsX = el.scrollWidth > el.clientWidth + 1;
+
+    // A box can overflow and still never show a scrollbar. A text input is the
+    // everyday example: its overflow computes to clip, so it scrolls as you
+    // type without ever drawing a bar. Calling the leftover space a scrollbar
+    // gutter there is a claim the tool cannot support, and reading "16px" next
+    // to the words "Scrollbar gutter" is exactly how it misleads. So the label
+    // itself, not just the note underneath, depends on whether a scrollbar
+    // could appear at all.
+    var canShowBar = /auto|scroll/.test(cs.overflowY) || /auto|scroll/.test(cs.overflowX);
 
     var gutterText;
     if (gutterV > 0 || gutterH > 0) {
@@ -294,29 +310,22 @@
     } else {
       gutterText = 'none';
     }
-    panel.appendChild(row('Scrollbar gutter', gutterText));
+    panel.appendChild(row(canShowBar ? 'Scrollbar gutter' : 'Reserved space',
+      gutterText));
 
-    // A box can overflow and still never show a scrollbar. A text input is the
-    // everyday example: its overflow computes to clip, so it scrolls as you
-    // type without ever drawing a bar. The measurement below is only a
-    // scrollbar gutter when a scrollbar could actually appear.
-    var canShowBar = /auto|scroll/.test(cs.overflowY) || /auto|scroll/.test(cs.overflowX);
-
-    // Explain where it sits, but only when there is one. Most elements have no
-    // gutter, and a glossary line on every element would be noise.
+    // Explain it, but only when there is some. Most elements have none, and a
+    // glossary line on every element would be noise.
     if (gutterV > 0 || gutterH > 0) {
       if (canShowBar) {
         panel.appendChild(note('The space a scrollbar is given. It sits between ' +
           'the inner border edge and the outer padding edge, so it takes from ' +
           'the content area rather than from the padding.'));
       } else {
-        // Measured, but it cannot be a scrollbar gutter: say so rather than
-        // mislabel it. Chrome reserves this inside a text input on a system
-        // set to always show scrollbars.
-        panel.appendChild(note('Reserved space, but not a scrollbar gutter: ' +
-          'overflow is "' + cs.overflowX + '", so no scrollbar can appear ' +
-          'here. The browser or the platform is holding this space for ' +
-          'something else.'));
+        // Measured, but it cannot be a scrollbar gutter. Chrome reserves this
+        // inside a text input on a system set to always show scrollbars.
+        panel.appendChild(note('Not a scrollbar gutter: overflow is "' +
+          cs.overflowX + '", so no scrollbar can appear here. The browser or ' +
+          'the platform is holding this space for something else.'));
       }
     }
 

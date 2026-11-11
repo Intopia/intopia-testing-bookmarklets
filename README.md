@@ -501,14 +501,18 @@ No CSS property reports it, so it is measured by subtraction: `offsetWidth − c
 
 The gutter sits between the inner border edge and the outer padding edge, so a scrollbar takes space from the **content area**, not from the padding. Most people assume the opposite.
 
-Three cases are reported differently, because they mean different things:
+**The row label depends on whether a scrollbar is possible at all**, not just the note underneath it. When computed `overflow-x` or `overflow-y` is `auto` or `scroll` the row is labelled `Scrollbar gutter`. Otherwise it is labelled `Reserved space`.
+
+That distinction matters because the label is what gets read. `Scrollbar gutter: 16px` on a text input is a claim the tool cannot support, and a reader will believe it long before they reach the explanation below.
+
+Values are rounded, and anything under 1px is reported as none. The figure comes from subtracting rounded integers against possibly fractional borders, so it arrives with sub-pixel noise, and page zoom adds more.
 
 | Condition | What the panel says |
 |---|---|
-| Space reserved, overflow allows a scrollbar | The gutter, with a note on where it sits |
-| Scrolls, no space reserved, overflow allows a scrollbar | Overlay scrollbar. Expect a reserved gutter on Windows, and on macOS when "Show scroll bars" is set to Always |
-| Scrolls, overflow is `clip` or `hidden` | No scrollbar can appear, so nothing is reserved. This is how a text input behaves |
-| Space reserved, but overflow is `clip` or `hidden` | Reserved space, explicitly **not** called a scrollbar gutter, since no scrollbar can appear there |
+| Space reserved, overflow allows a scrollbar | `Scrollbar gutter`, with a note on where it sits |
+| Scrolls, no space reserved, overflow allows a scrollbar | `Scrollbar gutter: none`, plus a note that the scrollbar is an overlay. Expect a reserved gutter on Windows, and on macOS when "Show scroll bars" is set to Always |
+| Scrolls, overflow is `clip` or `hidden` | `Reserved space: none`, plus a note that no scrollbar can appear. This is how a text input behaves |
+| Space reserved, but overflow is `clip` or `hidden` | `Reserved space: [N]px`, never called a gutter, with a note that something else is holding it |
 
 That last row is not hypothetical. On macOS with "Show scroll bars" set to Always, Chrome reserves 16px inside every single-line text input, because its inner editor is a horizontal scroll container, and then `overflow: clip` stops the bar ever being painted. The field has 16px less usable width than its CSS says. A `<textarea>` reserves only once its content overflows, and a `<select>` reserves nothing, having no scrolling inner editor.
 
@@ -550,7 +554,7 @@ Deliberately out of scope: `border-radius`, `box-shadow`, `gap` between children
 | box-sizing | `content-box` or `border-box` |
 | Content | `[W]px × [H]px`, the inner box |
 | Padding | CSS shorthand, or `none` |
-| Scrollbar gutter | `[N]px vertical`, `[N]px horizontal`, or `none` |
+| Scrollbar gutter *or* Reserved space | `[N]px vertical`, `[N]px horizontal`, or `none`. The label depends on whether `overflow` is `auto` or `scroll` |
 | Border | shorthand widths plus style, or `none` |
 | Outline | `[N]px [style], offset [N]px`, or `none` |
 | Margin | CSS shorthand, or `none` |
