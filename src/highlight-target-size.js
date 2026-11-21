@@ -26,16 +26,26 @@
 //   - hit testing uses viewport coordinates, so targets scrolled out of view
 //     cannot be probed. Those keep their CSS measurement and say so. Scroll and
 //     re-run to measure them.
+//   - a target whose centre is covered by something else, such as a sticky
+//     header or a cookie banner, cannot be probed either. That is reported
+//     separately, since scrolling will not help: the cover has to go.
 //   - controls that appear dynamically (menus, dialogs, toolbars, popovers)
 //     must be open when the bookmarklet runs. Re-run with them open.
+//   - only inline onclick is detectable. A <div> wired up with addEventListener
+//     is a real pointer target to a user and invisible to this tool, because
+//     listeners cannot be enumerated from script. Nothing can fix that from a
+//     bookmarklet, so a page built that way will under-report.
 (function () {
   var OVERLAY_ID = 'a11y-target-size-overlay';
   var PANEL_ID = 'a11y-target-size-panel';
 
-  var oldOverlay = document.getElementById(OVERLAY_ID);
-  if (oldOverlay) oldOverlay.remove();
-  var oldPanel = document.getElementById(PANEL_ID);
-  if (oldPanel) oldPanel.remove();
+  // Each run has to undo the previous one. Removing the overlay and panel was
+  // not enough: outlines stayed on elements that are no longer flagged, and
+  // every run added another Esc listener. The teardown is parked on window so
+  // the next run can find it whether or not Esc was pressed.
+  if (typeof window.__a11yTargetSize === 'function') {
+    try { window.__a11yTargetSize(); } catch (e) {}
+  }
 
   var overlay = document.createElement('div');
   overlay.id = OVERLAY_ID;
@@ -43,6 +53,7 @@
     'pointer-events:none;z-index:999999;';
   document.body.appendChild(overlay);
 
+  var BLUE = '#0a558c';
   var AMBER = '#e65100';
   var RED = '#b00020';
 
@@ -64,11 +75,32 @@
     return window.getComputedStyle(el).visibility !== 'hidden';
   }
 
-  // A disabled control does not accept a pointer action, so it is not a target
+  // A disabled control does not accept a pointer action, so it is not a target.
+  // :disabled rather than el.disabled, because a control inside a
+  // <fieldset disabled> is disabled without its own property being set. The
+  // selector also gets the exception right: a control in the fieldset's first
+  // <legend> stays enabled.
   function isDisabled(el) {
-    if (el.disabled) return true;
+    if (el.matches(':disabled')) return true;
     var ariaDisabled = el.getAttribute('aria-disabled');
     return ariaDisabled !== null && ariaDisabled.trim().toLowerCase() === 'true';
+  }
+
+  // Nothing inside an inert subtree can be clicked at all, so none of it is a
+  // pointer target. Setting el.inert reflects to the attribute, so this catches
+  // both the markup and the scripted form.
+  function isInert(el) {
+    return !!el.closest('[inert]');
+  }
+
+  // The visually-hidden pattern clips a focusable element to a pixel so it only
+  // appears on focus. A skip link measured in that state is 1 x 1, which is true
+  // and useless: in the state a pointer user can reach it, it is a normal size.
+  function isVisuallyHidden(el, rect) {
+    if (rect.width > 1.5 || rect.height > 1.5) return false;
+    var cs = window.getComputedStyle(el);
+    return cs.position === 'absolute' || cs.position === 'fixed' ||
+      cs.clipPath !== 'none' || (cs.clip && cs.clip !== 'auto');
   }
 
   // Clicking an associated label activates the control, so the label is part of
@@ -99,13 +131,7 @@
   function isInlineTextLink(el) {
     if (el.tagName.toLowerCase() !== 'a') return false;
     function adjacentText(node) {
-      while (node) {
-        if (node.nodeType === 3 && node.textContent.trim() !== '') return true;
-        if (node.nodeType === 1) return false;
-        node = node.nodeType === 3 ? null : node;
-        break;
-      }
-      return false;
+      return !!node && node.nodeType === 3 && node.textContent.trim() !== '';
     }
     return adjacentText(el.previousSibling) || adjacentText(el.nextSibling);
   }
@@ -128,16 +154,20 @@
   document.querySelectorAll(SELECTOR).forEach(function (el) {
     if (el.tagName.toLowerCase() === 'input' &&
         (el.getAttribute('type') || 'text').toLowerCase() === 'hidden') return;
-    if (isDisabled(el)) return;
+    if (isDisabled(el) || isInert(el)) return;
     var rect = el.getBoundingClientRect();
     if (!isRendered(el, rect)) return;
+    var hidden = isVisuallyHidden(el, rect);
     var box = unionWithLabels(el, rect);
     targets.push({
       el: el,
       box: box,
       cx: box.left + box.width / 2,
       cy: box.top + box.height / 2,
-      undersized: box.width < MIN || box.height < MIN
+      hidden: hidden,
+      // A visually hidden control is not a pointer target in this state, so it
+      // is reported on its own terms rather than counted as a tiny one
+      undersized: !hidden && (box.width < MIN || box.height < MIN)
     });
   });
 
@@ -200,12 +230,22 @@
     return lo < SLOP ? 0 : lo;
   }
 
-  // Returns true when the hit area could actually be measured
+  // Returns true when the hit area could actually be measured. The two reasons
+  // it cannot are recorded separately, because they call for different actions:
+  // an off-screen target needs scrolling, a covered one needs the cover moved.
   function measureHitArea(t) {
-    if (!inViewport(t.cx, t.cy)) return false;
+    if (!inViewport(t.cx, t.cy)) {
+      t.offscreen = true;
+      return false;
+    }
     // If the centre does not hit the target, something is covering it and any
     // probe result would describe that something instead
-    if (!isOwnTarget(document.elementFromPoint(t.cx, t.cy), t)) return false;
+    var atCentre = document.elementFromPoint(t.cx, t.cy);
+    if (!isOwnTarget(atCentre, t)) {
+      t.covered = true;
+      t.coveredBy = atCentre;
+      return false;
+    }
 
     var up = reach(t, 0, -1);
     var right = reach(t, 1, 0);
@@ -231,17 +271,16 @@
 
   // Measure before anything is drawn, so the overlay cannot be hit tested, and
   // before spacing is calculated, so conflicts use the real boxes
-  var verifiedCount = 0;
   var clearedCount = 0;
-  var unverifiedCount = 0;
+  var offscreenCount = 0;
+  var coveredCount = 0;
 
   targets.forEach(function (t) {
     if (!t.undersized) return;
     if (!measureHitArea(t)) {
-      unverifiedCount++;
+      if (t.offscreen) offscreenCount++; else coveredCount++;
       return;
     }
-    verifiedCount++;
     if (t.box.width >= MIN && t.box.height >= MIN) {
       t.undersized = false;
       clearedCount++;
@@ -312,8 +351,35 @@
     return Math.round(t.box.width) + ' \u00d7 ' + Math.round(t.box.height);
   }
 
+  // Naming what is covering a target is the difference between a reader
+  // shrugging and a reader knowing which element to go and look at
+  function describe(el) {
+    if (!el || el.nodeType !== 1) return 'something else';
+    var out = '<' + el.tagName.toLowerCase() + '>';
+    if (el.id) out = '<' + el.tagName.toLowerCase() + ' id="' + el.id + '">';
+    else if (el.className && typeof el.className === 'string' && el.className.trim()) {
+      out = '<' + el.tagName.toLowerCase() + ' class="' +
+        el.className.trim().split(/\s+/)[0] + '">';
+    }
+    return out;
+  }
+
   var undersizedCount = 0;
   var conflictCount = 0;
+  var hiddenCount = 0;
+
+  // Visually hidden focusable elements get their own badge rather than a
+  // warning. Blue is the informational colour: this is not a 2.5.8 finding, it
+  // is a note that the tool cannot measure the state a pointer user would see.
+  targets.forEach(function (t) {
+    if (!t.hidden) return;
+    hiddenCount++;
+    t.el.style.outline = '3px solid ' + BLUE;
+    t.el.style.outlineOffset = '2px';
+    flaggedEls.push(t.el);
+    badge(t, BLUE, 'Visually hidden until focused, so its size cannot be ' +
+      'measured here. Tab to it and re-run.');
+  });
 
   targets.forEach(function (t) {
     if (!t.undersized) return;
@@ -335,9 +401,13 @@
     }
 
     // Say where the number came from, so an unverified warning is not mistaken
-    // for a measured one
-    if (!t.verified) {
-      text += '. Hit area not verified: scroll it into view and re-run';
+    // for a measured one. The two failures need different actions from the
+    // reader, so they must not share a message.
+    if (t.offscreen) {
+      text += '. Hit area not measured: scroll it into view and re-run';
+    } else if (t.covered) {
+      text += '. Covered by ' + describe(t.coveredBy) + ' at its centre, so ' +
+        'the hit area was not measured';
     } else if (t.extended) {
       text += '. Hit area measured, larger than the visible box';
     }
@@ -394,9 +464,21 @@
     }
   }
 
-  if (unverifiedCount > 0) {
-    line(unverifiedCount + ' could not be hit tested, measured from CSS only. ' +
-      'Scroll ' + (unverifiedCount === 1 ? 'it' : 'them') + ' into view and re-run.');
+  if (offscreenCount > 0) {
+    line(offscreenCount + ' outside the viewport, measured from CSS only. ' +
+      'Scroll ' + (offscreenCount === 1 ? 'it' : 'them') + ' into view and re-run.');
+  }
+
+  if (coveredCount > 0) {
+    line(coveredCount + ' covered by something else at ' +
+      (coveredCount === 1 ? 'its' : 'their') + ' centre, measured from CSS ' +
+      'only. Scrolling will not help: close or move whatever is on top.');
+  }
+
+  if (hiddenCount > 0) {
+    line(hiddenCount + ' visually hidden until focused, so ' +
+      (hiddenCount === 1 ? 'its size was' : 'their sizes were') +
+      ' not measured', BLUE);
   }
 
   var note = document.createElement('div');
@@ -410,15 +492,24 @@
 
   document.body.appendChild(panel);
 
-  function onKey(e) {
-    if (e.key !== 'Escape') return;
+  // One teardown, used by Esc and by the next run. Leaving it on window is what
+  // lets a second run clear the first one's outlines and listener.
+  function teardown() {
     overlay.remove();
     panel.remove();
     flaggedEls.forEach(function (el) {
       el.style.outline = '';
       el.style.outlineOffset = '';
     });
+    flaggedEls.length = 0;
     document.removeEventListener('keydown', onKey);
+    if (window.__a11yTargetSize === teardown) delete window.__a11yTargetSize;
   }
+
+  function onKey(e) {
+    if (e.key === 'Escape') teardown();
+  }
+
   document.addEventListener('keydown', onKey);
+  window.__a11yTargetSize = teardown;
 })();

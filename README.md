@@ -418,9 +418,24 @@ Three details that took a few attempts to get right:
 - **The probe hits the far edge of each pixel, not its middle.** Rounding bleeds outward by up to a pixel on the top and left edges. Probing the middle over-reported and could have cleared a 23px target as 24px. This way the measurement is short by up to a pixel instead, which at worst leaves a warning on something that passes. For a warnings-only tool that is the safe direction.
 - **A target whose centre does not hit test to itself is not probed.** Something is covering it, and any result would describe that something instead.
 
-**Targets outside the viewport cannot be probed**, because hit testing uses viewport coordinates. Those keep their CSS measurement, their badge says `Hit area not verified: scroll it into view and re-run`, and the summary panel counts them separately. Scrolling and re-running measures them.
+**Two different things stop a target being probed, and they need different actions**, so they get different messages rather than one shared "not verified":
+
+| Why | Badge says | Panel line |
+|---|---|---|
+| Outside the viewport | `Hit area not measured: scroll it into view and re-run` | `[N] outside the viewport, measured from CSS only` |
+| Something covers its centre | `Covered by <div id="banner"> at its centre, so the hit area was not measured` | `[N] covered by something else at their centre. Scrolling will not help: close or move whatever is on top` |
+
+The covered case names the element on top, since a sticky header or a cookie banner is the usual culprit and knowing which one saves the hunt. Telling someone to scroll would have been useless advice there.
+
+**Excluded, because they are not pointer targets.** Disabled controls, matched with `:disabled` rather than `el.disabled` so a control inside a `<fieldset disabled>` is caught, with the spec's exception handled for free: a control in the fieldset's first `<legend>` stays enabled and is still measured. Anything inside an `[inert]` subtree, which cannot be clicked at all. Elements that are not rendered.
+
+**Visually hidden focusable elements get a blue badge, not a warning.** A skip link clipped to 1 × 1 until focused is measured as 1 × 1, which is true and useless, because in the state a pointer user can reach it, it is a normal size. The badge says `Visually hidden until focused, so its size cannot be measured here. Tab to it and re-run.` Blue is the informational colour: this is not a 2.5.8 finding, it is the tool saying what it cannot see.
+
+**Re-running cleans up the previous run.** The teardown is parked on `window.__a11yTargetSize`, so a second run clears the first run's outlines and removes its Esc listener. Removing only the overlay and panel left outlines on elements that were no longer flagged, and stacked a new listener on every run.
 
 **Other limits.** Controls that appear dynamically (menus, dialogs, toolbars, popovers) must be open when the bookmarklet runs, so re-run with them open.
+
+**Only inline `onclick` is detectable.** A `<div>` wired up with `addEventListener` is a real pointer target to a user and invisible to this tool, because event listeners cannot be enumerated from script. Nothing fixes that from a bookmarklet, so a page built that way will under-report.
 
 | Colour | Hex | Badge text |
 |--------|-----|------------|
@@ -429,7 +444,9 @@ Three details that took a few attempts to get right:
 | — | — | either of the above with `. Inline text link, exception may apply` |
 | — | — | either of the above with `. Native control, check whether the author changed its size` |
 | — | — | either of the above with `. Hit area measured, larger than the visible box` |
-| — | — | either of the above with `. Hit area not verified: scroll it into view and re-run` |
+| — | — | either of the above with `. Hit area not measured: scroll it into view and re-run` |
+| — | — | either of the above with `. Covered by [element] at its centre, so the hit area was not measured` |
+| Dark blue | `#0a558c` | Visually hidden until focused, so its size cannot be measured here. Tab to it and re-run. |
 
 Summary panel lines:
 
@@ -440,7 +457,9 @@ Summary panel lines:
 | — | None under 24 × 24 |
 | Amber | [N] under 24 × 24, of which [N] have clear spacing |
 | Red | [N] with a 24px circle overlapping another target |
-| — | [N] could not be hit tested, measured from CSS only. Scroll them into view and re-run. |
+| — | [N] outside the viewport, measured from CSS only. Scroll them into view and re-run. |
+| — | [N] covered by something else at their centre, measured from CSS only. Scrolling will not help. |
+| Dark blue | [N] visually hidden until focused, so their sizes were not measured |
 
 ---
 
